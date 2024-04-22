@@ -41,13 +41,13 @@ int main() {
 	// ---------------------------------------------------------------------------
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
-
+	
 	Shader shader("src/shader.vertex");
 
 	std::vector<float> vertices = {
 		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f,  0.5f, 0.0f,
 	};
 	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
 	BufferLayout layout({
@@ -78,8 +78,6 @@ int main() {
 		glfwPollEvents();
 		context.SwapBuffers();
 	}
-
-	glfwTerminate();
 
 	return 0;
 }

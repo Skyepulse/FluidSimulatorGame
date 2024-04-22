@@ -7,6 +7,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(glassOverFlow)
 
+# Enable debugging symbols
+set(CMAKE_BUILD_TYPE Debug)
+
 file(GLOB_RECURSE SOURCE
      "src/*.h"
      "src/*.cpp"

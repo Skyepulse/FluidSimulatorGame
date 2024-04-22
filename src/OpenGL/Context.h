@@ -6,6 +6,7 @@ class OpenGLContext
 {
 public:
 	OpenGLContext(GLFWwindow* windowHandle);
+	~OpenGLContext();
 
 	void Init();
 	void SwapBuffers();
