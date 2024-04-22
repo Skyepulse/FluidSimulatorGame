@@ -3,13 +3,19 @@ cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)  
 
 project(glassOverFlow)
 
+file(GLOB_RECURSE SOURCE
+     "src/*.h"
+     "src/*.cpp"
+)
+
 add_executable(
   ${PROJECT_NAME}
-  src/main.cpp)
+  ${SOURCE}
+)
 
 target_sources(${PROJECT_NAME} PRIVATE dep/glad/src/glad.c)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/glad/include/)
