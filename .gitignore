@@ -1,4 +1,6 @@
 .vs/    
 *.exe
+glassOverFlow
 out/
 build/
+.vscode/
