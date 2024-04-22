@@ -17,6 +17,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE dep/glad/include/)
 add_subdirectory(dep/glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
+add_subdirectory(dep/glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+
 find_package(OpenMP)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 
