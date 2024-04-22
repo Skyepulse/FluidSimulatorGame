@@ -10,6 +10,7 @@
 
 // temp
 #include "glm/ext.hpp"
+#include <iostream>
 
 static GLenum ShaderTypeFromString(const std::string& type)
 {
@@ -24,8 +25,6 @@ static GLenum ShaderTypeFromString(const std::string& type)
 
 Shader::Shader(const std::string& filepath)
 {
-	
-
 	std::string source = ReadFile(filepath);
 	auto shaderSources = PreProcess(source);
 	Compile(shaderSources);
@@ -136,6 +135,7 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 			glDeleteShader(shader);
 
 			// Use the infoLog as you see fit.
+			std::cout << infoLog.data() << std::endl;
 			//CORE_ERROR("{0}", infoLog.data());
 			//CORE_ASSERT(false, "Shader compilation failure");
 

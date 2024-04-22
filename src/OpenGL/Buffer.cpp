@@ -9,9 +9,7 @@
 
 VertexBuffer::VertexBuffer(float* vertices, uint32_t size)
 {
-	std::cout << "aiaiai" << std::endl;
 	glGenBuffers(1, &m_RendererID);
-	std::cout << "aiaiai" << std::endl;
 	glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 }
@@ -36,7 +34,7 @@ void VertexBuffer::Unbind() const
 IndexBuffer::IndexBuffer(uint32_t* indices, uint32_t count)
 	: m_Count(count)
 {
-	glCreateBuffers(1, &m_RendererID);
+	glGenBuffers(1, &m_RendererID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 }

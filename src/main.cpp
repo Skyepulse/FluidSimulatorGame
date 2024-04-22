@@ -20,7 +20,7 @@ int main() {
 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "GlassOverFlow", NULL, NULL);
@@ -49,11 +49,11 @@ int main() {
 		 0.5f, -0.5f, 0.0f,
 		 0.0f,  0.5f, 0.0f,
 	};
-	std::cout << "ok" << std::endl;
 	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
 	BufferLayout layout({
 		{ShaderDataType::Float3, "a_Position"}
 	});
+	vb->SetLayout(layout);
 
 
 	std::vector<uint32_t> index = {
@@ -61,7 +61,6 @@ int main() {
 	};
 
 	std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(index.data(), index.size());
-
 
 	VertexArray va{};
 	va.AddVertexBuffer(vb);
@@ -81,5 +80,6 @@ int main() {
 	}
 
 	glfwTerminate();
+
 	return 0;
 }
