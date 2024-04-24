@@ -29,6 +29,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 add_subdirectory(dep/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 
+add_subdirectory(dep/spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
+
 find_package(OpenMP)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 

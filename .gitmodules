@@ -7,3 +7,6 @@
 [submodule "dep/glad"]
 	path = dep/glad
 	url = https://github.com/DawidLokiec/glad.git
+[submodule "dep/spdlog"]
+	path = dep/spdlog
+	url = https://github.com/gabime/spdlog.git

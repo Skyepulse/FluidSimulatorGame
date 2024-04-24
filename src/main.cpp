@@ -12,8 +12,10 @@
 #include "OpenGL/Buffer.h"
 #include "OpenGL/VertexArray.h"
 
-int main() {
+#include "Core/Log.h"
 
+int main() {
+	Logger::Init();
 	// ---------------------------------------------------------------------------
 	//																	GLFW INIT
 	// ---------------------------------------------------------------------------
