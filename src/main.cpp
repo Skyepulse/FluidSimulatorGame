@@ -15,7 +15,17 @@
 #include "Core/Log.h"
 
 int main() {
+	// Init of logger
 	Logger::Init();
+	Logger::Test();
+
+	// Example :
+	// For engine related trace/debug/info/warning/error/critical
+	CORE_TRACE("Rendering took {}ms and raised {} warnings", 5, 1518);
+
+	// For game related trace/debug/info/warning/error/critical
+	TRACE("Successfully initialized level in {}ms with {} warnings", 5, 145);
+	
 	// ---------------------------------------------------------------------------
 	//																	GLFW INIT
 	// ---------------------------------------------------------------------------

@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "../Core/Log.h"
+
 OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
 	: m_WindowHandle(windowHandle)
 {
@@ -27,17 +29,11 @@ void OpenGLContext::Init()
 	const char* version = (const char*)glGetString(GL_VERSION);
 
 	const char* glVersion = (const char*)glGetString(GL_VERSION);
-
-	std::cout << " Infos:" << std::endl;
-	std::cout << "	- Vendor:   " << vendor << std::endl;
-	std::cout << "	- Renderer: " << renderer << std::endl;
-	std::cout << "	- Version:  " << version << std::endl;
-	std::cout << "  - OpenGL version : " << glVersion << std::endl;
 	
-	//CORE_INFO(" Infos:");
-	//CORE_INFO("	- Vendor:   {0}", vendor);
-	//CORE_INFO("	- Renderer: {0}", renderer);
-	//CORE_INFO("	- Version:  {0}", version);
+	CORE_INFO(" Infos:");
+	CORE_INFO("	- Vendor:   {0}", vendor);
+	CORE_INFO("	- Renderer: {0}", renderer);
+	CORE_INFO("	- Version:  {0}", version);
 
 	int versionMajor;
 	int versionMinor;
