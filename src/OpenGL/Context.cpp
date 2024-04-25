@@ -27,21 +27,12 @@ void OpenGLContext::Init()
 	const char* vendor = (const char*)glGetString(GL_VENDOR);
 	const char* renderer = (const char*)glGetString(GL_RENDERER);
 	const char* version = (const char*)glGetString(GL_VERSION);
-
 	const char* glVersion = (const char*)glGetString(GL_VERSION);
-	
+
 	CORE_INFO(" Infos:");
 	CORE_INFO("	- Vendor:   {0}", vendor);
 	CORE_INFO("	- Renderer: {0}", renderer);
 	CORE_INFO("	- Version:  {0}", version);
-
-	int versionMajor;
-	int versionMinor;
-	glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
-	glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
-
-	std::cout << "OpenGL major version : " << versionMajor << std::endl;
-	std::cout << "OpenGL minor version : " << versionMinor << std::endl;
 
 	//CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Hazel requires at least  version 4.5!");
 }

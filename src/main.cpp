@@ -12,12 +12,19 @@
 #include "OpenGL/Buffer.h"
 #include "OpenGL/VertexArray.h"
 
+#include "Core/Core.h"
 #include "Core/Log.h"
 
 int main() {
 	// Init of logger
 	Logger::Init();
+
+	// Logger test
 	Logger::Test();
+
+	// Assert use example stop the program if not satisfied
+	CORE_ASSERT(1 != 2, "1 is equal to 2");
+	CORE_ASSERT(1 == 2, "1 is not equal to 2");
 
 	// Example :
 	// For engine related trace/debug/info/warning/error/critical
