@@ -4,3 +4,4 @@ glassOverFlow
 out/
 build/
 .vscode/
+CMakeCache.txt
