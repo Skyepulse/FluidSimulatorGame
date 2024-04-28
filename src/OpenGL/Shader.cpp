@@ -12,6 +12,8 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
+#include "../Core/Core.h"
+
 static GLenum ShaderTypeFromString(const std::string& type)
 {
 	if (type == "vertex")
@@ -36,6 +38,25 @@ Shader::Shader(const std::string& filepath)
 	auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 	m_Name = filepath.substr(lastSlash, count);
 }
+
+Shader::Shader(const std::string& vertexFilepath, const std::string& fragmentFilepath)
+{
+	std::string vertexSource = ReadFile(vertexFilepath);
+	std::string fragmentSource = ReadFile(fragmentFilepath);
+	std::unordered_map<GLenum, std::string> shaderSources;
+
+	shaderSources[GL_VERTEX_SHADER] = vertexSource;
+	shaderSources[GL_FRAGMENT_SHADER] = fragmentSource;
+	Compile(shaderSources);
+
+	// assets/texture.glsl
+	auto lastSlash = vertexFilepath.find_last_of("/\\");
+	lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+	auto lastDot = vertexFilepath.rfind(".");
+	auto count = lastDot == std::string::npos ? vertexFilepath.size() - lastSlash : lastDot - lastSlash;
+	m_Name = vertexFilepath.substr(lastSlash, count);
+}
+
 
 Shader::Shader(const std::string name, const std::string& vertexSrc, const std::string& fragmentSrc)
 	: m_Name(name)
@@ -66,7 +87,7 @@ std::string Shader::ReadFile(const std::string& filepath)
 	}
 	else
 	{
-		//CORE_ERROR("Could not open file '{0}'", filepath);
+		CORE_ERROR("Could not open file '{0}'", filepath);
 	}
 
 	return result;
@@ -82,13 +103,13 @@ std::unordered_map<GLenum, std::string> Shader::PreProcess(const std::string& so
 	while (pos != source.npos)
 	{
 		size_t eol = source.find_first_of("\r\n", pos);
-		//CORE_ASSERT(eol != source.npos, "Synthax error");
+		CORE_ASSERT(eol != source.npos, "Synthax error");
 		size_t begin = pos + typeTokenLength + 1; // There must be only one space between #type and vertex/fragment
 		std::string type = source.substr(begin, eol - begin);
-		//CORE_ASSERT(ShaderTypeFromString(type), "Invalide shader type specified");
+		CORE_ASSERT(ShaderTypeFromString(type), "Invalide shader type specified");
 
 		size_t nextLinePos = source.find_first_of("\r\n", eol);
-		//CORE_ASSERT(nextLinePos != std::string::npos, "Synthax error");
+		CORE_ASSERT(nextLinePos != std::string::npos, "Synthax error");
 		pos = source.find(typeToken, nextLinePos);
 
 		shaderSources[ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
@@ -103,7 +124,7 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 
 	// Get a program object.
 	uint32_t program = glCreateProgram();
-	//CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
+	CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
 	std::array<GLenum, 2> glShaderIds;
 	int glShaderIDIndex = 0;
 
@@ -136,8 +157,8 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 
 			// Use the infoLog as you see fit.
 			std::cout << infoLog.data() << std::endl;
-			//CORE_ERROR("{0}", infoLog.data());
-			//CORE_ASSERT(false, "Shader compilation failure");
+			CORE_ERROR("{0}", infoLog.data());
+			CORE_ASSERT(false, "Shader compilation failure");
 
 			// In this simple program, we'll just leave
 			return;
@@ -170,8 +191,8 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 			glDeleteShader(id);
 
 		// Use the infoLog as you see fit.
-		//CORE_ERROR("{0}", infoLog.data());
-		//CORE_ASSERT(false, "Shader linking failed");
+		CORE_ERROR("{0}", infoLog.data());
+		CORE_ASSERT(false, "Shader linking failed");
 
 		// In this simple program, we'll just leave
 		return;
@@ -187,50 +208,36 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 
 void Shader::Bind() const
 {
-	
-
 	glUseProgram(m_RendererID);
 }
 
 void Shader::Unbind() const
 {
-	
-
 	glUseProgram(0);
 }
 
 void Shader::SetInt(const char* name, int value)
 {
-	
-
 	UploadUniformInt(name, value);
 }
 
 void Shader::SetFloat(const char* name, float value)
 {
-	
-
-		UploadUniformFloat(name, value);
+	UploadUniformFloat(name, value);
 }
 
 void Shader::SetFloat3(const char* name, const glm::vec3& value)
 {
-	
-
 	UploadUniformFloat3(name, value);
 }
 
 void Shader::SetFloat4(const char* name, const glm::vec4& value)
 {
-	
-
 	UploadUniformFloat4(name, value);
 }
 
 void Shader::SetMat4(const char* name, const glm::mat4& mat)
 {
-	
-
 	UploadUniformMat4(name, mat);
 }
 

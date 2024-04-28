@@ -23,8 +23,8 @@ int main() {
 	Logger::Test();
 
 	// Assert use example stop the program if not satisfied
-	CORE_ASSERT(1 != 2, "1 is equal to 2");
-	CORE_ASSERT(1 == 2, "1 is not equal to 2");
+	//CORE_ASSERT(1 != 2, "1 is equal to 2");
+	//CORE_ASSERT(1 == 2, "1 is not equal to 2");
 
 	// Example :
 	// For engine related trace/debug/info/warning/error/critical
@@ -61,7 +61,7 @@ int main() {
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
 	
-	Shader shader("src/shader.vertex");
+	Shader shader("src/shader.vertex", "src/shader.fragment");
 
 	std::vector<float> vertices = {
 		-0.5f, -0.5f, 0.0f,
