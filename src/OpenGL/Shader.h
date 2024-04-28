@@ -13,6 +13,7 @@ class Shader
 {
 public:
 	Shader(const std::string& filepath);
+	Shader(const std::string& vertexFilepath, const std::string& fragmentFilepath);
 	Shader(const std::string name, const std::string& vertexSrc, const std::string& fragmentSrc);
 	~Shader();
 
