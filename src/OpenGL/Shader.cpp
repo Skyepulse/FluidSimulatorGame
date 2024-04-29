@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <vector>
+#include <array>
 
 #include <glad/glad.h>
 
