@@ -2,7 +2,6 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/sink.h>
-#include <spdlog/sinks/ansicolor_sink.h>
 
 #include <memory>
 
