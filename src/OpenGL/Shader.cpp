@@ -22,7 +22,7 @@ static GLenum ShaderTypeFromString(const std::string& type)
 	if (type == "fragment")
 		return GL_FRAGMENT_SHADER;
 
-	//CORE_ASSERT(false, "Unknown shader type");
+	CORE_ASSERT(false, "Unknown shader type");
 	return 0;
 }
 

@@ -14,6 +14,7 @@
 
 #include "Core/Core.h"
 #include "Core/Log.h"
+#include "Core/Window.h"
 
 int main() {
 	// Init of logger
@@ -37,18 +38,7 @@ int main() {
 	//																	GLFW INIT
 	// ---------------------------------------------------------------------------
 
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(800, 600, "GlassOverFlow", NULL, NULL);
-	if (window == NULL) {
-		glfwTerminate();
-		return -1;
-	}
-
-	glfwMakeContextCurrent(window);
+	std::shared_ptr<Window> window = std::make_shared<Window>();
 	
 	// ---------------------------------------------------------------------------
 	//																	GLAD INIT
@@ -85,7 +75,7 @@ int main() {
 	va.AddVertexBuffer(vb);
 	va.SetIndexBuffer(ib);
 
-	while (!glfwWindowShouldClose(window)) {
+	while (!window->ShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -94,7 +84,7 @@ int main() {
 
 		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
-		glfwPollEvents();
+		window->PollEvents();
 		context.SwapBuffers();
 	}
 

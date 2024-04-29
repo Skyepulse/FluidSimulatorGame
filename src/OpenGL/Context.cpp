@@ -6,23 +6,16 @@
 #include <iostream>
 
 #include "../Core/Log.h"
+#include "../Core/Core.h"
 
-OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
-	: m_WindowHandle(windowHandle)
-{
-	//CORE_ASSERT(windowHandle, "Window handle is null!");
-}
-
-OpenGLContext::~OpenGLContext()
-{
-	glfwDestroyWindow(m_WindowHandle);
-}
+OpenGLContext::OpenGLContext(const std::shared_ptr<Window> windowHandle)
+	: m_WindowHandle(windowHandle) { }
 
 void OpenGLContext::Init()
 {
-	glfwMakeContextCurrent(m_WindowHandle);
+	m_WindowHandle->MakeContextCurrent();
 	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-	//CORE_ASSERT(status, "Failed to initialize Glad!");
+	CORE_ASSERT(status, "Failed to initialize Glad!");
 
 	const char* vendor = (const char*)glGetString(GL_VENDOR);
 	const char* renderer = (const char*)glGetString(GL_RENDERER);
@@ -33,11 +26,9 @@ void OpenGLContext::Init()
 	CORE_INFO("	- Vendor:   {0}", vendor);
 	CORE_INFO("	- Renderer: {0}", renderer);
 	CORE_INFO("	- Version:  {0}", version);
-
-	//CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Hazel requires at least  version 4.5!");
 }
 
 void OpenGLContext::SwapBuffers()
 {
-	glfwSwapBuffers(m_WindowHandle);
+	m_WindowHandle->SwapBuffers();
 }

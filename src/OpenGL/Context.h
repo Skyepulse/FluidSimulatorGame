@@ -1,16 +1,18 @@
 #pragma once
 
-struct GLFWwindow;
+#include "../Core/Window.h"
+
+#include <memory>
 
 class OpenGLContext
 {
 public:
-	OpenGLContext(GLFWwindow* windowHandle);
-	~OpenGLContext();
+	OpenGLContext(const std::shared_ptr<Window> windowHandle);
+	~OpenGLContext() { }
 
 	void Init();
 	void SwapBuffers();
 private:
-	GLFWwindow* m_WindowHandle;
+	const std::shared_ptr<Window> m_WindowHandle;
 };
 
