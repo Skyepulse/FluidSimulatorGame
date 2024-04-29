@@ -71,4 +71,3 @@ const void Logger::Test()
   s_Logger->error("Error");
   s_Logger->critical("Critical");
 }
-

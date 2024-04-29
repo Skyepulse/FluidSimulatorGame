@@ -4,3 +4,7 @@ glassOverFlow
 out/
 build/
 .vscode/
+CMakeCache.txt
+CMakeFiles/
+CMakeDoxygenDefaults.cmake
+CMakeDoxyfile.in
