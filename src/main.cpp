@@ -3,14 +3,16 @@
 
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
 
 #include <string>
 #include <iostream>
 
-#include "OpenGL/Context.h"
-#include "OpenGL/Shader.h"
-#include "OpenGL/Buffer.h"
-#include "OpenGL/VertexArray.h"
+#include "Core/OpenGL/Context.h"
+#include "Core/OpenGL/Shader.h"
+#include "Core/OpenGL/Buffer.h"
+#include "Core/OpenGL/VertexArray.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -51,7 +53,7 @@ int main() {
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
 	
-	Shader shader("src/shader.vertex", "src/shader.fragment");
+	std::shared_ptr<Shader> shader = std::make_shared<Shader>("src/shader.vertex", "src/shader.fragment");
 
 	std::vector<float> vertices = {
 		-0.5f, -0.5f, 0.0f,
@@ -75,12 +77,17 @@ int main() {
 	va.AddVertexBuffer(vb);
 	va.SetIndexBuffer(ib);
 
+	// TEST
+	glm::mat4 projMatrix = glm::mat4(1.0);
+	CORE_DEBUG("VP Matrix : {}", glm::to_string(projMatrix))
+
 	while (!window->ShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		va.Bind();
-		shader.Bind();
+		shader->Bind();
+		shader->SetMat4("u_VPMatrix", projMatrix);
 
 		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 

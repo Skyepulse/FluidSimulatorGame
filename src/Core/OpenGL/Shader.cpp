@@ -13,7 +13,7 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
-#include "../Core/Core.h"
+#include "../Core.h"
 
 static GLenum ShaderTypeFromString(const std::string& type)
 {

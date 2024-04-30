@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include "../Core/Log.h"
-#include "../Core/Core.h"
+#include "../Log.h"
+#include "../Core.h"
 
 OpenGLContext::OpenGLContext(const std::shared_ptr<Window> windowHandle)
 	: m_WindowHandle(windowHandle) { }

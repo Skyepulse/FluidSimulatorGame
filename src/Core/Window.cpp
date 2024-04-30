@@ -16,7 +16,6 @@ Window::~Window()
   CORE_TRACE("Destroying Window pointer");
 
  	glfwDestroyWindow(m_Window); // clear m_Window
-  CORE_ASSERT(m_Window == nullptr, "Window is not cleared");
 }
 
 void Window::Init()
