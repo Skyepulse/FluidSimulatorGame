@@ -14,6 +14,8 @@
 #include "Core/OpenGL/Buffer.h"
 #include "Core/OpenGL/VertexArray.h"
 
+#include "Core/Rendering/Transform.h"
+
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Window.h"
@@ -78,8 +80,8 @@ int main() {
 	va.SetIndexBuffer(ib);
 
 	// TEST
-	glm::mat4 projMatrix = glm::mat4(1.0);
-	CORE_DEBUG("VP Matrix : {}", glm::to_string(projMatrix))
+	Transform2D transform;
+	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetProjectionMatrix()))
 
 	while (!window->ShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -87,7 +89,8 @@ int main() {
 
 		va.Bind();
 		shader->Bind();
-		shader->SetMat4("u_VPMatrix", projMatrix);
+		transform.Scale2D(glm::vec2(0.99f, 1.001f));
+		shader->SetMat4("u_ModelMatrix", transform.GetProjectionMatrix());
 
 		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
