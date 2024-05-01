@@ -1,4 +1,21 @@
 #include "Log.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#ifdef _WIN32
+  #define TRACE_COLOR     0x0007
+  #define DEBUG_COLOR     0x0003
+  #define INFO_COLOR      0x0002
+  #define WARN_COLOR      0x0006
+  #define ERR_COLOR       0x0004
+  #define CRITICAL_COLOR  0x000C
+#else
+  #define TRACE_COLOR     "\033[37m" 
+  #define DEBUG_COLOR     "\033[36m" 
+  #define INFO_COLOR      "\033[32m" 
+  #define WARN_COLOR      "\033[33m" 
+  #define ERR_COLOR       "\033[31m"
+  #define CRITICAL_COLOR  "\033[1;31m" 
+#endif
 
 std::shared_ptr<spdlog::logger> Logger::s_CoreLogger;
 std::shared_ptr<spdlog::logger> Logger::s_Logger;
@@ -6,13 +23,13 @@ std::shared_ptr<spdlog::logger> Logger::s_Logger;
 void Logger::Init()
 { 
   // Create sink and add format for each level
-  auto coreSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
-  coreSink->set_color(spdlog::level::trace,    "\033[37m");
-  coreSink->set_color(spdlog::level::debug,    "\033[36m");
-  coreSink->set_color(spdlog::level::info,     "\033[32m");
-  coreSink->set_color(spdlog::level::warn,     "\033[33m");
-  coreSink->set_color(spdlog::level::err,      "\033[31m");
-  coreSink->set_color(spdlog::level::critical, "\033[1;31m");
+  auto coreSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+  coreSink->set_color(spdlog::level::trace,    TRACE_COLOR   );
+  coreSink->set_color(spdlog::level::debug,    DEBUG_COLOR   );
+  coreSink->set_color(spdlog::level::info,     INFO_COLOR    );
+  coreSink->set_color(spdlog::level::warn,     WARN_COLOR    );
+  coreSink->set_color(spdlog::level::err,      ERR_COLOR     );
+  coreSink->set_color(spdlog::level::critical, CRITICAL_COLOR);
   // Create sink list for Logger initialization
   spdlog::sinks_init_list coreSinkList = { coreSink };
 
@@ -22,13 +39,13 @@ void Logger::Init()
 
   // Copy coreSink, must be different from the one in core logger,
   // as set_pattern applies to the pointer coreSink
-  auto sink =std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
-  sink->set_color(spdlog::level::trace,    "\033[37m");
-  sink->set_color(spdlog::level::debug,    "\033[36m");
-  sink->set_color(spdlog::level::info,     "\033[32m");
-  sink->set_color(spdlog::level::warn,     "\033[33m");
-  sink->set_color(spdlog::level::err,      "\033[31m");
-  sink->set_color(spdlog::level::critical, "\033[1;31m");
+  auto sink =std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+  sink->set_color(spdlog::level::trace,     TRACE_COLOR   );
+  sink->set_color(spdlog::level::debug,     DEBUG_COLOR   );
+  sink->set_color(spdlog::level::info,      INFO_COLOR    );
+  sink->set_color(spdlog::level::warn,      WARN_COLOR    );
+  sink->set_color(spdlog::level::err,       ERR_COLOR     );
+  sink->set_color(spdlog::level::critical,  CRITICAL_COLOR); 
   // Create sink list for Logger initialization
   spdlog::sinks_init_list sinkList = { sink };
 
@@ -54,4 +71,3 @@ const void Logger::Test()
   s_Logger->error("Error");
   s_Logger->critical("Critical");
 }
-
