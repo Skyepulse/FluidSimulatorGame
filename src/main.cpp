@@ -83,7 +83,7 @@ int main() {
 	// TEST
 	Transform2D transform;
 	transform.Translate(glm::vec3(1.0f, 1.0f, 0.0f));
-	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetProjectionMatrix()))
+	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetModelMatrix()))
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
 	while (!window->ShouldClose()) {
@@ -93,7 +93,7 @@ int main() {
 		va.Bind();
 		shader->Bind();
 		shader->SetMat4("u_VPMatrix", camera.GetVPMatrix());
-		shader->SetMat4("u_ModelMatrix", transform.GetProjectionMatrix());
+		shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
 
 		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
