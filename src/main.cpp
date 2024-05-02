@@ -16,6 +16,7 @@
 
 #include "Core/Rendering/Transform.h"
 #include "Core/Rendering/Camera.h"
+#include "Core/Rendering/Renderer.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -82,12 +83,11 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-		va.Bind();
-		shader->Bind();
-		shader->SetMat4("u_VPMatrix", camera.GetVPMatrix());
-		shader->SetMat4("u_ModelMatrix", transform.GetProjectionMatrix());
+		Renderer::BeginScene(camera);
 
-		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		Renderer::Draw(transform, shader, va);
+
+		Renderer::EndScene();
 
 		window->OnUpdate();
 	}
