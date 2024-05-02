@@ -1,19 +1,17 @@
 #include "Context.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 
 #include "../Log.h"
 #include "../Core.h"
 
-OpenGLContext::OpenGLContext(const std::shared_ptr<Window> windowHandle)
+OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
 	: m_WindowHandle(windowHandle) { }
 
 void OpenGLContext::Init()
 {
-	m_WindowHandle->MakeContextCurrent();
+	glfwMakeContextCurrent(m_WindowHandle);
+	
 	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	CORE_ASSERT(status, "Failed to initialize Glad!");
 
@@ -30,5 +28,5 @@ void OpenGLContext::Init()
 
 void OpenGLContext::SwapBuffers()
 {
-	m_WindowHandle->SwapBuffers();
+	glfwSwapBuffers(m_WindowHandle);
 }

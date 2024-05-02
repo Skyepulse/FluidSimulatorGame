@@ -7,8 +7,7 @@ bool Window::isGLFWInit = false;
 Window::Window()
 {
   CORE_TRACE("Creating new GLFW Window");
-  if(!isGLFWInit)
-    Init();
+  Init();
 }
 
 Window::~Window()
@@ -20,6 +19,11 @@ Window::~Window()
 
 void Window::Init()
 {
+	static bool isGLFWInit = false;
+
+	if(isGLFWInit)
+		return;
+
   CORE_TRACE("Initializing GLFW");
 
   glfwInit();
@@ -32,6 +36,8 @@ void Window::Init()
 		glfwTerminate();
 		CORE_ASSERT(false, "Failed to create Window");
 	}
-
   isGLFWInit = true;
+
+	m_Context = std::make_shared<OpenGLContext>(m_Window);
+	m_Context->Init();
 }

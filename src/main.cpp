@@ -40,17 +40,10 @@ int main() {
 	TRACE("Successfully initialized level in {}ms with {} warnings", 5, 145);
 	
 	// ---------------------------------------------------------------------------
-	//																	GLFW INIT
+	//															GLFW / GLAD INIT
 	// ---------------------------------------------------------------------------
 
 	std::shared_ptr<Window> window = std::make_shared<Window>();
-	
-	// ---------------------------------------------------------------------------
-	//																	GLAD INIT
-	// ---------------------------------------------------------------------------
-
-	OpenGLContext context(window);
-	context.Init();
 
 	// ---------------------------------------------------------------------------
 	//																	DATA INIT
@@ -68,7 +61,6 @@ int main() {
 		{ShaderDataType::Float3, "a_Position"}
 	});
 	vb->SetLayout(layout);
-
 
 	std::vector<uint32_t> index = {
 		0, 1, 2,
@@ -97,8 +89,7 @@ int main() {
 
 		glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
-		window->PollEvents();
-		context.SwapBuffers();
+		window->OnUpdate();
 	}
 
 	return 0;
