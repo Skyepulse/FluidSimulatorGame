@@ -79,6 +79,8 @@ int main() {
 	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetModelMatrix()))
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
+	//glCreateTextures(GL_)
+
 	while (!window->ShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
