@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/VertexArray.h"
 #include "Transform.h"
@@ -16,5 +18,3 @@ public:
 private:
   static glm::mat4 m_VPMatrix;
 };
-
-glm::mat4 Renderer::m_VPMatrix;
