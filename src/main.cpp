@@ -76,7 +76,7 @@ int main() {
 	// TEST
 	Transform2D transform;
 	transform.Translate(glm::vec3(1.0f, 1.0f, 0.0f));
-	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetProjectionMatrix()))
+	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetModelMatrix()))
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
 	while (!window->ShouldClose()) {

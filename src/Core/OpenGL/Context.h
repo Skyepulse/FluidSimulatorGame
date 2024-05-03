@@ -5,6 +5,7 @@
 
 #include <memory>
 
+/// @brief OpenGL context interactions
 class OpenGLContext
 {
 public:

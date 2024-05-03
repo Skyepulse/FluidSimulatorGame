@@ -8,7 +8,7 @@ class Transform
 public:
   Transform() : m_ProjectionMatrix(glm::mat4(1.0)) {}
   ~Transform() {}
-  const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+  const glm::mat4& GetModelMatrix() const { return m_ProjectionMatrix; }
 
   // Transformation function
   void Translate(const glm::vec3& translation) { m_ProjectionMatrix = glm::translate(m_ProjectionMatrix, translation); }

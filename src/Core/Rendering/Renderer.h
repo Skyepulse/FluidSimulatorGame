@@ -5,6 +5,7 @@
 
 #include "glad/glad.h"
 
+/// @brief For all rendering actions on the current context (= window)
 class Renderer
 {
 public:
@@ -21,7 +22,7 @@ public:
 		shader->Bind();
 
     shader->SetMat4("u_VPMatrix", m_VPMatrix);
-		shader->SetMat4("u_ModelMatrix", transform.GetProjectionMatrix());
+		shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
 
   	glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
   }

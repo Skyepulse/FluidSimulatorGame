@@ -7,6 +7,7 @@
 
 #include <memory>
 
+/// @brief GLFWwindow abstraction
 class Window
 {
 public:
