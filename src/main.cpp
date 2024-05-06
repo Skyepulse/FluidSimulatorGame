@@ -36,7 +36,10 @@ int main() {
 	//															GLFW / GLAD INIT
 	// ---------------------------------------------------------------------------
 
-	std::shared_ptr<Window> window = std::make_shared<Window>();
+	std::shared_ptr<WindowProperties> windowProperties = std::make_shared<WindowProperties>();
+	windowProperties->Width = 800;
+	windowProperties->Height = 600;
+	std::shared_ptr<Window> window = std::make_shared<Window>(windowProperties);
 	
 	// TEMP A CHANGER
 	// Enable Blending
@@ -91,10 +94,6 @@ int main() {
 
 	// END CIRCLE
 
-	// TEST
-	Transform2D transform;
-	transform.Translate(glm::vec3(1.0f, 1.0f, 0.0f));
-	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetModelMatrix()))
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
 	// TEXTURE TEST
