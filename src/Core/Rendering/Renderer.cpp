@@ -36,20 +36,23 @@ void Renderer::Draw(const Transform &transform, std::shared_ptr<Shader> shader, 
   texture.Unbind();
 }
 
-void Renderer::DrawPoint(const Transform &transform, std::shared_ptr<Shader> shader, const VertexArray& va)
+void Renderer::DrawCircle(const Circle &circle)
 {
-  va.Bind();
-  shader->Bind();
+  Draw(*circle.m_Transform, circle.GetShader(), circle.GetVertexArray());
+}
 
-  shader->SetMat4("u_VPMatrix", m_VPMatrix);
-  shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
+void Renderer::DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle &circle)
+{
+  Transform2D transform = *circle.m_Transform;
+  std::shared_ptr<Shader> shader = circle.GetShader();
+  const VertexArray va = circle.GetVertexArray();
 
-  glEnable(GL_SMOOTH_POINT_SIZE_RANGE);
-  glPointSize(50);
-  glEnable( GL_BLEND );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glDrawElements(GL_POINTS, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-
-  shader->Unbind();
-  va.Unbind();
+  for (auto position : positions)
+  {
+    transform.Translate2D(glm::vec2(position.x, position.y)); 
+    Draw(transform, shader, va);
+    // TEMPPP
+    transform.Translate2D(glm::vec2(-position.x, -position.y)); 
+  }
+  
 }
