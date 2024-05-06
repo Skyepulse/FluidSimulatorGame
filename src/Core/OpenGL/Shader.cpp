@@ -13,7 +13,7 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
-#include "../Core/Core.h"
+#include "../Core.h"
 
 static GLenum ShaderTypeFromString(const std::string& type)
 {
@@ -22,7 +22,7 @@ static GLenum ShaderTypeFromString(const std::string& type)
 	if (type == "fragment")
 		return GL_FRAGMENT_SHADER;
 
-	//CORE_ASSERT(false, "Unknown shader type");
+	CORE_ASSERT(false, "Unknown shader type");
 	return 0;
 }
 
