@@ -2,6 +2,7 @@
 #define _VECTOR_H_
 
 #include <iostream>
+#include <cmath>
 
 typedef float Real;
 typedef long int tIndex;

@@ -3,6 +3,11 @@
 
 #include "cubicSpline.h"
 #include <unordered_map>
+#include <cmath>
+#include <memory>
+#include <vector>
+
+
 using namespace std;
 
 struct ParticleManager {
