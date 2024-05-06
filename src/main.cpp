@@ -20,6 +20,7 @@
 #include "Core/Rendering/Transform.h"
 #include "Core/Rendering/Camera.h"
 #include "Core/Rendering/Renderer.h"
+#include "Core/Rendering/RendererCommand.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -34,6 +35,10 @@ int main() {
 	// ---------------------------------------------------------------------------
 
 	std::shared_ptr<Window> window = std::make_shared<Window>();
+	
+	// TEMP A CHANGER
+	// Enable Blending
+	RendererCommand::EnableBlending(true);
 
 	// ---------------------------------------------------------------------------
 	//																	DATA INIT
@@ -75,8 +80,8 @@ int main() {
 	Texture2D tex("src/texture.jpeg");
 
 	while (!window->ShouldClose()) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		RendererCommand::Clear();
+		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		Renderer::BeginScene(camera);
 
