@@ -21,29 +21,33 @@ struct Particle {
 	Real density; // density
 };
 
+enum KernelType
+{
+	CUBIC_SPLINE = 0
+};
+
+
 class Solver
 {
 public:
 	explicit Solver(
 		const Real nu = 0.08, const Real h = 0.5, const Real density = 1e3,
 		const Vec2f g = Vec2f(0, -9.8), const Real eta = 0.01, const Real gamma = 7e0,
-		const Real dt = 0.0005, const string kernelType = "cubicSpline") :
-		_nu(nu), _d0(density), _g(g), _eta(eta), _gamma(gamma), _dt(dt)
+		const Real dt = 0.0005, const KernelType kt = KernelType::CUBIC_SPLINE) :
+		_nu(nu), _d0(density), _g(g), _eta(eta), _gamma(gamma), _dt(dt), _h(h)
 	{
 		_m0 = _d0 * _h * _h;
 		_c  = std::fabs(_g.y) / _eta;
 		_k = _d0 * _c * _c / _gamma;
-		switch (kernelType)
+		switch (kt)
 		{
-			case "cubicSpline":
-				_kernel = CubicSpline(h);
+			case KernelType::CUBIC_SPLINE:
+				_kernel = make_shared<CubicSpline>(h);
 				break;
 			default:
-				_kernel = CubicSpline(h);
+				_kernel = make_shared<CubicSpline>(h);
 				break;
 		}
-
-
 	}
 
 	void initSimulation(const Real resX, const Real resY);
@@ -53,12 +57,14 @@ public:
 	
 
 private:
-	inline tIndex idx1d(const int i, const int j) { return i + j * resX();}
-	void addParticle(const Vec2f& pos, const Vec2f& vel = 0e0, const Vec2f& acc = 0e0, const Real press = 0e0, const Real density = _d0);
+	inline tIndex idx1d(const int i, const int j) { return i + j * _resX;}
+	void addParticle(const Vec2f& pos, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
 	Particle removeParticle(const tIndex index);
 
-	Kernel _kernel;
+	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
+	Real _resX, _resY;
+	Real _h;
 	Vec2f _g;
 	Real _c;
 

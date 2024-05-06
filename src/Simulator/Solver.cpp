@@ -2,6 +2,8 @@
 
 void Solver::initSimulation(const Real resX, const Real resY)
 {
+	_resX = resX;
+	_resY = resY;
 	_pm.pos.clear();
 	_pm.vel.clear();
 	_pm.acc.clear();
@@ -49,6 +51,6 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	return p;
 }
 
-void Solver::update() {
+void Solver::update(const Real dt) {
 	//jean Loup
 }
