@@ -24,6 +24,10 @@ void OpenGLContext::Init()
 	CORE_INFO("	- Vendor:   {0}", vendor);
 	CORE_INFO("	- Renderer: {0}", renderer);
 	CORE_INFO("	- Version:  {0}", version);
+
+	// TEMPORARY
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 }
 
 void OpenGLContext::SwapBuffers()

@@ -18,6 +18,8 @@ public:
 
   static void Draw(const Transform& transform, std::shared_ptr<Shader> shader, const VertexArray& va);
   static void Draw(const Transform& transform, std::shared_ptr<Shader> shader, const Texture& texture, const VertexArray& va);
+
+  static void DrawPoint(const Transform& transform, std::shared_ptr<Shader> shader, const VertexArray& va);
 private:
   static glm::mat4 m_VPMatrix;
 };
