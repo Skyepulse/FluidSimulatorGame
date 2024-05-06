@@ -1,6 +1,8 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
+#include <iostream>
+
 typedef float Real;
 typedef long int tIndex;
 

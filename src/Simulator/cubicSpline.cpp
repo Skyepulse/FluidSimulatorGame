@@ -32,9 +32,9 @@ Real CubicSpline::f(const Real l) const
 {
 	const Real q = l / _h;
 	if(q < 1e0)
-		return _c[dim -1] * (1e0 - 1.5 * square(q) + 0.75 * cube(q));
+		return _c[_dim -1] * (1e0 - 1.5 * square(q) + 0.75 * cube(q));
 	else if(q < 2e0)
-		return _c[dim -1] * 0.25 * cube(2e0 - q);
+		return _c[_dim -1] * 0.25 * cube(2e0 - q);
 	return 0e0;
 }	
 
@@ -42,9 +42,9 @@ Real CubicSpline::derivative_f(const Real l) const
 {
 	const Real q = l / _h;
 	if(q < 1e0)
-		return _gc[dim -1] * (-3e0 * q + 2.25 * square(q));
+		return _gc[_dim -1] * (-3e0 * q + 2.25 * square(q));
 	else if(q < 2e0)
-		return _gc[dim -1] * (-0.75 * square(2e0 - q));
+		return _gc[_dim -1] * (-0.75 * square(2e0 - q));
 	return 0e0;
 }
 

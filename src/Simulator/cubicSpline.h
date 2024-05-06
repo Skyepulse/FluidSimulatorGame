@@ -6,7 +6,8 @@
 class CubicSpline : public Kernel
 {
 public:
-	explicit CubicSpline(const Real h = static_cast<Real>(1.0)) {
+	explicit CubicSpline(const Real h = static_cast<Real>(1.0)): _dim(2)
+	{
 		setSmoothingLength(h);
 	}
 
