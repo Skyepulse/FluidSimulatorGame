@@ -22,6 +22,8 @@
 #include "Core/Rendering/Renderer.h"
 #include "Core/Rendering/RendererCommand.h"
 
+#include "Core/Scene/Circle.h"
+
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Window.h"
@@ -74,32 +76,18 @@ int main() {
 	// END SQUARE */
 
 	// CIRCLE
-	std::shared_ptr<Shader> shader = std::make_shared<Shader>("src/pointShader.vertex", "src/pointShader.fragment");
-
-	std::vector<float> vertices = {
-		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+	Circle circle;
+	std::vector<glm::vec2> positions = { 
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(1.0f, 2.0f),
+		glm::vec2(1.0f, 3.0f),
+		glm::vec2(2.0f, 1.0f),
+		glm::vec2(2.0f, 2.0f),
+		glm::vec2(2.0f, 3.0f),
+		glm::vec2(3.0f, 1.0f),
+		glm::vec2(3.0f, 2.0f),
+		glm::vec2(3.0f, 3.0f),
 	};
-	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-	BufferLayout layout({
-		{ShaderDataType::Float3, "a_Position"},
-		{ShaderDataType::Float3, "a_Color"},
-		{ShaderDataType::Float2, "a_TexCoords"},
-	});
-	vb->SetLayout(layout);
-
-	std::vector<uint32_t> index = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(index.data(), index.size());
-
-	VertexArray va{};
-	va.AddVertexBuffer(vb);
-	va.SetIndexBuffer(ib);
 
 	// END CIRCLE
 
@@ -118,7 +106,7 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		Renderer::Draw(transform, shader, tex, va);
+		Renderer::DrawCircleDuplicate(positions, circle);
 
 		Renderer::EndScene();
 

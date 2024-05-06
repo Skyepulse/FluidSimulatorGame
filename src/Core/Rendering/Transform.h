@@ -11,7 +11,8 @@ public:
   const glm::mat4& GetModelMatrix() const { return m_ProjectionMatrix; }
 
   // Transformation function
-  void Translate(const glm::vec3& translation) { m_ProjectionMatrix = glm::translate(m_ProjectionMatrix, translation); }
+  void Translate(const glm::vec3& translation) { m_ProjectionMatrix = GetTranslated(translation); }
+  glm::mat4 GetTranslated(const glm::vec3& translation) { return glm::translate(m_ProjectionMatrix, translation); }
 
   void Scale(const glm::vec3 scale) { m_ProjectionMatrix = glm::scale(m_ProjectionMatrix, scale); }
   void Scale(float scale) { Scale(glm::vec3(scale)); }
@@ -26,6 +27,7 @@ class Transform2D : public Transform
 public:
   // Transformation function
   void Translate2D(const glm::vec2& translation) { Transform::Translate(glm::vec3(translation, 0.0f)); }
+  glm::mat4 GetTranslated2D(const glm::vec2& translation) { return Transform::GetTranslated(glm::vec3(translation, 0.0f)); }
 
   void Scale2D(const glm::vec2 scale) { Transform::Scale(glm::vec3(scale, 0.0f)); }
   void Scale2D(float scale) { Scale2D(glm::vec2(scale)); }
