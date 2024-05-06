@@ -37,7 +37,7 @@ $$\nabla^2 W_\text{vis}(r, h) = \frac{45}{\pi h^6}(h-|r|)$$
 
 ## PROJECT ADVANCEMENT
 
-###TODO
+### TODO
 - Solver: update, viscosity, density, pressure, acc + vel, pos update, time integration, kernels.
 - Engine: Circles, arrow, shape abstraction
 - Game Design: UI prototype, level design prototype
