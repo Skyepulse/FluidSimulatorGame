@@ -1,6 +1,9 @@
 #version 400
+in vec2 v_TexCoords;
 out vec4 f_Color;
 
+uniform sampler2D u_Texture;
+
 void main() {
-	f_Color = vec4(1.0, 0.0, 0.0, 1.0);
+	f_Color = texture(u_Texture, v_TexCoords).rgba;
 }
