@@ -54,5 +54,12 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 }
 
 void Solver::update(const Real dt) {
-	//jean Loup
+	
+	buildNeighbors();
+	computeDensity();
+	computePressure();
+	computeViscosity();
+
+	updateVel();
+	updatePos();
 }

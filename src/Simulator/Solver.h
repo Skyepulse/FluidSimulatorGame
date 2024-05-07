@@ -66,6 +66,13 @@ private:
 	void addParticle(const Vec2f& pos, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
 	Particle removeParticle(const tIndex index);
 
+	void buildNeighbors();
+	void computeDensity();
+	void computePressure();
+	void computeViscosity();
+	void updateVel();
+	void updatePos();
+
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
 	Real _resX, _resY;
