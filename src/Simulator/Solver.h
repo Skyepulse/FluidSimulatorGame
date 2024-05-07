@@ -68,8 +68,8 @@ private:
 
 	void buildNeighbors();
 	void computeDensity();
-	void computePressure(const Real dt);
-	void computeViscosity(const Real dt);
+	void computePressure();
+	void computeViscosity();
 	void updateVel(const Real dt);
 	void updatePos(const Real dt);
 

@@ -60,17 +60,27 @@ void Solver::update(const Real dt) {
 	
 	buildNeighbors();
 	computeDensity();
-	computePressure(dt);
-	computeViscosity(dt);
+	computePressure();
+	computeViscosity();
 
 	updateVel(dt);
 	updatePos(dt);
 }
 
-void Solver::computeViscosity(const Real dt){
+void Solver::computeViscosity(){
 	for (int i=0; i<_particleCount; i++){
 		for (int j=0; j<_neighbors[i].size(); j++){
-			_pm.acc[i] += _nu*_m0 * (_pm.vel[j]-_pm.vel[i]) / _pm.density[j] * _kernel->laplW(_pm.pos[i] - _pm.pos[j]);
+			// suppose all masses are equal
+			_pm.acc[i] += _nu * (_pm.vel[j]-_pm.vel[i]) / _pm.density[j] * _kernel->laplW(_pm.pos[i] - _pm.pos[j]);
+		}
+	}
+}
+
+void Solver::computePressure(){
+	for (int i=0; i<_particleCount; i++){
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			_pm.acc[i] += - (_pm.press[i]+_pm.press[j])/(2.0*_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
 		}
 	}
 }
