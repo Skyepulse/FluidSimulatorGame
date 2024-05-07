@@ -68,10 +68,10 @@ private:
 
 	void buildNeighbors();
 	void computeDensity();
-	void computePressure();
-	void computeViscosity();
-	void updateVel();
-	void updatePos();
+	void computePressure(const Real dt);
+	void computeViscosity(const Real dt);
+	void updateVel(const Real dt);
+	void updatePos(const Real dt);
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -79,6 +79,8 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
+
+	tIndex _particleCount;
 
 	ParticleManager _pm;
 	vector<vector<tIndex>> _particlesInGrid;
