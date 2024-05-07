@@ -6,20 +6,22 @@
 class Transform
 {
 public:
-  Transform() : m_ProjectionMatrix(glm::mat4(1.0)) {}
+  Transform() : m_ModelMatrix(glm::mat4(1.0)), m_Position(glm::mat4(1.0)), m_Rotation((glm::mat4(1.0))), m_Scale(glm::mat4(1.0)) {}
   ~Transform() {}
-  const glm::mat4& GetModelMatrix() const { return m_ProjectionMatrix; }
+  const glm::mat4& GetModelMatrix() const { ComputeModelMatrix(); return m_ModelMatrix; }
 
   // Transformation function
-  void Translate(const glm::vec3& translation) { m_ProjectionMatrix = GetTranslated(translation); }
-  glm::mat4 GetTranslated(const glm::vec3& translation) { return glm::translate(m_ProjectionMatrix, translation); }
+  void Translate(const glm::vec3& translation) { m_Position = glm::translate(m_Position, translation); }
 
-  void Scale(const glm::vec3 scale) { m_ProjectionMatrix = glm::scale(m_ProjectionMatrix, scale); }
+  void Scale(const glm::vec3 scale) { m_Scale = glm::scale(m_Scale, scale); }
   void Scale(float scale) { Scale(glm::vec3(scale)); }
 
-  void Rotate(float angle, const glm::vec3& axis) { m_ProjectionMatrix = glm::rotate(m_ProjectionMatrix, angle, axis); }
+  void Rotate(float angle, const glm::vec3& axis) { m_Rotation = glm::rotate(m_Rotation, angle, axis); }
+private:
+  void ComputeModelMatrix() const { m_ModelMatrix = m_Position * m_Rotation * m_Scale; }
 protected:
-  glm::mat4 m_ProjectionMatrix;
+  mutable glm::mat4 m_ModelMatrix;
+  glm::mat4 m_Position, m_Rotation, m_Scale;
 };
 
 class Transform2D : public Transform
@@ -27,7 +29,6 @@ class Transform2D : public Transform
 public:
   // Transformation function
   void Translate2D(const glm::vec2& translation) { Transform::Translate(glm::vec3(translation, 0.0f)); }
-  glm::mat4 GetTranslated2D(const glm::vec2& translation) { return Transform::GetTranslated(glm::vec3(translation, 0.0f)); }
 
   void Scale2D(const glm::vec2 scale) { Transform::Scale(glm::vec3(scale, 0.0f)); }
   void Scale2D(float scale) { Scale2D(glm::vec2(scale)); }
