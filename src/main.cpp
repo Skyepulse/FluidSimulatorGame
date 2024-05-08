@@ -22,6 +22,8 @@
 #include "Core/Rendering/Renderer.h"
 #include "Core/Rendering/RendererCommand.h"
 
+#include "Core/Scene/Circle.h"
+
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Window.h"
@@ -44,40 +46,75 @@ int main() {
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
 	
-	std::shared_ptr<Shader> shader = std::make_shared<Shader>("src/shader.vertex", "src/shader.fragment");
-
-	std::vector<float> vertices = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
-	};
-	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-	BufferLayout layout({
-		{ShaderDataType::Float3, "a_Position"},
-		{ShaderDataType::Float2, "a_TexCoords"},
-	});
-	vb->SetLayout(layout);
-
-	std::vector<uint32_t> index = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(index.data(), index.size());
-
-	VertexArray va{};
-	va.AddVertexBuffer(vb);
-	va.SetIndexBuffer(ib);
-
-	// TEST
-	Transform2D transform;
-	transform.Translate(glm::vec3(1.0f, 1.0f, 0.0f));
-	CORE_DEBUG("Model Matrix : {}", glm::to_string(transform.GetModelMatrix()))
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
-	// TEXTURE TEST
-	Texture2D tex("src/texture.jpeg");
+	// Border Generation
+	glm::vec2 cameraSize = camera.GetSize();
+	glm::vec2 cameraOrigin = camera.GetOrigin();
+
+	Circle circle;
+	float circleRadius = 0.2f;
+	circle.m_Transform->Scale2D(circleRadius);
+		
+	glm::ivec2 borderParticleCount = glm::vec2(60.0f, 40.0f);
+
+	// Border positions generation
+	std::vector<glm::vec2> borderPositions;
+
+	glm::vec2 lbCorner = cameraOrigin;
+	glm::vec2 rbCorner = cameraOrigin + glm::vec2(cameraSize.x, 0.0f);
+	glm::vec2 ltCorner = cameraOrigin + glm::vec2(0.0f, cameraSize.y);
+	glm::vec2 rtCorner = cameraOrigin + glm::vec2(cameraSize.x, cameraSize.y);
+
+	// Horizontal borders
+	float dx = 1.0f / ((float) borderParticleCount.x - 1.0f);
+	float dy = 1.0f / ((float) borderParticleCount.y - 1.0f);
+
+	glm::vec2 hiOffset = glm::vec2(0.0f, dy) * (ltCorner.y - lbCorner.y); // Horizontal inner border offset from outter border
+	glm::vec2 viOffset = glm::vec2(dx, 0.0f) * (rbCorner.x - lbCorner.y); // Vertical inner border offset from outter border
+
+	for (size_t i = 0; i < borderParticleCount.x ; i++)
+	{
+		float t = (float) i * dx;
+
+		// Outter border
+		borderPositions.push_back(rbCorner * (1.0f - t) + lbCorner * t);
+		borderPositions.push_back(rtCorner * (1.0f - t) + ltCorner * t);
+
+		// Inner border
+		borderPositions.push_back(rbCorner * (1.0f - t) + lbCorner * t + hiOffset);
+		borderPositions.push_back(rtCorner * (1.0f - t) + ltCorner * t - hiOffset);
+	}
+
+	// Vertical borders
+	for (size_t i = 0; i < borderParticleCount.y ; i++)
+	{
+		float t = (float) i * dy;
+
+		// Outter border
+		borderPositions.push_back(rbCorner * (1.0f - t) + rtCorner * t);
+		borderPositions.push_back(lbCorner * (1.0f - t) + ltCorner * t);
+
+		// Inner border
+		borderPositions.push_back(lbCorner * (1.0f - t) + ltCorner * t + viOffset);
+		borderPositions.push_back(rbCorner * (1.0f - t) + rtCorner * t - viOffset);
+	}
+
+	// fluid position generation
+	std::vector<glm::vec2> fluidPositions;
+	glm::ivec2 fluidSize = glm::ivec2(20);
+	glm::vec2 spacing = glm::vec2(0.2f);
+	glm::vec2 fluidlbCorner = lbCorner + 3.0f * hiOffset + 3.0f * viOffset;
+
+	for (size_t i = 0; i < fluidSize.x; i++)
+	{
+		for (size_t j = 0; j < fluidSize.y; j++)
+		{
+			fluidPositions.push_back(fluidlbCorner + glm::vec2(i, j) * spacing);
+		}
+	}
+	
+	// END CIRCLE
 
 	while (!window->ShouldClose()) {
 		RendererCommand::Clear();
@@ -85,7 +122,8 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		Renderer::Draw(transform, shader, tex, va);
+		Renderer::DrawCircleDuplicate(borderPositions, circle); // Draw Border
+		Renderer::DrawCircleDuplicate(fluidPositions, circle); // Draw fluid
 
 		Renderer::EndScene();
 

@@ -34,7 +34,7 @@ uint32_t Texture2D::GenerateTexture(const char* texturePath, int* width, int* he
   unsigned int textureID;
 	glGenTextures(1, &textureID);
 
-	const char* path = "src/texture.jpeg";
+	const char* path = texturePath;
 	unsigned char *data = stbi_load(path, width, height, nrChannels, 0);
 	if (data)
 	{
