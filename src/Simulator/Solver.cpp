@@ -1,6 +1,5 @@
 #include "Solver.h"
-#include <math.h>
-#include <memory>
+
 
 void Solver::initSimulation(const Real resX, const Real resY)
 {
