@@ -17,15 +17,16 @@
 #include "Core/OpenGL/Texture.h"
 
 
-#include "Core/Rendering/Transform.h"
 #include "Core/Rendering/Camera.h"
 #include "Core/Rendering/Renderer.h"
 #include "Core/Rendering/RendererCommand.h"
+#include "Core/Rendering/Transform.h"
 
 #include "Core/Scene/Circle.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
+#include "Core/Time.h"
 #include "Core/Window.h"
 
 int main() {
@@ -114,16 +115,22 @@ int main() {
 		}
 	}
 	
+
+	Arrow arrow;
 	// END CIRCLE
 
 	while (!window->ShouldClose()) {
+		CORE_INFO(Time::GetDeltaTime());
+		
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		Renderer::BeginScene(camera);
 
-		Renderer::DrawCircleDuplicate(borderPositions, circle); // Draw Border
-		Renderer::DrawCircleDuplicate(fluidPositions, circle); // Draw fluid
+		//Renderer::DrawCircleDuplicate(borderPositions, circle); // Draw Border
+		//Renderer::DrawCircleDuplicate(fluidPositions, circle); // Draw fluid
+
+		Renderer::DrawArrow(arrow);
 
 		Renderer::EndScene();
 
