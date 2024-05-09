@@ -12,6 +12,7 @@ public:
 	virtual Real W(const Vec2f& r) const = 0;
 	virtual Vec2f gradW(const Vec2f& r) const = 0;
 	virtual Vec2f gradW(const Vec2f& r, const Real l) const = 0;
+	virtual Vec2f laplW(const Vec2f& r) const = 0;
 };
 
 #endif 

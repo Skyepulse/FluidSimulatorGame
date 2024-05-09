@@ -14,6 +14,8 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(resX * resY);
 
+	_particleCount = 0;
+
 	//We add particles in the bottom right corner
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
@@ -32,6 +34,7 @@ void Solver::addParticle(const Vec2f& pos, const Vec2f& vel, const Vec2f& acc, c
 	_pm.acc.push_back(acc);
 	_pm.press.push_back(press);
 	_pm.density.push_back(density);
+	_particleCount++;
 }
 
 Particle Solver::removeParticle(const tIndex index) //Erase the particles at the end of the simulation stepsize
@@ -53,5 +56,30 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 }
 
 void Solver::update(const Real dt) {
-	//jean Loup
+	
+	buildNeighbors();
+	computeDensity();
+	computePressure();
+	computeViscosity();
+
+	updateVel(dt);
+	updatePos(dt);
+}
+
+void Solver::computeViscosity(){
+	for (int i=0; i<_particleCount; i++){
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			_pm.acc[i] += _nu * (_pm.vel[j]-_pm.vel[i]) / _pm.density[j] * _kernel->laplW(_pm.pos[i] - _pm.pos[j]);
+		}
+	}
+}
+
+void Solver::computePressure(){
+	for (int i=0; i<_particleCount; i++){
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			_pm.acc[i] += - (_pm.press[i]+_pm.press[j])/(2.0*_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+		}
+	}
 }

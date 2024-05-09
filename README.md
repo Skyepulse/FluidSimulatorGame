@@ -34,3 +34,11 @@ Viscosity:
 $$W_\text{vis}(r, h) = \frac{15}{2\pi h^3}\left(-\frac{|r|^3}{2h^3}+\frac{|r|^2}{h^2}+\frac{h}{2|r|}-1\right)$$
 $$\nabla W_\text{vis}(r, h) = \frac{15}{2\pi h^3}r\left(-\frac{3|r|}{2h^3}+\frac{2}{h^2}-\frac{h}{2|r|^3}\right)$$
 $$\nabla^2 W_\text{vis}(r, h) = \frac{45}{\pi h^6}(h-|r|)$$
+
+## PROJECT ADVANCEMENT
+
+### TODO
+- Solver: update, viscosity, density, pressure, acc + vel, pos update, time integration, kernels.
+- Engine: Circles, arrow, shape abstraction
+- Game Design: UI prototype, level design prototype
+- 
