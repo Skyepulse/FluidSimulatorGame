@@ -115,8 +115,6 @@ int main() {
 		}
 	}
 	
-
-	Arrow arrow;
 	// END CIRCLE
 
 	while (!window->ShouldClose()) {
