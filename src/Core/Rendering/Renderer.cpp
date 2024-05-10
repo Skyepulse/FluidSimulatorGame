@@ -17,6 +17,11 @@ void Renderer::Draw(const Transform& transform, const RendererData& rendererData
   rendererData.shader->SetMat4("u_VPMatrix", m_VPMatrix);
   rendererData.shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
 
+  for(auto& renderProperty : rendererData.renderProperties)
+  {
+    renderProperty->SetProperties(rendererData.shader);
+  }
+
   glDrawElements(rendererData.renderMode, rendererData.vertexArray.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 

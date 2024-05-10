@@ -1,11 +1,12 @@
 #include "Circle.h"
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 Circle::Circle(const glm::vec3& color) : m_Color(color)
 {
   // SHADER 
-  m_RendererData.shader = std::make_shared<Shader>("src/shader.vertex", "src/pointShader.fragment");
+  m_RendererData.shader = std::make_shared<Shader>("src/shader.vertex", "src/circleShader.fragment");
 
   // VERTEX ARRAY DATA
 	std::vector<float> vertices = {
@@ -35,6 +36,12 @@ Circle::Circle(const glm::vec3& color) : m_Color(color)
 
   // TRANSFORM
   m_Transform = std::make_shared<Transform2D>();
+
+	// Color Render property
+	std::shared_ptr<ColorRenderProperty> colorProperties = std::make_shared<ColorRenderProperty>(&m_Color);
+
+	// Texture Render property
+	m_RendererData.renderProperties.push_back(colorProperties);
 }
 
 Circle::~Circle()

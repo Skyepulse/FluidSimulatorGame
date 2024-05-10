@@ -56,7 +56,7 @@ int main() {
 	glm::vec2 cameraSize = camera.GetSize();
 	glm::vec2 cameraOrigin = camera.GetOrigin();
 
-	Circle circle;
+	Circle circle(glm::vec3(1.0f, 0.0f, 0.0f));
 	float circleRadius = 0.2f;
 	circle.m_Transform->Scale2D(circleRadius);
 		
