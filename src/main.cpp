@@ -126,14 +126,19 @@ int main() {
 
 	// CIRCLE
 
-	Circle circle(glm::vec3(1.0f, 0.0f, 0.0f));
+	Circle circle(glm::vec3(0.0f, 1.0f, 0.0f));
 	float circleRadius = 0.2f;
 	circle.Transform->Scale2D(circleRadius);
+
+	glm::vec2 direction(1.0f, 0.0f);
 
 	// END CIRCLE
 
 	while (!window->ShouldClose()) {
 		CORE_INFO(Time::GetDeltaTime());
+
+		direction = glm::vec2(glm::cos(Time::GetSeconds()), glm::sin(Time::GetSeconds()));
+		line.Transform->SetDirection(direction);
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
