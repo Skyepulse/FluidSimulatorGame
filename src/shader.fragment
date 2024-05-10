@@ -1,9 +1,11 @@
 #version 400
-in vec2 v_TexCoords;
-out vec4 f_Color;
+
+in vec2 f_TexCoords;
+
+out vec4 Color;
 
 uniform sampler2D u_Texture;
 
 void main() {
-	f_Color = texture(u_Texture, v_TexCoords).rgba;
+	color = texture(u_Texture, f_TexCoords).rgba;
 }

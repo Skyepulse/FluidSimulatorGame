@@ -4,20 +4,23 @@
 #include "../OpenGL/VertexArray.h"
 
 #include "../Rendering/Transform.h"
+#include "../Rendering/RendererInfos.h"
 
 #include <memory>
 
 class Circle
 {
 public:
-  Circle();
+  Circle(const glm::vec3& color = glm::vec3(1.0));
   ~Circle();
 
-  const VertexArray& GetVertexArray() const { return m_VertexArray; }
-  std::shared_ptr<Shader> GetShader() const { return m_Shader; }
+  const RendererData& GetRendererData() const { return m_RendererData; }
+
+  const glm::vec3& GetColor() const { return m_Color; }
+  void SetColor(const glm::vec3& color) { m_Color = color;}
 public:
   std::shared_ptr<Transform2D> m_Transform;
 private:
-  std::shared_ptr<Shader> m_Shader;
-  VertexArray m_VertexArray;
+  RendererData m_RendererData;
+  glm::vec3 m_Color;
 };

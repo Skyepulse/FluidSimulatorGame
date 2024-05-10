@@ -121,8 +121,6 @@ std::unordered_map<GLenum, std::string> Shader::PreProcess(const std::string& so
 
 void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 {
-	
-
 	// Get a program object.
 	uint32_t program = glCreateProgram();
 	CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
@@ -157,8 +155,7 @@ void Shader::Compile(std::unordered_map<GLenum, std::string>& shaderSources)
 			glDeleteShader(shader);
 
 			// Use the infoLog as you see fit.
-			std::cout << infoLog.data() << std::endl;
-			CORE_ERROR("{0}", infoLog.data());
+			CORE_ERROR("Shader error :{0}", infoLog.data());
 			CORE_ASSERT(false, "Shader compilation failure");
 
 			// In this simple program, we'll just leave

@@ -1,12 +1,13 @@
 #version 400
-in vec3 v_Color;
-in vec2 v_TexCoords;
 
-out vec4 f_Color;
+in vec3 f_Color;
+in vec2 f_TexCoords;
+
+out vec4 color;
 
 uniform float u_Radius;
 
 void main() {
-	float t = step(length(v_TexCoords - vec2(0.5)), 0.5);
-  f_Color = t * vec4(v_Color, 1.0);
+	float t = step(length(f_TexCoords - vec2(0.5)), 0.5);
+  color = t * vec4(f_Color, 1.0);
 }

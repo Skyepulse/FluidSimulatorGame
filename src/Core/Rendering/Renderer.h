@@ -9,6 +9,7 @@
 
 #include "Transform.h"
 #include "Camera.h"
+#include "RendererInfos.h"
 
 #include "glad/glad.h"
 
@@ -19,8 +20,8 @@ public:
   static void BeginScene(Camera& camera);
   static void EndScene();
 
-  static void Draw(const Transform& transform, std::shared_ptr<Shader> shader, const VertexArray& va);
-  static void Draw(const Transform& transform, std::shared_ptr<Shader> shader, const Texture& texture, const VertexArray& va);
+  static void Draw(const Transform& transform, const RendererData& rendererData);
+  static void Draw(const Transform& transform, const RendererData& rendererData, const Texture& texture);
 
   static void DrawCircle(const Circle& circle);
   static void DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle& circle);
