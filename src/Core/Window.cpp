@@ -10,11 +10,34 @@ Window::Window()
   Init();
 }
 
+Window::Window(std::shared_ptr<WindowProperties> properties)
+{ 
+	m_Width = properties->Width;
+	m_Height = properties->Height;
+	
+	CORE_TRACE("Creating new GLFW Window");
+	Init();
+}
+
 Window::~Window()
 {
   CORE_TRACE("Destroying Window pointer");
 
  	glfwDestroyWindow(m_Window); // clear m_Window
+}
+
+void Window::EnableVSync(bool enabled)
+{
+	if(enabled)
+	{
+		CORE_TRACE("Enabled VSync")
+		glfwSwapInterval(1);
+	}
+	else
+	{
+		CORE_TRACE("Disabled VSync")
+		glfwSwapInterval(0);
+	}
 }
 
 void Window::Init()
@@ -31,7 +54,7 @@ void Window::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	m_Window = glfwCreateWindow(800, 600, "GlassOverFlow", NULL, NULL);
+	m_Window = glfwCreateWindow(m_Width, m_Height, "GlassOverFlow", NULL, NULL);
 	if (m_Window == NULL) {
 		glfwTerminate();
 		CORE_ASSERT(false, "Failed to create Window");

@@ -37,7 +37,10 @@ int main() {
 	//															GLFW / GLAD INIT
 	// ---------------------------------------------------------------------------
 
-	std::shared_ptr<Window> window = std::make_shared<Window>();
+	std::shared_ptr<WindowProperties> windowProperties = std::make_shared<WindowProperties>();
+	windowProperties->Width = 800;
+	windowProperties->Height = 600;
+	std::shared_ptr<Window> window = std::make_shared<Window>(windowProperties);
 	
 	// TEMP A CHANGER
 	// Enable Blending
