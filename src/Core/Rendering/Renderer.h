@@ -6,6 +6,7 @@
 
 // TEMP TO REMOVE
 #include "../Scene/Circle.h"
+#include "../Scene/Line.h"
 
 #include "Transform.h"
 #include "Camera.h"
@@ -25,6 +26,9 @@ public:
 
   static void DrawCircle(const Circle& circle);
   static void DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle& circle);
+
+  static void DrawLine(const Line& line);
+  static void DrawLineDuplicate(std::vector<glm::vec2> positions, const Line& line);
 private:
   static glm::mat4 m_VPMatrix;
 };

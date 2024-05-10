@@ -8,11 +8,11 @@
 
 #include <memory>
 
-class Circle
+class Line
 {
 public:
-  Circle(const glm::vec3& color = glm::vec3(1.0));
-  ~Circle();
+  Line(const glm::vec3& color = glm::vec3(1.0));
+  ~Line();
 
   const RendererData& GetRendererData() const { return m_RendererData; }
 

@@ -43,12 +43,12 @@ void Renderer::Draw(const Transform& transform, const RendererData& rendererData
 
 void Renderer::DrawCircle(const Circle &circle)
 {
-  Draw(*circle.m_Transform, circle.GetRendererData());
+  Draw(*circle.Transform, circle.GetRendererData());
 }
 
 void Renderer::DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle &circle)
 {
-  Transform2D transform = *circle.m_Transform;
+  Transform2D transform = *circle.Transform;
   const RendererData rendererData = circle.GetRendererData();
 
   for (auto position : positions)
@@ -58,5 +58,23 @@ void Renderer::DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circl
     // TEMPPP
     transform.Translate2D(glm::vec2(-position.x, -position.y)); 
   }
-  
+}
+
+void Renderer::DrawLine(const Line &line)
+{
+  Draw(*line.Transform, line.GetRendererData());
+}
+
+void Renderer::DrawLineDuplicate(std::vector<glm::vec2> positions, const Line &line)
+{
+  Transform2D transform = *line.Transform;
+  const RendererData rendererData = line.GetRendererData();
+
+  for (auto position : positions)
+  {
+    transform.Translate2D(glm::vec2(position.x, position.y)); 
+    Draw(transform, rendererData);
+    // TEMPPP
+    transform.Translate2D(glm::vec2(-position.x, -position.y)); 
+  }
 }

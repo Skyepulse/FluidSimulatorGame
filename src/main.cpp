@@ -23,6 +23,7 @@
 #include "Core/Rendering/Transform.h"
 
 #include "Core/Scene/Circle.h"
+#include "Core/Scene/Line.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -52,13 +53,11 @@ int main() {
 	
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
+	// POSITION
+
 	// Border Generation
 	glm::vec2 cameraSize = camera.GetSize();
 	glm::vec2 cameraOrigin = camera.GetOrigin();
-
-	Circle circle(glm::vec3(1.0f, 0.0f, 0.0f));
-	float circleRadius = 0.2f;
-	circle.m_Transform->Scale2D(circleRadius);
 		
 	glm::ivec2 borderParticleCount = glm::vec2(60.0f, 40.0f);
 
@@ -118,6 +117,19 @@ int main() {
 		}
 	}
 	
+	// END POSITION
+
+	// LINE
+	Line line(glm::vec3(1.0f, 0.0f, 0.0f));
+
+	// END LINE
+
+	// CIRCLE
+
+	Circle circle(glm::vec3(1.0f, 0.0f, 0.0f));
+	float circleRadius = 0.2f;
+	circle.Transform->Scale2D(circleRadius);
+
 	// END CIRCLE
 
 	while (!window->ShouldClose()) {
@@ -130,6 +142,10 @@ int main() {
 
 		Renderer::DrawCircleDuplicate(borderPositions, circle); // Draw Border
 		Renderer::DrawCircleDuplicate(fluidPositions, circle); // Draw fluid
+
+		Renderer::DrawLine(line);
+		Renderer::DrawLineDuplicate(borderPositions, line); // Draw Border
+		Renderer::DrawLineDuplicate(fluidPositions, line); // Draw fluid
 
 		Renderer::EndScene();
 
