@@ -1,0 +1,35 @@
+#version 400
+
+in vec3 f_Color;
+in vec2 f_TexCoords;
+
+out vec4 color;
+
+// TEXTURE USAGE
+// By default, u_UseTexture = 0 so no texture usage
+
+uniform int u_UseTexture;
+uniform sampler2D u_Texture;
+
+// COLOR
+// Value is sent by ColorRenderProperty
+// If nothing is displayed, verify that the object has a ColorRenderProperty
+
+uniform vec3 u_Color;
+
+float normalized_circle_enveloppe(vec2 coordinates)
+{
+  return step(length(f_TexCoords - vec2(0.5)), 0.5);
+}
+
+void main() {
+  color = vec4(f_Color, 1.0);
+  color *= normalized_circle_enveloppe(f_TexCoords);
+
+  if(u_UseTexture == 1)
+  {
+    color *= texture(u_Texture, f_TexCoords).rgba;
+  }
+
+  color *= vec4(u_Color, 1.0);
+}
