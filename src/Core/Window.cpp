@@ -35,8 +35,8 @@ void Window::EnableVSync(bool enabled)
 	}
 	else
 	{
-		glfwSwapInterval(0);
 		CORE_TRACE("Disabled VSync")
+		glfwSwapInterval(0);
 	}
 }
 
