@@ -1,9 +1,5 @@
 #include "cubicSpline.h"
 
-#ifndef M_PI
-#define M_PI 3.141592
-#endif
-
 
 void CubicSpline::setSmoothingLength(const Real h)
 {
@@ -15,14 +11,9 @@ void CubicSpline::setSmoothingLength(const Real h)
 	_gc[0] = _c[0] / _h;
 	_gc[1] = _c[1] / _h;
 	_gc[2] = _c[2] / _h;
-	_ggc[0] = _gc[0] / _h;
-	_ggc[1] = _gc[1] / _h;
-	_ggc[2] = _gc[2] / _h;
-}
-
-Real CubicSpline::getSmoothingLength() const
-{
-	return _h;
+	_lc[0] = _gc[0] / _h;
+	_lc[1] = _gc[1] / _h;
+	_lc[2] = _gc[2] / _h;
 }
 
 Real CubicSpline::f(const Real l) const
@@ -62,15 +53,19 @@ Vec2f CubicSpline::gradW(const Vec2f& r, const Real l) const
 	return derivative_f(l) * r / l;
 }
 
-Vec2f CubicSpline::laplW(const Vec2f& r) const {
+Real CubicSpline::laplW(const Vec2f& r) const {
 
 	const Real l = r.length();
 	const Real q = l/_h;
 	
+	Vec2f val;
+
 	if (q < 1e0)
-		return _ggc[_dim -1] * (9.0/(4.0*_h*_h*l) * (r*r + l*l) - 3.0);
+		val =  _lc[_dim -1] * (9.0/(4.0*_h*_h*l) * (r*r + l*l) - 3.0);
 	else if (q < 2e0)
-		return _ggc[_dim -1] * (-3*Vec2f(r.y*r.y, r.y*r.y)/(l*l*l) -3.0/(4.0*_h)*(r*r + l*l) + 3.0);
+		val = _lc[_dim -1] * (-3*Vec2f(r.y*r.y, r.y*r.y)/(l*l*l) -3.0/(4.0*_h)*(r*r + l*l) + 3.0);
 	else
-		return Vec2f(0);
+		val = Vec2f(0);
+
+	return val.x + val.y;
 }
