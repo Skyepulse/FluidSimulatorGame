@@ -120,15 +120,15 @@ int main() {
 	// END POSITION
 
 	// LINE
-	Line line;
+	std::shared_ptr<Shape> line = std::make_shared<Line>();
 
 	// END LINE
 
 	// CIRCLE
 
-	Circle circle;
+	std::shared_ptr<Circle> circle  = std::make_shared<Circle>();
 	float circleRadius = 0.2f;
-	circle.Transform->Scale2D(circleRadius);
+	circle->Transform->Scale2D(circleRadius);
 
 	// END CIRCLE
 
@@ -140,12 +140,11 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		Renderer::DrawCircleDuplicate(borderPositions, circle); // Draw Border
-		Renderer::DrawCircleDuplicate(fluidPositions, circle); // Draw fluid
+		Renderer::DrawShapeDuplicate(borderPositions, circle); // Draw Border
+		Renderer::DrawShapeDuplicate(fluidPositions, circle); // Draw fluid
 
-		Renderer::DrawLine(line);
-		Renderer::DrawLineDuplicate(borderPositions, line); // Draw Border
-		Renderer::DrawLineDuplicate(fluidPositions, line); // Draw fluid
+		Renderer::DrawShapeDuplicate(borderPositions, line); // Draw Border
+		Renderer::DrawShapeDuplicate(fluidPositions, line); // Draw fluid
 
 		Renderer::EndScene();
 

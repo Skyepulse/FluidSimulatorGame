@@ -41,34 +41,15 @@ void Renderer::Draw(const Transform& transform, const RendererData& rendererData
   texture.Unbind();
 }
 
-void Renderer::DrawCircle(const Circle &circle)
+void Renderer::DrawShape(std::shared_ptr<Shape> shape)
 {
-  Draw(*circle.Transform, circle.GetRendererData());
+  Draw(*shape->Transform, shape->GetRendererData());
 }
 
-void Renderer::DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle &circle)
+void Renderer::DrawShapeDuplicate(std::vector<glm::vec2> positions, std::shared_ptr<Shape> shape)
 {
-  Transform2D transform = *circle.Transform;
-  const RendererData rendererData = circle.GetRendererData();
-
-  for (auto position : positions)
-  {
-    transform.Translate2D(glm::vec2(position.x, position.y)); 
-    Draw(transform, rendererData);
-    // TEMPPP
-    transform.Translate2D(glm::vec2(-position.x, -position.y)); 
-  }
-}
-
-void Renderer::DrawLine(const Line &line)
-{
-  Draw(*line.Transform, line.GetRendererData());
-}
-
-void Renderer::DrawLineDuplicate(std::vector<glm::vec2> positions, const Line &line)
-{
-  Transform2D transform = *line.Transform;
-  const RendererData rendererData = line.GetRendererData();
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
 
   for (auto position : positions)
   {
