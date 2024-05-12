@@ -1,37 +1,37 @@
 #include "Circle.h"
 
 Circle::Circle()
+	: Shape()
 {
-  // SHADER 
-  m_Shader = std::make_shared<Shader>("src/pointShader.vertex", "src/pointShader.fragment");
-
-  // VERTEX ARRAY DATA
-	std::vector<float> vertices = {
+	m_ShapeInfos.vertexShaderFilepath = std::string("src/shader.vertex"), 
+  m_ShapeInfos.fragmentShaderFilepath = std::string("src/circleShader.fragment"),
+    
+    // Vertex Buffer
+  m_ShapeInfos.vertices =  {
 		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+			0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+			0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
 		-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
 	};
-	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-	BufferLayout layout({
-		{ShaderDataType::Float3, "a_Position"},
-		{ShaderDataType::Float3, "a_Color"},
-		{ShaderDataType::Float2, "a_TexCoords"},
-	});
-	vb->SetLayout(layout);
 
-	std::vector<uint32_t> index = {
+	 // Index Buffer
+  m_ShapeInfos.indices = 
+	{
 		0, 1, 2,
 		2, 3, 0
 	};
 
-	std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(index.data(), index.size());
+	// Buffer Layout
+  m_ShapeInfos.layout = BufferLayout({
+		{ShaderDataType::Float3, "v_Position"},
+		{ShaderDataType::Float3, "v_Color"},
+		{ShaderDataType::Float2, "v_TexCoords"},
+	});
 
-	m_VertexArray.AddVertexBuffer(vb);
-	m_VertexArray.SetIndexBuffer(ib);
+  // Render Mode
+	m_ShapeInfos.renderMode = GL_TRIANGLES;
 
-  // TRANSFORM
-  m_Transform = std::make_shared<Transform2D>();
+	SetRendererData(m_ShapeInfos);
 }
 
 Circle::~Circle()

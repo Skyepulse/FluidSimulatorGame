@@ -9,50 +9,53 @@ void Renderer::BeginScene(Camera& camera)
 
 void Renderer::EndScene() {}
 
-void Renderer::Draw(const Transform& transform, std::shared_ptr<Shader> shader, const VertexArray& va)
+void Renderer::Draw(const Transform& transform, const RendererData& rendererData)
 {
-  va.Bind();
-  shader->Bind();
+  rendererData.vertexArray.Bind();
+  rendererData.shader->Bind();
 
-  shader->SetMat4("u_VPMatrix", m_VPMatrix);
-  shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
+  rendererData.shader->SetMat4("u_VPMatrix", m_VPMatrix);
+  rendererData.shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
 
-  glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+  for(auto& renderProperty : rendererData.renderProperties)
+  {
+    renderProperty->SetProperties(rendererData.shader);
+  }
+
+  glDrawElements(rendererData.renderMode, rendererData.vertexArray.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::Draw(const Transform &transform, std::shared_ptr<Shader> shader, const Texture& texture, const VertexArray& va)
+void Renderer::Draw(const Transform& transform, const RendererData& rendererData, const Texture& texture)
 {
-  va.Bind();
-  shader->Bind();
+  rendererData.vertexArray.Bind();
+  rendererData.shader->Bind();
 
-  shader->SetMat4("u_VPMatrix", m_VPMatrix);
-  shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
+  rendererData.shader->SetMat4("u_VPMatrix", m_VPMatrix);
+  rendererData.shader->SetMat4("u_ModelMatrix", transform.GetModelMatrix());
 
   texture.Bind();
 
-  shader->SetInt("u_Texture", 0);
+  rendererData.shader->SetInt("u_Texture", 0);
 
-  glDrawElements(GL_TRIANGLES, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(rendererData.renderMode, rendererData.vertexArray.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
   texture.Unbind();
 }
 
-void Renderer::DrawCircle(const Circle &circle)
+void Renderer::DrawShape(std::shared_ptr<Shape> shape)
 {
-  Draw(*circle.m_Transform, circle.GetShader(), circle.GetVertexArray());
+  Draw(*shape->Transform, shape->GetRendererData());
 }
 
-void Renderer::DrawCircleDuplicate(std::vector<glm::vec2> positions, const Circle &circle)
+void Renderer::DrawShapeDuplicate(std::vector<glm::vec2> positions, std::shared_ptr<Shape> shape)
 {
-  Transform2D transform = *circle.m_Transform;
-  std::shared_ptr<Shader> shader = circle.GetShader();
-  const VertexArray va = circle.GetVertexArray();
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
 
   for (auto position : positions)
   {
     transform.Translate2D(glm::vec2(position.x, position.y)); 
-    Draw(transform, shader, va);
+    Draw(transform, rendererData);
     // TEMPPP
     transform.Translate2D(glm::vec2(-position.x, -position.y)); 
   }
-  
 }

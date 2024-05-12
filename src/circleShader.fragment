@@ -17,8 +17,14 @@ uniform sampler2D u_Texture;
 
 uniform vec3 u_Color;
 
+float normalized_circle_enveloppe(vec2 coordinates)
+{
+  return step(length(f_TexCoords - vec2(0.5)), 0.5);
+}
+
 void main() {
   color = vec4(f_Color, 1.0);
+  color *= normalized_circle_enveloppe(f_TexCoords);
 
   if(u_UseTexture == 1)
   {
