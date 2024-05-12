@@ -1,26 +1,15 @@
 #pragma once
 
-#include "../OpenGL/Shader.h"
-#include "../OpenGL/VertexArray.h"
+#include "Shape.h"
 
-#include "../Rendering/Transform.h"
-#include "../Rendering/RendererInfos.h"
+#include <glad/glad.h>
 
-#include <memory>
-
-class Line
+class Line : public Shape
 {
 public:
-  Line(const glm::vec3& color = glm::vec3(1.0));
+  Line();
   ~Line();
-
-  const RendererData& GetRendererData() const { return m_RendererData; }
-
-  const glm::vec3& GetColor() const { return m_Color; }
-  void SetColor(const glm::vec3& color) { m_Color = color;}
-public:
-  std::shared_ptr<Transform2D> Transform;
 private:
-  RendererData m_RendererData;
-  glm::vec3 m_Color;
+  // The data is not static because we want to avoid bugs where one line modifies its ShapeInfos and all of them are modified
+  ShapeInfos m_ShapeInfos;
 };

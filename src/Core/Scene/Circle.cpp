@@ -1,47 +1,37 @@
 #include "Circle.h"
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-
-Circle::Circle(const glm::vec3& color) : m_Color(color)
+Circle::Circle()
+	: Shape()
 {
-  // SHADER 
-  m_RendererData.shader = std::make_shared<Shader>("src/shader.vertex", "src/circleShader.fragment");
-
-  // VERTEX ARRAY DATA
-	std::vector<float> vertices = {
+	m_ShapeInfos.vertexShaderFilepath = std::string("src/shader.vertex"), 
+  m_ShapeInfos.fragmentShaderFilepath = std::string("src/circleShader.fragment"),
+    
+    // Vertex Buffer
+  m_ShapeInfos.vertices =  {
 		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+			0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+			0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
 		-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
 	};
-	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-	BufferLayout layout({
-		{ShaderDataType::Float3, "v_Position"},
-		{ShaderDataType::Float3, "v_Color"},
-		{ShaderDataType::Float2, "v_TexCoords"},
-	});
-	vb->SetLayout(layout);
 
-	std::vector<uint32_t> index = {
+	 // Index Buffer
+  m_ShapeInfos.indices = 
+	{
 		0, 1, 2,
 		2, 3, 0
 	};
 
-	std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(index.data(), index.size());
+	// Buffer Layout
+  m_ShapeInfos.layout = BufferLayout({
+		{ShaderDataType::Float3, "v_Position"},
+		{ShaderDataType::Float3, "v_Color"},
+		{ShaderDataType::Float2, "v_TexCoords"},
+	});
 
-	m_RendererData.vertexArray.AddVertexBuffer(vb);
-	m_RendererData.vertexArray.SetIndexBuffer(ib);
-	m_RendererData.renderMode = GL_TRIANGLES;
+  // Render Mode
+	m_ShapeInfos.renderMode = GL_TRIANGLES;
 
-  // TRANSFORM
-  Transform = std::make_shared<Transform2D>();
-
-	// Color Render property
-	std::shared_ptr<ColorRenderProperty> colorProperties = std::make_shared<ColorRenderProperty>(&m_Color);
-
-	// Texture Render property
-	m_RendererData.renderProperties.push_back(colorProperties);
+	SetRendererData(m_ShapeInfos);
 }
 
 Circle::~Circle()

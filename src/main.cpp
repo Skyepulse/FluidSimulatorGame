@@ -120,13 +120,13 @@ int main() {
 	// END POSITION
 
 	// LINE
-	Line line(glm::vec3(1.0f, 0.0f, 0.0f));
+	Line line;
 
 	// END LINE
 
 	// CIRCLE
 
-	Circle circle(glm::vec3(1.0f, 0.0f, 0.0f));
+	Circle circle;
 	float circleRadius = 0.2f;
 	circle.Transform->Scale2D(circleRadius);
 
