@@ -58,7 +58,7 @@ int main() {
 	solver.initSimulation(24.0f, 18.0f);
 	ParticleManager particleManager;
 	
-	Camera camera(0.0f, 24.0f * 0.5f, 0.0f, 18.0f * 0.5f); // MUltiply by h
+	Camera camera(0.0f, 24.0f * solver.getH(), 0.0f, 18.0f * solver.getH()); // MUltiply by h
 
 	// // POSITION
 

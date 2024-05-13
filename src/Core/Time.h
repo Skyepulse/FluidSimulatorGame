@@ -3,13 +3,21 @@
 #define CORE_TIME_IN_UNIT(unit) std::chrono::duration_cast<std::chrono::unit>(GetTime().time_since_epoch()).count()
 
 #include <chrono>
+#include <math.h>
+
+#ifndef _WIN32
+    using ClockType = std::chrono::system_clock;
+#else
+    using ClockType = std::chrono::high_resolution_clock;
+#endif
 
 class Time
 {
 public:
   enum class TimeUnit { Seconds, Milliseconds, Microseconds, Nanoseconds };
 
-  static std::chrono::system_clock::time_point GetTime() { return m_Clock.now(); }
+  // Platform-specific clock selection
+  static ClockType::time_point GetTime() { return m_Clock.now(); }  
   static double GetMillis()   { return CORE_TIME_IN_UNIT(microseconds)  / 1000.0; }
   static double GetMicros()   { return CORE_TIME_IN_UNIT(nanoseconds)   / 1000.0; }
   static double GetSeconds()  { return CORE_TIME_IN_UNIT(milliseconds)  / 1000.0; }
@@ -22,9 +30,9 @@ private:
     return time * factor;
   }
 private:
-  static std::chrono::high_resolution_clock m_Clock;
+  static ClockType m_Clock;
   static double m_LastSampledMilliseconds;
 };
 
-std::chrono::high_resolution_clock Time::m_Clock;
+ClockType Time::m_Clock;
 double Time::m_LastSampledMilliseconds;
