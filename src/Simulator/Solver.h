@@ -60,6 +60,8 @@ public:
 	void initSimulation(const Real resX, const Real resY);
 	void update(const Real dt);
 
+	Real getH() const { return _h; }
+
 	ParticleManager& getParticleManager() { return _pm; }
 	
 
