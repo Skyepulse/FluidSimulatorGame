@@ -4,6 +4,12 @@ Shape::Shape()
 {  
   // TRANSFORM
   Transform = std::make_shared<Transform2D>();
+
+  // TODO : Enable add only desired render properties
+  // Color property
+  std::shared_ptr<RenderProperty> colorProperty;
+  colorProperty = std::make_shared<ColorRenderProperty>(&m_Color);
+  m_RendererData.renderProperties.push_back(colorProperty);
 }
 
 void Shape::SetRendererData(const ShapeInfos& shapeInfos)

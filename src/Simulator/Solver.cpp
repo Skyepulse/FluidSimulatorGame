@@ -1,5 +1,8 @@
 #include "Solver.h"
 
+// TEMP
+#include "../Core/Log.h"
+
 
 void Solver::initSimulation(const Real resX, const Real resY)
 {
@@ -167,24 +170,21 @@ void Solver::updateVel(const Real dt) {
 		if(_pm.type[i] == 1) continue;
 		_pm.acc[i] += _g;
 		_pm.vel[i] += dt * (_pm.acc[i]);
+		//DEBUG("{0}", _pm.vel);
 	}
 }
 
 void Solver::updatePos(const Real dt) {
-	vector<int> toRemove;
+	//vector<int> toRemove;
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
-		/*
-		if (_pm.pos[i].x < 0 || _pm.pos[i].x > _resX * _h || _pm.pos[i].y < 0 || _pm.pos[i].y > _resY * _h) {
+		/*if (_pm.pos[i].x < 0 || _pm.pos[i].x > _resX * _h || _pm.pos[i].y < 0 || _pm.pos[i].y > _resY * _h) {
 			toRemove.push_back(i);
-		}
-		*/
+		}*/
 	}
 
-	/*
-	for (int i = 0; i < toRemove.size(); i++) {
+	/*for (int i = 0; i < toRemove.size(); i++) {
 		removeParticle(toRemove[i]);
-	}
-	*/
+	}*/
 }

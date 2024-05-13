@@ -4,12 +4,13 @@
 #include "../OpenGL/VertexArray.h"
 #include "../OpenGL/Texture.h"
 
-// TEMP TO REMOVE
 #include "../Scene/Shape.h"
 
 #include "Transform.h"
 #include "Camera.h"
 #include "RendererInfos.h"
+
+#include "../../Simulator/Solver.h"
 
 #include "glad/glad.h"
 
@@ -25,6 +26,7 @@ public:
 
   static void DrawShape(std::shared_ptr<Shape> shape);
   static void DrawShapeDuplicate(std::vector<glm::vec2> positions, std::shared_ptr<Shape> shape);
+  static void DrawShapeDuplicate(std::vector<Vec2f> positions, std::shared_ptr<Shape> shape);
 private:
   static glm::mat4 m_VPMatrix;
 };
