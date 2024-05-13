@@ -3,6 +3,7 @@
 #define CORE_TIME_IN_UNIT(unit) std::chrono::duration_cast<std::chrono::unit>(GetTime().time_since_epoch()).count()
 
 #include <chrono>
+#include <cmath>
 
 class Time
 {
