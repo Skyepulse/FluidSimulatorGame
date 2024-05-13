@@ -121,6 +121,7 @@ int main() {
 
 	// LINE
 	std::shared_ptr<Shape> line = std::make_shared<Line>();
+	line->SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// END LINE
 
@@ -129,6 +130,7 @@ int main() {
 	std::shared_ptr<Circle> circle  = std::make_shared<Circle>();
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
+	circle->SetColor(glm::vec3(1.0f));
 
 	// END CIRCLE
 

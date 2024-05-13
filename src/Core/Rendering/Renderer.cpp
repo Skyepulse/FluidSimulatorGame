@@ -59,3 +59,17 @@ void Renderer::DrawShapeDuplicate(std::vector<glm::vec2> positions, std::shared_
     transform.Translate2D(glm::vec2(-position.x, -position.y)); 
   }
 }
+
+void Renderer::DrawShapeDuplicate(std::vector<Vec2f> positions, std::shared_ptr<Shape> shape)
+{
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
+
+  for (auto position : positions)
+  {
+    transform.Translate2D(glm::vec2(position.x, position.y)); 
+    Draw(transform, rendererData);
+    // TEMPPP
+    transform.Translate2D(glm::vec2(-position.x, -position.y)); 
+  }
+}
