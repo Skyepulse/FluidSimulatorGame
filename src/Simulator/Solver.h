@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include "../Core/Log.h"
 
 
 using namespace std;
@@ -46,6 +47,8 @@ public:
 		_m0 = _d0 * _h * _h;
 		_c  = std::fabs(_g.y) / _eta;
 		_k = _d0 * _c * _c / _gamma;
+
+		CORE_DEBUG("{0}", _c);
 		switch (kt)
 		{
 			case KernelType::CUBIC_SPLINE:
@@ -73,7 +76,6 @@ private:
 	void buildNeighbors();
 	void computeDensity();
 	void computePressure();
-	void computeViscosity();
 	void updateVel(const Real dt);
 	void updatePos(const Real dt);
 

@@ -1,4 +1,5 @@
 #include "Solver.h"
+#include <algorithm>
 
 // TEMP
 #include "../Core/Log.h"
@@ -23,26 +24,28 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_particleCount = 0;
 	_immovableParticleCount = 0;
 
+	Real sr = _kernel.getSupportRad();
+
 	for (int i = 0; i < resX; i++) {
-		addParticle(_h * Vec2f(i + 0.25,0.25), 0);
-		addParticle(_h * Vec2f(i + 0.75,0.25), 0);
-		addParticle(_h * Vec2f(i + 0.25,0.75), 0);
-		addParticle(_h * Vec2f(i + 0.75,0.75), 0);
-		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.25), 0);
-		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.25), 0);
-		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.75), 0);
-		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.75), 0);
+		addParticle(_h * Vec2f(i + 0.25,0.25), 1);
+		addParticle(_h * Vec2f(i + 0.75,0.25), 1);
+		addParticle(_h * Vec2f(i + 0.25,0.75), 1);
+		addParticle(_h * Vec2f(i + 0.75,0.75), 1);
+		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.25), 1);
+		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.25), 1);
+		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.75), 1);
+		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.75), 1);
 	}
 
 	for (int j = 1; j < resY-1; j++) {
-		addParticle(_h * Vec2f(0.25, j + 0.25), 0);
-		addParticle(_h * Vec2f(0.75, j + 0.25), 0);
-		addParticle(_h * Vec2f(0.25, j + 0.75), 0);
-		addParticle(_h * Vec2f(0.75, j + 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.25), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.25), 0);
+		addParticle(_h * Vec2f(0.25, j + 0.25), 1);
+		addParticle(_h * Vec2f(0.75, j + 0.25), 1);
+		addParticle(_h * Vec2f(0.25, j + 0.75), 1);
+		addParticle(_h * Vec2f(0.75, j + 0.75), 1);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.25), 1);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.75), 1);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.75), 1);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.25), 1);
 	}
 
 	//We add particles in the bottom right corner
@@ -97,7 +100,6 @@ void Solver::update(const Real dt) {
 	buildNeighbors();
 	computeDensity();
 	computePressure();
-	computeViscosity();
 
 	updateVel(dt);
 	updatePos(dt);
@@ -125,10 +127,10 @@ void Solver::buildNeighbors() {
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dy = -1; dy <= 1; dy++) {
 				tIndex idx = idx1d(x + dx, y + dy);
-				if (idx >= 0 && idx < _resX * _resY) {
+				if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
 					for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
 						tIndex p = _particlesInGrid[idx][j];
-						if (p != i && (_pm.pos[i] - _pm.pos[j]).length() <= _h) {
+						if (p != i && (_pm.pos[i] - _pm.pos[p]).length() <= _h) {
 							_neighbors[i].push_back(p);
 						}
 					}
@@ -140,35 +142,45 @@ void Solver::buildNeighbors() {
 
 void Solver::computeDensity() {
 	for (int i = 0; i < _particleCount; i++) {
+		_pm.density[i] = 0.0f;
 		for (int j = 0; j < _neighbors[i].size(); j++) {
-			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[j]);
+			tIndex p = _neighbors[i][j];
+			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[p]);
+		CORE_DEBUG("dens {} {}", i, _pm.density[i]);
+
+		//CORE_DEBUG("dens {} {}", i, _kernel->W(_pm.pos[i] - _pm.pos[p]));
+
 		}
+		//CORE_DEBUG("dens {}", _pm.density[i]);
+
 	}
 }
 
-void Solver::computeViscosity(){
-	for (int i=0; i<_particleCount; i++){
-		if(_pm.type[i] == 1) continue;
-		for (int j=0; j<_neighbors[i].size(); j++){
-			// suppose all masses are equal
-			_pm.acc[i] += _nu * (_pm.vel[j]-_pm.vel[i]) / _pm.density[j] * _kernel->laplW(_pm.pos[i] - _pm.pos[j]);
-		}
-	}
-}
 
 void Solver::computePressure(){
 	for (int i=0; i<_particleCount; i++){
-		for (int j=0; j<_neighbors[i].size(); j++){
-			// suppose all masses are equal
-			_pm.acc[i] += - (1/_m0) * (_pm.press[i]+_pm.press[j])/(2.0*_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
-		}
+		_pm.press[i] = max(_k*(pow(_pm.density[i]/_d0, 7.0f) - 1.0f), 0.0f);
+		//CORE_DEBUG("press {0}", _pm.density[i]/_d0);
 	}
+	
 }
+
 
 void Solver::updateVel(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
-		_pm.acc[i] += _g;
+		_pm.acc[i] = _g;
+
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			// pressure force
+			tIndex p = _neighbors[i][j];
+			_pm.acc[i] += - (_pm.press[i]+_pm.press[p])/(2.0*_pm.density[p]) * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
+
+			// viscosity force
+			// _pm.acc[i] += _nu * (_pm.vel[p]-_pm.vel[i]) / _pm.density[p] * _kernel->laplW(_pm.pos[i] - _pm.pos[p]);
+		}
+
 		_pm.vel[i] += dt * (_pm.acc[i]);
 		//DEBUG("{0}", _pm.vel);
 	}

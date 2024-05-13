@@ -19,8 +19,11 @@ public:
 	Vec2f gradW(const Vec2f& r, const Real l) const override;
 	Real laplW(const Vec2f& r) const override;
 
+	Real getSupportRad() const {return _sr;}
+
 private:
 	unsigned int _dim;
 	Real _c[3], _gc[3], _lc[3];
+	Real _sr;
 };
 #endif // !_CUBIC_SPLINE_H_

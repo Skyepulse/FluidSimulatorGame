@@ -9,7 +9,7 @@ class Time
 public:
   enum class TimeUnit { Seconds, Milliseconds, Microseconds, Nanoseconds };
 
-  static std::chrono::steady_clock::time_point GetTime() { return m_Clock.now(); }
+  static std::chrono::system_clock::time_point GetTime() { return m_Clock.now(); }
   static double GetMillis()   { return CORE_TIME_IN_UNIT(microseconds)  / 1000.0; }
   static double GetMicros()   { return CORE_TIME_IN_UNIT(nanoseconds)   / 1000.0; }
   static double GetSeconds()  { return CORE_TIME_IN_UNIT(milliseconds)  / 1000.0; }

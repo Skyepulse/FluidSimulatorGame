@@ -3,7 +3,8 @@
 
 void CubicSpline::setSmoothingLength(const Real h)
 {
-	_h = h/2;
+	_sr = h*2;
+	_h = h;
 	const Real h2 =square(_h), h3 = h2 * _h;
 	_c[0] = 2e0 / (3e0 * _h);
 	_c[1] = 10e0 / (7e0 * M_PI * h2);
