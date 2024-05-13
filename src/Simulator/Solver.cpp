@@ -39,10 +39,10 @@ void Solver::initSimulation(const Real resX, const Real resY)
 		addParticle(_h * Vec2f(0.75, j + 0.25), 0);
 		addParticle(_h * Vec2f(0.25, j + 0.75), 0);
 		addParticle(_h * Vec2f(0.75, j + 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, 0.25), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, 0.75), 0);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, 0.25), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.25), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.75), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.75), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.25), 0);
 	}
 
 	//We add particles in the bottom right corner
