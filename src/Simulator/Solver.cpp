@@ -24,37 +24,37 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_particleCount = 0;
 	_immovableParticleCount = 0;
 
-	Real sr = _kernel.getSupportRad();
+	Real sr = _kernel->getSupportRad();
 
 	for (int i = 0; i < resX; i++) {
-		addParticle(_h * Vec2f(i + 0.25,0.25), 1);
-		addParticle(_h * Vec2f(i + 0.75,0.25), 1);
-		addParticle(_h * Vec2f(i + 0.25,0.75), 1);
-		addParticle(_h * Vec2f(i + 0.75,0.75), 1);
-		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.25), 1);
-		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.25), 1);
-		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.75), 1);
-		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.75), 1);
+		addParticle(sr * Vec2f(i + 0.25,0.25), 1);
+		addParticle(sr * Vec2f(i + 0.75,0.25), 1);
+		addParticle(sr * Vec2f(i + 0.25,0.75), 1);
+		addParticle(sr * Vec2f(i + 0.75,0.75), 1);
+		addParticle(sr * Vec2f(i + 0.25, resY-1 + 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.75, resY-1 + 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.25, resY-1 + 0.75), 1);
+		addParticle(sr * Vec2f(i + 0.75, resY-1 + 0.75), 1);
 	}
 
 	for (int j = 1; j < resY-1; j++) {
-		addParticle(_h * Vec2f(0.25, j + 0.25), 1);
-		addParticle(_h * Vec2f(0.75, j + 0.25), 1);
-		addParticle(_h * Vec2f(0.25, j + 0.75), 1);
-		addParticle(_h * Vec2f(0.75, j + 0.75), 1);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.25), 1);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.75), 1);
-		addParticle(_h * Vec2f(resX - 1 + 0.75, j + 0.75), 1);
-		addParticle(_h * Vec2f(resX - 1 + 0.25, j + 0.25), 1);
+		addParticle(sr * Vec2f(0.25, j + 0.25), 1);
+		addParticle(sr * Vec2f(0.75, j + 0.25), 1);
+		addParticle(sr * Vec2f(0.25, j + 0.75), 1);
+		addParticle(sr * Vec2f(0.75, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.25), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.25), 1);
 	}
 
 	//We add particles in the bottom right corner
 	for (int i = 1; i < 11; i++) {
 		for (int j = 1; j < 11; j++) {
-			addParticle(_h*Vec2f(i + 0.25, j + 0.25));
-			addParticle(_h*Vec2f(i + 0.75, j + 0.25));
-			addParticle(_h*Vec2f(i + 0.25, j + 0.75));
-			addParticle(_h*Vec2f(i + 0.75, j + 0.75));
+			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
+			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
+			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
+			addParticle(sr*Vec2f(i + 0.75, j + 0.75));
 		}
 	}
 }
@@ -130,13 +130,14 @@ void Solver::buildNeighbors() {
 				if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
 					for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
 						tIndex p = _particlesInGrid[idx][j];
-						if (p != i && (_pm.pos[i] - _pm.pos[p]).length() <= _h) {
+						if (p != i && (_pm.pos[i] - _pm.pos[p]).length() <= _kernel->getSupportRad()) {
 							_neighbors[i].push_back(p);
 						}
 					}
 				}
 			}
 		}
+		//CORE_DEBUG("neighbors {}", _neighbors[i].size());
 	}
 }
 
@@ -146,7 +147,6 @@ void Solver::computeDensity() {
 		for (int j = 0; j < _neighbors[i].size(); j++) {
 			tIndex p = _neighbors[i][j];
 			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[p]);
-		CORE_DEBUG("dens {} {}", i, _pm.density[i]);
 
 		//CORE_DEBUG("dens {} {}", i, _kernel->W(_pm.pos[i] - _pm.pos[p]));
 
@@ -160,7 +160,8 @@ void Solver::computeDensity() {
 void Solver::computePressure(){
 	for (int i=0; i<_particleCount; i++){
 		_pm.press[i] = max(_k*(pow(_pm.density[i]/_d0, 7.0f) - 1.0f), 0.0f);
-		//CORE_DEBUG("press {0}", _pm.density[i]/_d0);
+		//CORE_DEBUG("press {0}", _pm.density[i]/_d0);}
+		//CORE_DEBUG("press {0}", _pm.press[i]);
 	}
 	
 }

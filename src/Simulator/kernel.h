@@ -17,6 +17,7 @@ public:
 	virtual Vec2f gradW(const Vec2f& r) const = 0;
 	virtual Vec2f gradW(const Vec2f& r, const Real l) const = 0;
 	virtual Real laplW(const Vec2f& r) const = 0;
+	virtual Real getSupportRad() const = 0;
 
 protected:
 	Real _h;

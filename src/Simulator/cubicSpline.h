@@ -19,7 +19,7 @@ public:
 	Vec2f gradW(const Vec2f& r, const Real l) const override;
 	Real laplW(const Vec2f& r) const override;
 
-	Real getSupportRad() const {return _sr;}
+	Real getSupportRad() const override {return _sr;}
 
 private:
 	unsigned int _dim;

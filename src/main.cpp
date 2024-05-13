@@ -58,7 +58,7 @@ int main() {
 	solver.initSimulation(24.0f, 18.0f);
 	ParticleManager particleManager;
 	
-	Camera camera(0.0f, 24.0f * solver.getH(), 0.0f, 18.0f * solver.getH()); // MUltiply by h
+	Camera camera(0.0f, 24.0f * solver.getH() *2, 0.0f, 18.0f * solver.getH()*2); // MUltiply by h
 
 	// // POSITION
 
@@ -135,7 +135,7 @@ int main() {
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
-		solver.update(0.0001f);
+	solver.update(0.0001f);
 
 
 	while (!window->ShouldClose()) {
@@ -146,7 +146,7 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-
+		
 
 		particleManager = solver.getParticleManager();
 		
