@@ -52,8 +52,13 @@ int main() {
 	// ---------------------------------------------------------------------------
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
+
+	// Solver
+	Solver solver;
+	solver.initSimulation(24.0f, 18.0f);
+	ParticleManager particleManager;
 	
-	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
+	Camera camera(0.0f, 24.0f * 0.5f, 0.0f, 18.0f * 0.5f); // MUltiply by h
 
 	// // POSITION
 
@@ -130,11 +135,6 @@ int main() {
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
-
-	// Solver
-	Solver solver;
-	solver.initSimulation(12.0f, 9.0f);
-	ParticleManager particleManager;
 
 	while (!window->ShouldClose()) {
 		CORE_INFO(Time::GetDeltaTime());
