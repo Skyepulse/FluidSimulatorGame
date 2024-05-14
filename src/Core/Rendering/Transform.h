@@ -12,6 +12,7 @@ public:
 
   // Transformation function
   void Translate(const glm::vec3& translation) { m_Position = glm::translate(m_Position, translation); }
+  Transform GetTranslated(const glm::vec3& translation) { Transform transform(*this); transform.Translate(translation); return transform; }
 
   void Scale(const glm::vec3 scale) { m_Scale = glm::scale(m_Scale, scale); }
   void Scale(float scale) { Scale(glm::vec3(scale)); }
@@ -30,6 +31,7 @@ class Transform2D : public Transform
 public:
   // Transformation function
   void Translate2D(const glm::vec2& translation) { Translate(glm::vec3(translation, 0.0f)); }
+  Transform2D GetTranslated2D(const glm::vec2& translation) { Transform2D transform(*this); transform.Translate2D(translation); return transform; }
 
   void Scale2D(const glm::vec2 scale) { Scale(glm::vec3(scale, 0.0f)); }
   void Scale2D(float scale) { Scale2D(glm::vec2(scale)); }

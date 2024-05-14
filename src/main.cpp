@@ -150,7 +150,7 @@ int main() {
 
 		particleManager = solver.getParticleManager();
 		
-		Renderer::DrawShapeDuplicate(particleManager.pos, circle); // Draw Border
+		Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
 
 		Renderer::EndScene();
 
