@@ -130,7 +130,11 @@ int main() {
 	std::shared_ptr<Circle> circle  = std::make_shared<Circle>();
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
+	circle->Transform->GetTranslated(glm::vec3(10.0));
 	circle->SetColor(glm::vec3(1.0f));
+
+	std::vector<glm::vec2> pos = { glm::vec2(1.0f), glm::vec2(1.0f) };
+	std::vector<glm::vec2> direction = { glm::vec2(1.0f, 0.0f), glm::vec2(0.0f, 1.0f) };
 
 	// END CIRCLE
 
@@ -142,11 +146,12 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		Renderer::DrawShapeDuplicate(borderPositions, circle); // Draw Border
-		Renderer::DrawShapeDuplicate(fluidPositions, circle); // Draw fluid
+		Renderer::DrawShapeDuplicate(circle, borderPositions); // Draw Border
+		Renderer::DrawShapeDuplicate(circle, fluidPositions); // Draw fluid
 
-		Renderer::DrawShapeDuplicate(borderPositions, line); // Draw Border
-		Renderer::DrawShapeDuplicate(fluidPositions, line); // Draw fluid
+		Renderer::DrawShapeDuplicate(line, borderPositions); // Draw Border
+		Renderer::DrawShapeDuplicate(line, fluidPositions); // Draw fluid
+		Renderer::DrawShapeDuplicate(line, pos, direction); // Draw Border
 
 		Renderer::EndScene();
 
