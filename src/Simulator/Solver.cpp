@@ -10,6 +10,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_pm.acc.clear();
 	_pm.press.clear();
 	_pm.density.clear();
+	_pm.type.clear();
 	_neighbors.clear();
 
 	_particlesInGrid.clear();
@@ -17,10 +18,33 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	_neighbors.clear();
 	_particleCount = 0;
+	_immovableParticleCount = 0;
+
+	for (int i = 0; i < resX; i++) {
+		addParticle(_h * Vec2f(i + 0.25,0.25), 0);
+		addParticle(_h * Vec2f(i + 0.75,0.25), 0);
+		addParticle(_h * Vec2f(i + 0.25,0.75), 0);
+		addParticle(_h * Vec2f(i + 0.75,0.75), 0);
+		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.25), 0);
+		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.25), 0);
+		addParticle(_h * Vec2f(i + 0.25, resY-1 + 0.75), 0);
+		addParticle(_h * Vec2f(i + 0.75, resY-1 + 0.75), 0);
+	}
+
+	for (int j = 1; j < resY-1; j++) {
+		addParticle(_h * Vec2f(0.25, j + 0.25), 0);
+		addParticle(_h * Vec2f(0.75, j + 0.25), 0);
+		addParticle(_h * Vec2f(0.25, j + 0.75), 0);
+		addParticle(_h * Vec2f(0.75, j + 0.75), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, 0.25), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, 0.75), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.75, 0.75), 0);
+		addParticle(_h * Vec2f(resX - 1 + 0.25, 0.25), 0);
+	}
 
 	//We add particles in the bottom right corner
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
+	for (int i = 1; i < 11; i++) {
+		for (int j = 1; j < 11; j++) {
 			addParticle(_h*Vec2f(i + 0.25, j + 0.25));
 			addParticle(_h*Vec2f(i + 0.75, j + 0.25));
 			addParticle(_h*Vec2f(i + 0.25, j + 0.75));
@@ -29,13 +53,15 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	}
 }
 
-void Solver::addParticle(const Vec2f& pos, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density)
+void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density)
 {
 	_pm.pos.push_back(pos);
 	_pm.vel.push_back(vel);
 	_pm.acc.push_back(acc);
 	_pm.press.push_back(press);
 	_pm.density.push_back(density);
+	_pm.type.push_back(type);
+	if(type == 1) _immovableParticleCount++;
 	_neighbors.push_back(vector<tIndex>());
 	_particleCount++;
 }
@@ -48,15 +74,18 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	p.acc = _pm.acc[index];
 	p.press = _pm.press[index];
 	p.density = _pm.density[index];
+	p.type = _pm.type[index];
 
 	_pm.pos.erase(_pm.pos.begin() + index);
 	_pm.vel.erase(_pm.vel.begin() + index);
 	_pm.acc.erase(_pm.acc.begin() + index);
 	_pm.press.erase(_pm.press.begin() + index);
 	_pm.density.erase(_pm.density.begin() + index);
+	_pm.type.erase(_pm.type.begin() + index);
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
+	if(p.type == 1) _immovableParticleCount--;	
 	return p;
 }
 
@@ -116,6 +145,7 @@ void Solver::computeDensity() {
 
 void Solver::computeViscosity(){
 	for (int i=0; i<_particleCount; i++){
+		if(_pm.type[i] == 1) continue;
 		for (int j=0; j<_neighbors[i].size(); j++){
 			// suppose all masses are equal
 			_pm.acc[i] += _nu * (_pm.vel[j]-_pm.vel[i]) / _pm.density[j] * _kernel->laplW(_pm.pos[i] - _pm.pos[j]);
@@ -134,6 +164,7 @@ void Solver::computePressure(){
 
 void Solver::updateVel(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
+		if(_pm.type[i] == 1) continue;
 		_pm.acc[i] += _g;
 		_pm.vel[i] += dt * (_pm.acc[i]);
 	}
@@ -142,13 +173,18 @@ void Solver::updateVel(const Real dt) {
 void Solver::updatePos(const Real dt) {
 	vector<int> toRemove;
 	for (int i = 0; i < _particleCount; i++) {
+		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
+		/*
 		if (_pm.pos[i].x < 0 || _pm.pos[i].x > _resX * _h || _pm.pos[i].y < 0 || _pm.pos[i].y > _resY * _h) {
 			toRemove.push_back(i);
 		}
+		*/
 	}
 
+	/*
 	for (int i = 0; i < toRemove.size(); i++) {
 		removeParticle(toRemove[i]);
 	}
+	*/
 }

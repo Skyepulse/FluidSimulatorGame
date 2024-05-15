@@ -12,16 +12,15 @@ public:
 	}
 
 	void setSmoothingLength(const Real h) override;
-	Real getSmoothingLength() const override;
 	Real f(const Real l) const override;
 	Real derivative_f(const Real l) const override;
 	Real W(const Vec2f& r) const override;
 	Vec2f gradW(const Vec2f& r) const override;
 	Vec2f gradW(const Vec2f& r, const Real l) const override;
-	Vec2f laplW(const Vec2f& r) const override;
+	Real laplW(const Vec2f& r) const override;
 
 private:
 	unsigned int _dim;
-	Real _h, _c[3], _gc[3], _ggc[3];
+	Real _c[3], _gc[3], _lc[3];
 };
 #endif // !_CUBIC_SPLINE_H_

@@ -16,6 +16,7 @@ struct ParticleManager {
 	vector<Vec2f> acc; // acceleration
 	vector<Real> press; // pressure
 	vector<Real> density; // density
+	vector<int> type; // type of particle
 };
 
 struct Particle {
@@ -24,6 +25,7 @@ struct Particle {
 	Vec2f acc; // acceleration
 	Real press; // pressure
 	Real density; // density
+	int type; // type of particle
 };
 
 enum KernelType
@@ -63,7 +65,7 @@ public:
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX;}
-	void addParticle(const Vec2f& pos, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
+	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
@@ -81,6 +83,7 @@ private:
 	Real _c;
 
 	tIndex _particleCount;
+	tIndex _immovableParticleCount;
 
 	ParticleManager _pm;
 	vector<vector<tIndex>> _particlesInGrid;
