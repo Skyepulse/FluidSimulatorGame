@@ -53,6 +53,41 @@ int main() {
 	
 	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
 
+	// GRID
+	std::shared_ptr<Shape> gridLine = std::make_shared<Line>();
+	gridLine->SetColor(glm::vec3(1.0f)); 
+
+	glm::ivec2 gridSize = glm::vec2(12, 9);
+	glm::ivec2 gridResolution = glm::ivec2(12, 9);
+
+	std::vector<glm::vec2> gridPosition;
+	std::vector<glm::vec2> gridDirection;
+	std::vector<glm::vec2> gridScale;
+
+	float dx = (float) gridSize.x / ((float) gridResolution.x - 1.0f);
+	float dy = (float) gridSize.y / ((float) gridResolution.y - 1.0f);
+
+	/*gridPosition.push_back(glm::vec2(12.0f, 0.0f));
+	gridDirection.push_back(glm::vec2(0.0f, 1.0f));
+	gridScale.push_back(glm::vec2(gridSize.y, 1.0f));*/
+
+ 	for (size_t i = 0; i < gridResolution.x; i++)
+	{
+		CORE_DEBUG("Position : {0}, {1}", dx * (float) i, 0.0f);
+		gridPosition.push_back(glm::vec2(dx * (float) i, 0.0f));
+		gridDirection.push_back(glm::vec2(0.0f, 1.0f));
+		gridScale.push_back(glm::vec2(gridSize.y));
+	}
+
+	for (size_t i = 0; i < gridResolution.y; i++)
+	{
+		gridPosition.push_back(glm::vec2(0.0f, dy * (float) i));
+		gridDirection.push_back(glm::vec2(1.0f, 0.0f));
+		gridScale.push_back(glm::vec2(gridSize.x));
+	}
+
+	// END GRID
+
 	// POSITION
 
 	// Border Generation
@@ -70,8 +105,8 @@ int main() {
 	glm::vec2 rtCorner = cameraOrigin + glm::vec2(cameraSize.x, cameraSize.y);
 
 	// Horizontal borders
-	float dx = 1.0f / ((float) borderParticleCount.x - 1.0f);
-	float dy = 1.0f / ((float) borderParticleCount.y - 1.0f);
+	dx = 1.0f / ((float) borderParticleCount.x - 1.0f);
+	dy = 1.0f / ((float) borderParticleCount.y - 1.0f);
 
 	glm::vec2 hiOffset = glm::vec2(0.0f, dy) * (ltCorner.y - lbCorner.y); // Horizontal inner border offset from outter border
 	glm::vec2 viOffset = glm::vec2(dx, 0.0f) * (rbCorner.x - lbCorner.y); // Vertical inner border offset from outter border
@@ -139,19 +174,20 @@ int main() {
 	// END CIRCLE
 
 	while (!window->ShouldClose()) {
-		CORE_INFO(Time::GetDeltaTime());
+		//CORE_INFO(Time::GetDeltaTime());
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		Renderer::BeginScene(camera);
 
-		Renderer::DrawShapeDuplicate(circle, borderPositions); // Draw Border
+		Renderer::DrawShapeDuplicate(gridLine, gridPosition, gridDirection, gridScale);
+
+		/*Renderer::DrawShapeDuplicate(circle, borderPositions); // Draw Border
 		Renderer::DrawShapeDuplicate(circle, fluidPositions); // Draw fluid
 
 		Renderer::DrawShapeDuplicate(line, borderPositions); // Draw Border
-		Renderer::DrawShapeDuplicate(line, fluidPositions); // Draw fluid
-		Renderer::DrawShapeDuplicate(line, pos, direction); // Draw Border
+		Renderer::DrawShapeDuplicate(line, fluidPositions); // Draw fluid*/
 
 		Renderer::EndScene();
 
