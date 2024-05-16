@@ -135,8 +135,6 @@ int main() {
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
-	solver.update(0.0001f);
-
 
 	while (!window->ShouldClose()) {
 		CORE_INFO(Time::GetDeltaTime());
@@ -146,7 +144,8 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		
+		solver.update(0.005f);
+
 
 		particleManager = solver.getParticleManager();
 		

@@ -107,11 +107,13 @@ void Solver::update(const Real dt) {
 
 void Solver::buildNeighbors() {
 	// We first build the grid
+
+	Real R = _kernel->getSupportRad();
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(_resX * _resY);
 	for (int i = 0; i < _particleCount; i++) {
-		int x = _pm.pos[i].x / _h;
-		int y = _pm.pos[i].y / _h;
+		int x = _pm.pos[i].x / R;
+		int y = _pm.pos[i].y / R;
 		tIndex idx = idx1d(x, y);
 		if (idx >= 0 && idx < _resX * _resY) {
 			_particlesInGrid[idx].push_back(i);
@@ -122,15 +124,15 @@ void Solver::buildNeighbors() {
 	_neighbors.clear();
 	_neighbors.resize(_particleCount);
 	for (int i = 0; i < _particleCount; i++) {
-		int x = _pm.pos[i].x / _h;
-		int y = _pm.pos[i].y / _h;
+		int x = _pm.pos[i].x / R;
+		int y = _pm.pos[i].y / R;
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dy = -1; dy <= 1; dy++) {
 				tIndex idx = idx1d(x + dx, y + dy);
 				if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
 					for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
 						tIndex p = _particlesInGrid[idx][j];
-						if (p != i && (_pm.pos[i] - _pm.pos[p]).length() <= _kernel->getSupportRad()) {
+						if ((_pm.pos[i] - _pm.pos[p]).length() <= R) {
 							_neighbors[i].push_back(p);
 						}
 					}
@@ -143,7 +145,7 @@ void Solver::buildNeighbors() {
 
 void Solver::computeDensity() {
 	for (int i = 0; i < _particleCount; i++) {
-		_pm.density[i] = 0.0f;
+		_pm.density[i] = 0;
 		for (int j = 0; j < _neighbors[i].size(); j++) {
 			tIndex p = _neighbors[i][j];
 			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[p]);
@@ -176,10 +178,16 @@ void Solver::updateVel(const Real dt) {
 			// suppose all masses are equal
 			// pressure force
 			tIndex p = _neighbors[i][j];
-			_pm.acc[i] += - (_pm.press[i]+_pm.press[p])/(2.0*_pm.density[p]) * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
+			if (i == p) continue;
+
+			_pm.acc[i] += - 1.0/_m0 * (_pm.press[i]+_pm.press[p])/(2.0*_pm.density[p]) * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
 
 			// viscosity force
-			// _pm.acc[i] += _nu * (_pm.vel[p]-_pm.vel[i]) / _pm.density[p] * _kernel->laplW(_pm.pos[i] - _pm.pos[p]);
+			//_pm.acc[i] += _nu * (_pm.vel[p]-_pm.vel[i]) / _pm.density[p] * _kernel->laplW(_pm.pos[i] - _pm.pos[p]);
+
+			Vec2f x = (_pm.pos[i] - _pm.pos[p]);
+            Vec2f u = (_pm.vel[i] - _pm.vel[p]);
+            _pm.acc[i] += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
 		}
 
 		_pm.vel[i] += dt * (_pm.acc[i]);
