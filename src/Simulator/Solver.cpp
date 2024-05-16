@@ -49,8 +49,8 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	}
 
 	//We add particles in the bottom right corner
-	for (int i = 1; i < 11; i++) {
-		for (int j = 1; j < 11; j++) {
+	for (int i = 1; i < 21; i++) {
+		for (int j = 1; j < 21; j++) {
 			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
@@ -162,6 +162,7 @@ void Solver::computeDensity() {
 void Solver::computePressure(){
 	for (int i=0; i<_particleCount; i++){
 		_pm.press[i] = max(_k*(pow(_pm.density[i]/_d0, 7.0f) - 1.0f), 0.0f);
+		//_pm.press[i] = max(_k*(pow(_pm.density[i]/_d0, 7.0f) - 1.0f), 0.0f);
 		//CORE_DEBUG("press {0}", _pm.density[i]/_d0);}
 		//CORE_DEBUG("press {0}", _pm.press[i]);
 	}

@@ -55,10 +55,10 @@ int main() {
 
 	// Solver
 	Solver solver;
-	solver.initSimulation(24.0f, 18.0f);
+	solver.initSimulation(48.0f, 36.0f);
 	ParticleManager particleManager;
 	
-	Camera camera(0.0f, 24.0f * solver.getH() *2, 0.0f, 18.0f * solver.getH()*2); // MUltiply by h
+	Camera camera(0.0f, 48.0f * solver.getH() *2, 0.0f, 36.0f * solver.getH()*2); // MUltiply by h
 
 	// // POSITION
 
