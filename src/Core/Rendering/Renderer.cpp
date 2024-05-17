@@ -54,7 +54,7 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2
   }
 }
 
-void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> direction)
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> directions)
 {
   Transform2D transform = *shape->Transform;
   const RendererData rendererData = shape->GetRendererData();
@@ -62,7 +62,34 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm:
   for (size_t i = 0; i < positions.size(); i++)
   {
     Transform2D dupTransform = transform.GetTranslated2D(positions[i]);
-    dupTransform.SetDirection(direction[i]);
+    dupTransform.SetDirection(directions[i]);
+    Draw(dupTransform, rendererData);
+  }
+}
+
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<Vec2f> directions)
+{
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
+
+  for (size_t i = 0; i < positions.size(); i++)
+  {
+    Transform2D dupTransform = transform.GetTranslated2D(glm::vec2(positions[i].x, positions[i].y));
+    dupTransform.SetDirection(glm::vec2(directions[i].x, directions[i].y));
+    Draw(dupTransform, rendererData);
+  }
+}
+
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> directions, std::vector<glm::vec2> scales)
+{
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
+
+  for (size_t i = 0; i < positions.size(); i++)
+  {
+    Transform2D dupTransform = transform.GetTranslated2D(positions[i]);
+    dupTransform.SetDirection(directions[i]);
+    dupTransform.Scale2D(scales[i]);
     Draw(dupTransform, rendererData);
   }
 }

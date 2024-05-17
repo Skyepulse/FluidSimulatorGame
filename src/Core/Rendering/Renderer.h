@@ -28,6 +28,10 @@ public:
   static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions);
 
   static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> rotations);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<Vec2f> rotations);
+
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> rotations, std::vector<glm::vec2> scales);
+
 private:
   static glm::mat4 m_VPMatrix;
 };
