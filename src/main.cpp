@@ -54,8 +54,6 @@ int main() {
 	//																	DATA INIT
 	// ---------------------------------------------------------------------------
 
-	Camera camera(0.0f, 12.0f, 0.0f, 9.0f);
-
 	// GRID
 	std::shared_ptr<Shape> gridLine = std::make_shared<Line>();
 	gridLine->SetColor(glm::vec3(1.0f));
@@ -175,25 +173,6 @@ int main() {
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
-
-	// LINE
-	std::shared_ptr<Shape> line = std::make_shared<Line>();
-	line->SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
-
-	// END LINE
-
-	// CIRCLE
-
-	std::shared_ptr<Circle> circle = std::make_shared<Circle>();
-	float circleRadius = 0.2f;
-	circle->Transform->Scale2D(circleRadius);
-	circle->Transform->GetTranslated(glm::vec3(10.0));
-	circle->SetColor(glm::vec3(1.0f));
-
-	std::vector<glm::vec2> pos = { glm::vec2(1.0f), glm::vec2(1.0f) };
-	std::vector<glm::vec2> direction = { glm::vec2(1.0f, 0.0f), glm::vec2(0.0f, 1.0f) };
-
-	// END CIRCLE
 
 	while (!window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
