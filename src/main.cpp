@@ -67,7 +67,7 @@ int main() {
 	gridLine->SetColor(glm::vec3(0.0f)); 
 
 	glm::ivec2 gridSize = camera.GetSize();
-	glm::ivec2 gridResolution = glm::ivec2(gridSize.x / solver.getH(), gridSize.y / solver.getH());
+	glm::ivec2 gridResolution = glm::ivec2(48, 36);
 
 	std::vector<glm::vec2> gridPosition;
 	std::vector<glm::vec2> gridDirection;
@@ -101,9 +101,9 @@ int main() {
 	std::vector<glm::vec2> rectPosition;
 	std::vector<float> values;
 	
-	for (size_t i = 0; i < gridResolution.x; i++)
+	for (size_t j = 0; j < gridResolution.y; j++)
 	{
-		for (size_t j = 0; j < gridResolution.y; j++)
+		for (size_t i = 0; i < gridResolution.x; i++)
 		{
 			values.push_back((float) (i*i + j*j) / (gridResolution.x * gridResolution.x + gridResolution.y * gridResolution.y));
 			rectPosition.push_back(glm::vec2(cellWidth * (float) i , cellHeight * (float) j));
@@ -126,12 +126,12 @@ int main() {
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		Renderer::BeginScene(camera);
-		Renderer::DrawShapeDuplicate(rectangle, rectPosition, values, glm::vec3(1.0f, 0.0f, 0.0f));
-		Renderer::DrawShapeDuplicate(gridLine, gridPosition, gridDirection, gridScale);
-
 		solver.update(0.005f);
 		particleManager = solver.getParticleManager();
-		
+
+		Renderer::DrawShapeDuplicate(rectangle, rectPosition, values, glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+		Renderer::DrawShapeDuplicate(gridLine, gridPosition, gridDirection, gridScale);
+
 		Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
 
 		Renderer::EndScene();

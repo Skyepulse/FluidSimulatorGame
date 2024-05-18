@@ -27,13 +27,13 @@ public:
   static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions);
   static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions);
 
-  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> rotations);
-  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<Vec2f> rotations);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> directions);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<Vec2f> directions);
 
-  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> rotations, std::vector<glm::vec2> scales);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> directions, std::vector<glm::vec2> scales);
 
-  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3& color);
-  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3& color);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3& color, float maxValue = 1.0f);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3& , float maxValue = 1.0f);
 
 private:
   static glm::mat4 m_VPMatrix;

@@ -94,7 +94,7 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm:
   }
 }
 
-void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3 &color)
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3 &color, float maxValue)
 {
   Transform2D transform = *shape->Transform;
   const RendererData rendererData = shape->GetRendererData();
@@ -102,12 +102,12 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm:
   for (size_t i = 0; i < positions.size(); i++)
   {
     Transform2D dupTransform = transform.GetTranslated2D(positions[i]);
-    shape->SetColor(value[i] * color);
+    shape->SetColor(value[i] / maxValue * color);
     Draw(dupTransform, rendererData);
   }
 }
 
-void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3 &color)
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3 &color, float maxValue)
 {
   Transform2D transform = *shape->Transform;
   const RendererData rendererData = shape->GetRendererData();
@@ -115,7 +115,7 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2
   for (size_t i = 0; i < positions.size(); i++)
   {
     Transform2D dupTransform = transform.GetTranslated2D(glm::vec2(positions[i].x, positions[i].y));
-    shape->SetColor(value[i] * color);
+    shape->SetColor(value[i] / maxValue * color);
     Draw(dupTransform, rendererData);
   }
 }
