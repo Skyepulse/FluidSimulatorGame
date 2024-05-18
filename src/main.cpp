@@ -24,6 +24,7 @@
 
 #include "Core/Scene/Circle.h"
 #include "Core/Scene/Line.h"
+#include "Core/Scene/Rectangle.h"
 
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -58,29 +59,77 @@ int main() {
 	solver.initSimulation(48.0f, 36.0f);
 	ParticleManager particleManager;
 	
-	Camera camera(0.0f, 48.0f * solver.getH() *2, 0.0f, 36.0f * solver.getH()*2); // MUltiply by h
+	Camera camera(0.0f, 48.0f * solver.getH() *2, 0.0f, 36.0f * solver.getH()*2); // Multiply by h
+
+	// GRID
+
+	std::shared_ptr<Line> gridLine = std::make_shared<Line>();
+	gridLine->SetColor(glm::vec3(0.0f)); 
+
+	glm::ivec2 gridSize = camera.GetSize();
+	glm::ivec2 gridResolution = glm::ivec2(gridSize.x / solver.getH(), gridSize.y / solver.getH());
+
+	std::vector<glm::vec2> gridPosition;
+	std::vector<glm::vec2> gridDirection;
+	std::vector<glm::vec2> gridScale;
+
+	float cellWidth = (float) gridSize.x / ((float) gridResolution.x - 1.0f);
+	float cellHeight = (float) gridSize.y / ((float) gridResolution.y - 1.0f);
+	
+	for (size_t i = 0; i < gridResolution.x; i++)
+	{
+		gridPosition.push_back(glm::vec2(cellWidth * (float) i, 0.0f));
+		gridDirection.push_back(glm::vec2(0.0f, 1.0f));
+		gridScale.push_back(glm::vec2(1.0f, gridSize.y));
+	}
+
+	for (size_t i = 0; i < gridResolution.y; i++)
+	{
+		CORE_DEBUG("Position : {0}, {1}", cellHeight * (float) i, 0.0f);
+		gridPosition.push_back(glm::vec2(0.0f, cellHeight * (float) i));
+		gridDirection.push_back(glm::vec2(1.0f, 0.0f));
+		gridScale.push_back(glm::vec2(1.0f, gridSize.x));
+	}
+
+	// END GRID
+
+	// CELLS
+
+	std::shared_ptr<Rectangle> rectangle = std::make_shared<Rectangle>();
+	rectangle->SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); 
+
+	std::vector<glm::vec2> rectPosition;
+	std::vector<float> values;
+	
+	for (size_t i = 0; i < gridResolution.x; i++)
+	{
+		for (size_t j = 0; j < gridResolution.y; j++)
+		{
+			values.push_back((float) (i*i + j*j) / (gridResolution.x * gridResolution.x + gridResolution.y * gridResolution.y));
+			rectPosition.push_back(glm::vec2(cellWidth * (float) i , cellHeight * (float) j));
+		}
+	}
+
+	// END CELLS
 
 	// Particle representation
 	std::shared_ptr<Circle> circle  = std::make_shared<Circle>();
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
-	circle->Transform->GetTranslated(glm::vec3(10.0));
 	circle->SetColor(glm::vec3(1.0f));
 
-	// END CIRCLE
 
 	while (!window->ShouldClose()) {
 		CORE_INFO(Time::GetDeltaTime());
-
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		Renderer::BeginScene(camera);
+		Renderer::DrawShapeDuplicate(rectangle, rectPosition, values, glm::vec3(1.0f, 0.0f, 0.0f));
+		Renderer::DrawShapeDuplicate(gridLine, gridPosition, gridDirection, gridScale);
 
 		solver.update(0.005f);
-
-
 		particleManager = solver.getParticleManager();
 		
 		Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border

@@ -93,3 +93,29 @@ void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm:
     Draw(dupTransform, rendererData);
   }
 }
+
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3 &color)
+{
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
+
+  for (size_t i = 0; i < positions.size(); i++)
+  {
+    Transform2D dupTransform = transform.GetTranslated2D(positions[i]);
+    shape->SetColor(value[i] * color);
+    Draw(dupTransform, rendererData);
+  }
+}
+
+void Renderer::DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3 &color)
+{
+  Transform2D transform = *shape->Transform;
+  const RendererData rendererData = shape->GetRendererData();
+
+  for (size_t i = 0; i < positions.size(); i++)
+  {
+    Transform2D dupTransform = transform.GetTranslated2D(glm::vec2(positions[i].x, positions[i].y));
+    shape->SetColor(value[i] * color);
+    Draw(dupTransform, rendererData);
+  }
+}

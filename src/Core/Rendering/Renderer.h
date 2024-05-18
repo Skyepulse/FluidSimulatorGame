@@ -32,6 +32,9 @@ public:
 
   static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<glm::vec2> rotations, std::vector<glm::vec2> scales);
 
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<glm::vec2> positions, std::vector<float> value, const glm::vec3& color);
+  static void DrawShapeDuplicate(std::shared_ptr<Shape> shape, std::vector<Vec2f> positions, std::vector<float> value, const glm::vec3& color);
+
 private:
   static glm::mat4 m_VPMatrix;
 };

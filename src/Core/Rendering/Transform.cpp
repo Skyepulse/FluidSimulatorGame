@@ -25,6 +25,5 @@ void Transform2D::SetDirection(const glm::vec2& direction)
 {
   glm::vec2 normalizedDirection = glm::normalize(direction);
   double angle = glm::orientedAngle(glm::vec2(0.0f, 1.0f), direction);
-  CORE_DEBUG("Angle : {0}", angle);
   SetRotation2D(angle);
 }
