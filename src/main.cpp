@@ -64,17 +64,17 @@ int main() {
 	// GRID
 
 	std::shared_ptr<Line> gridLine = std::make_shared<Line>();
-	gridLine->SetColor(glm::vec3(0.0f)); 
+	gridLine->SetColor(glm::vec3(1.0f)); 
 
 	glm::ivec2 gridSize = camera.GetSize();
-	glm::ivec2 gridResolution = glm::ivec2(48, 36);
+	glm::ivec2 gridResolution = glm::ivec2(4, 4);
 
 	std::vector<glm::vec2> gridPosition;
 	std::vector<glm::vec2> gridDirection;
 	std::vector<glm::vec2> gridScale;
 
-	float cellWidth = (float) gridSize.x / ((float) gridResolution.x - 1.0f);
-	float cellHeight = (float) gridSize.y / ((float) gridResolution.y - 1.0f);
+	float cellWidth = (float) gridSize.x / ((float) gridResolution.x);
+	float cellHeight = (float) gridSize.y / ((float) gridResolution.y);
 	
 	for (size_t i = 0; i < gridResolution.x; i++)
 	{
@@ -85,7 +85,6 @@ int main() {
 
 	for (size_t i = 0; i < gridResolution.y; i++)
 	{
-		CORE_DEBUG("Position : {0}, {1}", cellHeight * (float) i, 0.0f);
 		gridPosition.push_back(glm::vec2(0.0f, cellHeight * (float) i));
 		gridDirection.push_back(glm::vec2(1.0f, 0.0f));
 		gridScale.push_back(glm::vec2(1.0f, gridSize.x));
@@ -97,13 +96,15 @@ int main() {
 
 	std::shared_ptr<Rectangle> rectangle = std::make_shared<Rectangle>();
 	rectangle->SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); 
+	rectangle->Transform->Translate2D(glm::vec2(cellWidth * 0.5f, cellHeight * 0.5f));
+	rectangle->Transform->Scale2D(glm::vec2(cellWidth, cellHeight));
 
 	std::vector<glm::vec2> rectPosition;
 	std::vector<float> values;
 	
-	for (size_t j = 0; j < gridResolution.y; j++)
+	for (size_t i = 0; i < gridResolution.x; i++)
 	{
-		for (size_t i = 0; i < gridResolution.x; i++)
+		for (size_t j = 0; j < gridResolution.y; j++)
 		{
 			values.push_back((float) (i*i + j*j) / (gridResolution.x * gridResolution.x + gridResolution.y * gridResolution.y));
 			rectPosition.push_back(glm::vec2(cellWidth * (float) i , cellHeight * (float) j));
@@ -132,7 +133,7 @@ int main() {
 		Renderer::DrawShapeDuplicate(rectangle, rectPosition, values, glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
 		Renderer::DrawShapeDuplicate(gridLine, gridPosition, gridDirection, gridScale);
 
-		Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
+		//Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
 
 		Renderer::EndScene();
 
