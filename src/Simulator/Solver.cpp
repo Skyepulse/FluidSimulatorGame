@@ -16,6 +16,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_pm.density.clear();
 	_pm.type.clear();
 	_neighbors.clear();
+	_pm.alpha.clear();
 
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(resX * resY);
@@ -59,7 +60,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	}
 }
 
-void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density)
+void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
 {
 	_pm.pos.push_back(pos);
 	_pm.vel.push_back(vel);
@@ -67,6 +68,7 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	_pm.press.push_back(press);
 	_pm.density.push_back(density);
 	_pm.type.push_back(type);
+	_pm.alpha.push_back(alpha);
 	if(type == 1) _immovableParticleCount++;
 	_neighbors.push_back(vector<tIndex>());
 	_particleCount++;
@@ -81,6 +83,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	p.press = _pm.press[index];
 	p.density = _pm.density[index];
 	p.type = _pm.type[index];
+	p.alpha = _pm.alpha[index];
 
 	_pm.pos.erase(_pm.pos.begin() + index);
 	_pm.vel.erase(_pm.vel.begin() + index);
@@ -88,6 +91,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	_pm.press.erase(_pm.press.begin() + index);
 	_pm.density.erase(_pm.density.begin() + index);
 	_pm.type.erase(_pm.type.begin() + index);
+	_pm.alpha.erase(_pm.alpha.begin() + index);
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
@@ -161,7 +165,18 @@ void Solver::initDensity() {
 }
 
 void Solver::computeAlpha() {
-
+	for (int i = 0; i < _particleCount; i++) {
+		Real di = _pm.density[i];
+		Vec2f a = Vec2f(0e0);
+		Real b = 0e0;
+		for (int j = 0; j < _neighbors[i].size(); j++) {
+			tIndex p = _neighbors[i][j];
+			Vec2f factor = _m0 * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
+			b += factor.lengthSquare();
+			a += factor;
+		}
+		_pm.alpha[i] = di/(b + a.lengthSquare());
+	}
 }
 
 
