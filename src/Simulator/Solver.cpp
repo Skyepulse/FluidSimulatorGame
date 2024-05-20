@@ -164,6 +164,26 @@ void Solver::computeAlpha() {
 
 }
 
+void Solver::computeNPforces() {
+	for (int i = 0; i < _particleCount; i++) {
+		if(_pm.type[i] == 1) continue;
+		// gravity
+		_pm.acc[i] = _g;
+
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			// pressure force
+			tIndex p = _neighbors[i][j];
+			if (i == p) continue;
+
+			// viscosity force
+			Vec2f x = (_pm.pos[i] - _pm.pos[p]);
+            Vec2f u = (_pm.vel[i] - _pm.vel[p]);
+            _pm.acc[i] += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
+		}
+	}
+}
+
 
 void Solver::computePressure(){
 	for (int i=0; i<_particleCount; i++){
@@ -173,6 +193,12 @@ void Solver::computePressure(){
 		//CORE_DEBUG("press {0}", _pm.press[i]);
 	}
 	
+}
+
+void Solver::predictVel(const Real dt){
+	for (int i = 0; i < _particleCount; i++) {
+		_pm.vel[i] += dt * (_pm.acc[i]);
+	}
 }
 
 
