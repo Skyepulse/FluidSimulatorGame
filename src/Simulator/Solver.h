@@ -64,7 +64,7 @@ public:
 
 	void initSimulation(const Real resX, const Real resY);
 	void init();
-	void update(const Real dt);
+	void update();
 
 	Real getH() const { return _h; }
 

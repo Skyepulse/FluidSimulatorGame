@@ -69,8 +69,11 @@ int main() {
 
 	// END CIRCLE
 
+	solver.init();
+	
+
 	while (!window->ShouldClose()) {
-		CORE_INFO(Time::GetDeltaTime());
+		//CORE_INFO(Time::GetDeltaTime());
 
 
 		RendererCommand::Clear();
@@ -78,8 +81,7 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		solver.update(0.005f);
-
+		solver.update();
 
 		particleManager = solver.getParticleManager();
 		
