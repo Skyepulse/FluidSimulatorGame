@@ -101,7 +101,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 
 void Solver::init() {
 	buildNeighbors();
-	initDensity();
+	computeDensity();
 	computeAlpha();
 }
 
@@ -113,7 +113,7 @@ void Solver::update(const Real dt) {
 	correctDensityError(_dt);
 	updatePos(_dt);
 	buildNeighbors();
-	computeDensity(_dt);
+	computeDensity();
 	computeAlpha();
 	correctDivergenceError(_dt);
 }
@@ -156,7 +156,7 @@ void Solver::buildNeighbors() {
 	}
 }
 
-void Solver::initDensity() {
+void Solver::computeDensity() {
 	for (int i = 0; i < _particleCount; i++) {
 		_pm.density[i] = 0;
 		for (int j = 0; j < _neighbors[i].size(); j++) {
@@ -240,13 +240,11 @@ void Solver::updatePos(const Real dt) {
 	}
 }
 
-void Solver::computeDensity(const Real dt) {
-	for (int i = 0; i < _particleCount; i++) {
-		Real factor = 0;
-		for (int j = 0; j < _neighbors[i].size(); j++) {
-			tIndex p = _neighbors[i][j];
-			factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p]));
-		}
-		_pm.density[i] +=  dt * factor;
+Real Solver::predictDensity(const Real dt, tIndex i) {
+	Real factor = 0;
+	for (int j = 0; j < _neighbors[i].size(); j++) {
+		tIndex p = _neighbors[i][j];
+		factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p]));
 	}
+	return _pm.density[i] + dt * factor;
 }

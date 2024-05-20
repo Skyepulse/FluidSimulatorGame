@@ -77,7 +77,7 @@ private:
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
-	void initDensity();
+	void computeDensity();
 	void computeAlpha();
 
 	void computeNPforces();
@@ -85,7 +85,7 @@ private:
 	void predictVel(const Real dt);
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
-	void computeDensity(const Real dt);
+	Real predictDensity(const Real dt, tIndex i);
 	void correctDivergenceError(const Real dt);
 	void computePressure();	
 
