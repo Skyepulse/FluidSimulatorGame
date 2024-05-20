@@ -101,15 +101,21 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 
 void Solver::init() {
 	buildNeighbors();
-
 	initDensity();
+	computeAlpha();
 }
 
 void Solver::update(const Real dt) {
-	computePressure();
+	computeNPforces();
+	adaptDt();
+	predictVel(_dt);
 
-	updateVel(dt);
-	updatePos(dt);
+	correctDensityError(_dt);
+	updatePos(_dt);
+	buildNeighbors();
+	computeDensity();
+	computeAlpha();
+	correctDivergenceError(_dt);
 }
 
 void Solver::buildNeighbors() {
@@ -171,8 +177,9 @@ void Solver::computeAlpha() {
 		Real b = 0e0;
 		for (int j = 0; j < _neighbors[i].size(); j++) {
 			tIndex p = _neighbors[i][j];
+			if(i == p) continue;
 			Vec2f factor = _m0 * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
-			b += factor.lengthSquare();
+			b += _pm.type[p] == 1 ? 0 : factor.lengthSquare();
 			a += factor;
 		}
 		_pm.alpha[i] = di/(b + a.lengthSquare());
@@ -216,31 +223,14 @@ void Solver::predictVel(const Real dt){
 	}
 }
 
-
-void Solver::updateVel(const Real dt) {
+void Solver::adaptDt() {
+	Real maxVel2 = 0e0;
 	for (int i = 0; i < _particleCount; i++) {
-		if(_pm.type[i] == 1) continue;
-		_pm.acc[i] = _g;
-
-		for (int j=0; j<_neighbors[i].size(); j++){
-			// suppose all masses are equal
-			// pressure force
-			tIndex p = _neighbors[i][j];
-			if (i == p) continue;
-
-			_pm.acc[i] += - 1.0/_m0 * (_pm.press[i]+_pm.press[p])/(2.0*_pm.density[p]) * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
-
-			// viscosity force
-			//_pm.acc[i] += _nu * (_pm.vel[p]-_pm.vel[i]) / _pm.density[p] * _kernel->laplW(_pm.pos[i] - _pm.pos[p]);
-
-			Vec2f x = (_pm.pos[i] - _pm.pos[p]);
-            Vec2f u = (_pm.vel[i] - _pm.vel[p]);
-            _pm.acc[i] += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
-		}
-
-		_pm.vel[i] += dt * (_pm.acc[i]);
-		//DEBUG("{0}", _pm.vel);
+		maxVel2 = max(maxVel2, _pm.vel[i].lengthSquare());
 	}
+	Real maxVel = sqrt(maxVel2);
+	if(maxVel == 0e0) _dt = DEFAULT_DT;
+	else _dt = 0.4*_h/maxVel;
 }
 
 void Solver::updatePos(const Real dt) {
@@ -248,12 +238,5 @@ void Solver::updatePos(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
-		/*if (_pm.pos[i].x < 0 || _pm.pos[i].x > _resX * _h || _pm.pos[i].y < 0 || _pm.pos[i].y > _resY * _h) {
-			toRemove.push_back(i);
-		}*/
 	}
-
-	/*for (int i = 0; i < toRemove.size(); i++) {
-		removeParticle(toRemove[i]);
-	}*/
 }

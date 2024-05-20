@@ -87,9 +87,7 @@ private:
 	void updatePos(const Real dt);
 	void computeDensity();
 	void correctDivergenceError(const Real dt);
-	void computePressure();
-	void updateVel(const Real dt);
-	
+	void computePressure();	
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -97,6 +95,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
+	const Real DEFAULT_DT = 0.005f;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
