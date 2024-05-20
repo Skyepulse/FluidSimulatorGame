@@ -194,7 +194,6 @@ void Solver::computeNPforces() {
 
 		for (int j=0; j<_neighbors[i].size(); j++){
 			// suppose all masses are equal
-			// pressure force
 			tIndex p = _neighbors[i][j];
 			if (i == p) continue;
 
@@ -238,5 +237,28 @@ void Solver::updatePos(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
+	}
+}
+
+void Solver::correctDivergenceError(const Real dt){
+	Real dp[_particleCount];
+	Real dpAvg = 1000000;
+	Real eta = 0.01;
+	Real dtInv = 1.0 / dt;
+	while (dpAvg > eta){
+		dpAvg = 0;
+		for (int i=0; i<_particleCount; i++){
+			dp[i] = -_pm.density[i] * dtInv * (_pm.vel[i].x + _pm.vel[i].y);
+			dpAvg += dp[i];
+		}
+
+		for (int i=0; i<_particleCount; i++){
+			Real ki = dtInv * dp[i] * _pm.alpha[i];
+			for (int p=0; p<_neighbors[i].size(); p++){
+				int j = _neighbors[i][p];
+				Real kj = dtInv * dp[j] * _pm.alpha[j];
+				_pm.vel[i] += - dt*_m0 * (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+			}
+		}
 	}
 }
