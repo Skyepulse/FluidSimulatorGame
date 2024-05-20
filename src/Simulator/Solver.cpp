@@ -95,10 +95,13 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	return p;
 }
 
-void Solver::update(const Real dt) {
-	
+void Solver::init() {
 	buildNeighbors();
-	computeDensity();
+
+	initDensity();
+}
+
+void Solver::update(const Real dt) {
 	computePressure();
 
 	updateVel(dt);
@@ -143,7 +146,7 @@ void Solver::buildNeighbors() {
 	}
 }
 
-void Solver::computeDensity() {
+void Solver::initDensity() {
 	for (int i = 0; i < _particleCount; i++) {
 		_pm.density[i] = 0;
 		for (int j = 0; j < _neighbors[i].size(); j++) {
@@ -154,8 +157,11 @@ void Solver::computeDensity() {
 
 		}
 		//CORE_DEBUG("dens {}", _pm.density[i]);
-
 	}
+}
+
+void Solver::computeAlpha() {
+
 }
 
 

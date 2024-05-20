@@ -18,6 +18,7 @@ struct ParticleManager {
 	vector<Real> press; // pressure
 	vector<Real> density; // density
 	vector<int> type; // type of particle
+	vector<Real> alpha; // alpha
 };
 
 struct Particle {
@@ -61,6 +62,7 @@ public:
 	}
 
 	void initSimulation(const Real resX, const Real resY);
+	void init();
 	void update(const Real dt);
 
 	Real getH() const { return _h; }
@@ -74,10 +76,19 @@ private:
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
+	void initDensity();
+	void computeAlpha();
+
+	void computeNPforces();
+	void adaptDt();
+	void predictVel(const Real dt);
+	void correctDensityError(const Real dt);
+	void updatePos(const Real dt);
 	void computeDensity();
+	void correctDivergenceError(const Real dt);
 	void computePressure();
 	void updateVel(const Real dt);
-	void updatePos(const Real dt);
+	
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
