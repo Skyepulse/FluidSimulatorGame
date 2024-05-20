@@ -113,7 +113,7 @@ void Solver::update(const Real dt) {
 	correctDensityError(_dt);
 	updatePos(_dt);
 	buildNeighbors();
-	computeDensity();
+	computeDensity(_dt);
 	computeAlpha();
 	correctDivergenceError(_dt);
 }
@@ -164,7 +164,6 @@ void Solver::initDensity() {
 			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[p]);
 
 		//CORE_DEBUG("dens {} {}", i, _kernel->W(_pm.pos[i] - _pm.pos[p]));
-
 		}
 		//CORE_DEBUG("dens {}", _pm.density[i]);
 	}
@@ -238,5 +237,16 @@ void Solver::updatePos(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
+	}
+}
+
+void Solver::computeDensity(const Real dt) {
+	for (int i = 0; i < _particleCount; i++) {
+		Real factor = 0;
+		for (int j = 0; j < _neighbors[i].size(); j++) {
+			tIndex p = _neighbors[i][j];
+			factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p]));
+		}
+		_pm.density[i] +=  dt * factor;
 	}
 }

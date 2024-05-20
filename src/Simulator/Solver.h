@@ -85,7 +85,7 @@ private:
 	void predictVel(const Real dt);
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
-	void computeDensity();
+	void computeDensity(const Real dt);
 	void correctDivergenceError(const Real dt);
 	void computePressure();	
 
