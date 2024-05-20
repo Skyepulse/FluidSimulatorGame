@@ -27,6 +27,7 @@ struct Particle {
 	Vec2f acc; // acceleration
 	Real press; // pressure
 	Real density; // density
+	Real alpha; // alpha
 	int type; // type of particle
 };
 
@@ -72,7 +73,7 @@ public:
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX;}
-	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
+	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
