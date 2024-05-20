@@ -240,7 +240,7 @@ void Solver::updatePos(const Real dt) {
 }
 
 void Solver::correctDivergenceError(const Real dt){
-	Real dp[_particleCount];
+	vector<Real> dp(_particleCount);
 	Real dpAvg = 1000000;
 	Real eta = 0.01;
 	Real dtInv = 1.0 / dt;
@@ -263,7 +263,7 @@ void Solver::correctDivergenceError(const Real dt){
 }
 
 void Solver::correctDensityError(const Real dt){
-	Real dens[_particleCount];
+	vector<Real> dens(_particleCount);
 	Real densAvg = 100000;
 	Real eta = 0.01;
 	Real dt2Inv = 1.0 / (dt*dt);
