@@ -239,15 +239,6 @@ void Solver::updatePos(const Real dt) {
 	}
 }
 
-Real Solver::predictDensity(const Real dt, tIndex i) {
-	Real factor = 0;
-	for (int j = 0; j < _neighbors[i].size(); j++) {
-		tIndex p = _neighbors[i][j];
-		factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p]));
-	}
-	return _pm.density[i] + dt * factor;
-}
-
 void Solver::correctDivergenceError(const Real dt){
 	Real dp[_particleCount];
 	Real dpAvg = 1000000;
