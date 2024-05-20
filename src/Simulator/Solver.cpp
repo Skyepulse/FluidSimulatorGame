@@ -255,18 +255,48 @@ void Solver::correctDivergenceError(const Real dt){
 	Real dtInv = 1.0 / dt;
 	while (dpAvg > eta){
 		dpAvg = 0;
-		for (int i=0; i<_particleCount; i++){
+		for (tIndex i=0; i<_particleCount; i++){
 			dp[i] = -_pm.density[i] * dtInv * (_pm.vel[i].x + _pm.vel[i].y);
 			dpAvg += dp[i];
 		}
 
-		for (int i=0; i<_particleCount; i++){
+		for (tIndex i=0; i<_particleCount; i++){
 			Real ki = dtInv * dp[i] * _pm.alpha[i];
 			for (int p=0; p<_neighbors[i].size(); p++){
-				int j = _neighbors[i][p];
+				tIndex j = _neighbors[i][p];
 				Real kj = dtInv * dp[j] * _pm.alpha[j];
 				_pm.vel[i] += - dt*_m0 * (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
 			}
 		}
+	}
+}
+
+void Solver::correctDensityError(const Real dt){
+	Real dens[_particleCount];
+	Real densAvg = 100000;
+	Real eta = 0.01;
+	Real dt2Inv = 1.0 / (dt*dt);
+
+	while (densAvg - _d0 > eta){
+		densAvg = 0;
+		for (tIndex i=0; i<_particleCount; i++){
+			Real factor = 0;
+			for (int p = 0; p < _neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
+				factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
+			}
+			dens[i] = _pm.density[i] + dt * factor;
+			densAvg += dens[i];
+		}
+
+		for (tIndex i=0; i<_particleCount; i++){
+			Real ki = dt2Inv*(dens[i] - _d0) * _pm.alpha[i];
+			for (int p=0; p<_neighbors[i].size(); p++){
+				tIndex j = _neighbors[i][p];
+				Real kj = dt2Inv*(dens[j] - _d0) * _pm.alpha[j];
+				_pm.vel[i] += - dt * _m0 * (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+			}
+		}
+
 	}
 }
