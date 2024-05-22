@@ -71,7 +71,8 @@ int main() {
 
 	solver.init();
 	
-
+	
+	int numUpdates = 3;
 	while (!window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
 
@@ -81,15 +82,16 @@ int main() {
 
 		Renderer::BeginScene(camera);
 
-		solver.update();
-
 		particleManager = solver.getParticleManager();
+
+		if(numUpdates > 0) solver.update();
 		
 		Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
 
 		Renderer::EndScene();
 
 		window->OnUpdate();
+		numUpdates--;
 	}
 
 	return 0;
