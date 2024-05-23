@@ -1,39 +1,16 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
+#include "Core/Application.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/string_cast.hpp"
+Application* Application::Create() { return new Application(); }
 
-#include <string>
-#include <iostream>
+int main() 
+{
+	Application* application = Application::Create();
+	application->Start();
+	delete application;
+}
 
-#include "Core/OpenGL/Context.h"
-#include "Core/OpenGL/Shader.h"
-#include "Core/OpenGL/Buffer.h"
-#include "Core/OpenGL/VertexArray.h"
-#include "Core/OpenGL/Texture.h"
-
-
-#include "Core/Rendering/Camera.h"
-#include "Core/Rendering/Renderer.h"
-#include "Core/Rendering/RendererCommand.h"
-#include "Core/Rendering/Transform.h"
-
-#include "Core/Scene/Circle.h"
-#include "Core/Scene/Line.h"
-#include "Core/Scene/Rectangle.h"
-
-#include "Core/Core.h"
-#include "Core/Log.h"
-#include "Core/Time.h"
-#include "Core/Window.h"
-
-#include "Simulator/Solver.h"
-
-int main() {
+/*int main() {
 	// Init of logger
 	Logger::Init();
 	
@@ -141,4 +118,4 @@ int main() {
 	}
 
 	return 0;
-}
+}*/
