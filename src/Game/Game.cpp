@@ -1,6 +1,8 @@
 #include "Game.h"
 
 #include "../Core/Rendering/Renderer.h"
+#include "../Core/Event/ApplicationEvent.h"
+#include "../Core/Event/KeyCode.h"
 
 Game::Game()
 {
@@ -17,7 +19,7 @@ void Game::Init()
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
 
-	solver.initSimulation(48.0f, 36.0f);
+	solver.initSimulation(48.0f, 100.0f);
 }
 
 void Game::Update()
@@ -30,9 +32,16 @@ void Game::Update()
 
 bool Game::OnEvent(Event& e)
 {
-  // Return event handled or not ? 
-  // If no, continue processing event
-  // If yes, event is destroyed
+  if(e.GetEventType() != EventType::KeyPressed)
+    return false;
+  
+  KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-  return false;
+  if(keypressed.GetKey() != CORE_KEY_P)
+    return false;
+  
+  CORE_DEBUG("Particle Spawned")
+  // TODO : Spawn particles
+
+  return true;
 }
