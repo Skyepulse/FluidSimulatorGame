@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "Core.h"
 
+#include "Rendering/RendererCommand.h"
+
 bool Window::isGLFWInit = false;
 
 Window::Window(WindowProperties windowProps, EventCallback callback)
@@ -153,5 +155,16 @@ void Window::Init()
 
 		previousButton = button;
 		previousAction = action;
+	});
+
+	glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+	{
+		WindowData* windowData = (WindowData*)glfwGetWindowUserPointer(window);
+
+		// TEMP ??
+		RendererCommand::SetViewportSize(glm::ivec2(width, height));
+
+		WindowResizedEvent e(width, height);
+		windowData->eventCallback(e);
 	});
 }
