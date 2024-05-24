@@ -24,10 +24,10 @@ bool CameraController::OnKeyPressed(KeyPressedEvent &e)
   switch (e.GetKey())
   {
   case CORE_KEY_W:
-    translation -= glm::vec2(0.0f, m_CameraSpeed);
+    translation += glm::vec2(0.0f, m_CameraSpeed);
     break;
   case CORE_KEY_S:
-    translation += glm::vec2(0.0f, m_CameraSpeed);
+    translation -= glm::vec2(0.0f, m_CameraSpeed);
     break;
   case CORE_KEY_A:
     translation -= glm::vec2(m_CameraSpeed, 0.0f);
