@@ -10,10 +10,10 @@
   virtual bool IsEventCategory(EventCategory category) const override { return eventCategory == category; }       \
 
 #define CORE_CREATE_EVENT_TYPE_METHODS(eventType)                                                                 \
-  static EventType GetStaticType() { return eventType; }                                                    \
+  static EventType GetStaticType() { return eventType; }                                                          \
   virtual EventType GetEventType() const override { return GetStaticType(); }                                     \
-  virtual bool IsEventType(EventType type) const override { return type == eventType; }   \
-  virtual const char* GetName() const { return #eventType; }
+  virtual bool IsEventType(EventType type) const override { return type == eventType; }                           \
+  virtual const char* GetName() const { return #eventType; }                                                      \
 
 /// @brief  TODO : CHANGE CATEGORIES TO FLAGS
 enum class EventCategory

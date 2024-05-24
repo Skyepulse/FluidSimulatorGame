@@ -9,6 +9,9 @@
 #include <functional>
 #include <iostream>
 
+// TEMP
+#include "Scene/Circle.h"
+
 Application::Application()
 {
  	Logger::Init();
@@ -39,13 +42,22 @@ Application::~Application()
 void Application::Start()
 {
   CORE_TRACE("Applications started");
-  Camera camera(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
+	t_Controller = std::make_shared<CameraController>(camera, glm::vec2(), glm::vec2());
+
+	shared_ptr<Circle> circle = std::make_shared<Circle>();
+	circle->Transform->Scale2D(10.0f);
 
   while (!m_Window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
 
+		// TEMP : TODO PASS CAMERA SHARED PTR
+		Renderer::BeginScene(*camera.get());
+
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+		Renderer::DrawShape(circle);
 
     // TODO : Update layers for events
 
@@ -58,7 +70,8 @@ void Application::Start()
 
 void Application::OnEvent(Event &e)
 {
-	CORE_DEBUG("Received Event");
+	// TEMP
+	t_Controller->OnEvent(e);
 
 	EventDispatcher dispatcher(e);
 	dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(Application, OnKeyPressed));

@@ -2,6 +2,9 @@
 
 #include "Window.h"
 #include "Log.h"
+
+#include "Rendering/CameraController.h"
+
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
 
@@ -30,4 +33,8 @@ private:
 
 private:
   std::shared_ptr<Window> m_Window;
+
+  // TEMP
+  std::shared_ptr<CameraController> t_Controller;
+
 };
