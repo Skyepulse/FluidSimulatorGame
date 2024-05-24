@@ -43,7 +43,7 @@ void Application::Start()
 {
   CORE_TRACE("Applications started");
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
-	t_Controller = std::make_shared<CameraController>(camera, glm::vec2(), glm::vec2());
+	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
 	shared_ptr<Circle> circle = std::make_shared<Circle>();
 	circle->Transform->Scale2D(10.0f);
