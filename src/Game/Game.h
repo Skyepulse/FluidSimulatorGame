@@ -2,6 +2,7 @@
 
 #include "../Simulator/Solver.h"
 #include "../Core/Scene/Circle.h"
+#include "../Core/Event/Event.h"
 
 // TEMP : TODO : REPLACE BY LAYERS
 class Game
@@ -13,7 +14,7 @@ public:
   void Init();
   void Update();
 
-  void OnEvent();
+  bool OnEvent(Event& e);
 private:
   Solver solver;
 

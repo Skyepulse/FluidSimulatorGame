@@ -25,9 +25,14 @@ void Game::Update()
   solver.update(0.005f);
 	ParticleManager particleManager = solver.getParticleManager();
 
-	Renderer::DrawShapeDuplicate(circle, particleManager.pos); // Draw Border
+	Renderer::DrawShapeDuplicate(circle, particleManager.pos);
 }
 
-void Game::OnEvent()
+bool Game::OnEvent(Event& e)
 {
+  // Return event handled or not ? 
+  // If no, continue processing event
+  // If yes, event is destroyed
+
+  return false;
 }

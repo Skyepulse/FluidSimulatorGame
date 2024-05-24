@@ -9,9 +9,6 @@
 #include <functional>
 #include <iostream>
 
-// TEMP
-#include "../Game/Game.h"
-
 Application::Application()
 {
  	Logger::Init();
@@ -45,8 +42,8 @@ void Application::Start()
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
-	Game game;
-	game.Init();
+	t_Game = std::make_shared<Game>();
+	t_Game->Init();
 
   while (!m_Window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
@@ -58,7 +55,7 @@ void Application::Start()
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		// TEMP
-		game.Update();
+		t_Game->Update();
 
     // TODO : Update layers for events
 
@@ -72,17 +69,14 @@ void Application::Start()
 void Application::OnEvent(Event &e)
 {
 	// TEMP
-	t_Controller->OnEvent(e);
-
-	EventDispatcher dispatcher(e);
-	dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(Application, OnKeyPressed));
-	dispatcher.Dispatch<KeyReleasedEvent>(CORE_BIND_EVENT_METHOD(Application, OnKeyReleased));
-	dispatcher.Dispatch<KeyTypedEvent>(CORE_BIND_EVENT_METHOD(Application, OnKeyTyped));
-
-	dispatcher.Dispatch<MousePressedEvent>(CORE_BIND_EVENT_METHOD(Application, OnMousePressed));
-	dispatcher.Dispatch<MouseReleasedEvent>(CORE_BIND_EVENT_METHOD(Application, OnMouseReleased));
-	dispatcher.Dispatch<MouseTypedEvent>(CORE_BIND_EVENT_METHOD(Application, OnMouseTyped));
+	if(t_Controller->OnEvent(e))
+		return;
+	
+	if(t_Game->OnEvent(e))
+		return;
 }
+
+// DEBUG METHODS
 
 bool Application::OnKeyPressed(KeyPressedEvent &e)
 {

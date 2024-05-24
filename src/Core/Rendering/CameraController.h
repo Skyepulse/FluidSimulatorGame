@@ -12,7 +12,7 @@ public:
   CameraController(std::shared_ptr<Camera> camera, float cameraSpeed);
   ~CameraController();
 
-  void OnEvent(Event& e);
+  bool OnEvent(Event& e);
 private:
   bool OnKeyPressed(KeyPressedEvent& e);
 private:

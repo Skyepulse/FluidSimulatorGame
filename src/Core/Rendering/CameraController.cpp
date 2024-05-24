@@ -12,10 +12,10 @@ CameraController::~CameraController()
 {
 }
 
-void CameraController::OnEvent(Event & e)
+bool CameraController::OnEvent(Event & e)
 {
   EventDispatcher dispatcher(e);
-  dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnKeyPressed));
+  return dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnKeyPressed));
 }
 
 bool CameraController::OnKeyPressed(KeyPressedEvent &e)

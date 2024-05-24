@@ -8,7 +8,9 @@
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
 
-#include <queue>
+// TEMP
+#include "../Game/Game.h"
+
 
 class Application 
 {
@@ -36,5 +38,5 @@ private:
 
   // TEMP
   std::shared_ptr<CameraController> t_Controller;
-
+  std::shared_ptr<Game> t_Game;
 };
