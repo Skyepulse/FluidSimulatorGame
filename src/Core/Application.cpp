@@ -10,7 +10,7 @@
 #include <iostream>
 
 // TEMP
-#include "Scene/Circle.h"
+#include "../Game/Game.h"
 
 Application::Application()
 {
@@ -45,8 +45,8 @@ void Application::Start()
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
-	shared_ptr<Circle> circle = std::make_shared<Circle>();
-	circle->Transform->Scale2D(10.0f);
+	Game game;
+	game.Init();
 
   while (!m_Window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
@@ -57,7 +57,8 @@ void Application::Start()
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-		Renderer::DrawShape(circle);
+		// TEMP
+		game.Update();
 
     // TODO : Update layers for events
 
