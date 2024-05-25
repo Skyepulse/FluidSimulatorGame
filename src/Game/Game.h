@@ -20,4 +20,5 @@ private:
 
   std::shared_ptr<Circle> circleWalls;
   std::shared_ptr<Circle> circleLiquid;
+  std::shared_ptr<Circle> circleGlass;
 };

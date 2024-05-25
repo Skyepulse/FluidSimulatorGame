@@ -83,7 +83,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
-	if(p.type == 1) _immovableParticleCount--;	
+	if(p.type == 1 || p.type == 2) _immovableParticleCount--;	
 	return p;
 }
 
@@ -179,7 +179,7 @@ void Solver::computeAlpha() {
 
 void Solver::computeNPforces() {
 	for (int i = 0; i < _particleCount; i++) {
-		if(_pm.type[i] == 1) continue;
+		if(_pm.type[i] == 1 || _pm.type[i] == 2) continue;
 		// gravity
 		_pm.acc[i] = _g;
 		//_pm.acc[i] = Vec2f(0e0);
@@ -232,7 +232,7 @@ void Solver::adaptDt() {
 void Solver::updatePos(const Real dt) {
 	//vector<int> toRemove;
 	for (int i = 0; i < _particleCount; i++) {
-		if(_pm.type[i] == 1) continue;
+		if(_pm.type[i] == 1 || _pm.type[i] == 2) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
 		//CORE_DEBUG("vel {0} {1} {2} {3} {4} {5}", dt*_pm.vel[i].x, dt*_pm.vel[i].y, i, dt, _pm.vel[i].x, _pm.vel[i].y);
 
@@ -310,7 +310,7 @@ void Solver::correctDensityError(const Real dt){
 		densAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
-			if (_pm.type[i] == 1) continue;
+			if (_pm.type[i] == 1 || _pm.type[i] == 2) continue;
 			Real ki = max(dt2Inv*(dens[i] - _d0) * _pm.alpha[i], 0.0f);
 			for (int p=0; p<_neighbors[i].size(); p++){
 				tIndex j = _neighbors[i][p];
@@ -349,17 +349,17 @@ void Solver::drawWalls(int resX, int resY) {
 	}
 }
 
-void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength) {
+void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type) {
 	Real sr = _kernel->getSupportRad(); 
 	for (int i = 0; i < particleLength; i++) {
 		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
-		addParticle(sr * pos1, 1);
+		addParticle(sr * pos1, type);
 		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
-		addParticle(sr * pos2, 1);
+		addParticle(sr * pos2, type);
 	}
 }
 
-void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle) {
+void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type) {
 	Real sr = _kernel->getSupportRad();
 	Real radAngle = angle * M_PI / 180.0;
 	Real cosAngle = cos(radAngle);
@@ -370,18 +370,18 @@ void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle) 
 	for (int i = 0; i < particleLength; i++) {
 		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
 		Vec2f newPos1 = Vec2f(cosAngle * (pos1.x - p1.x) - sinAngle * (pos1.y - p1.y) + p1.x, sinAngle * (pos1.x - p1.x) + cosAngle * (pos1.y - p1.y) + p1.y);
-		addParticle(sr * newPos1, 1);
+		addParticle(sr * newPos1, type);
 
 		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
-		addParticle(sr * newPos2, 1);	
+		addParticle(sr * newPos2, type);	
 	}
 }
 
 void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
-	drawAngleLineWall(cornerPosition, width, 0);
-	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90);
-	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90);
+	drawAngleLineWall(cornerPosition, width, 0, 2);
+	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2);
+	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2);
 	this->_glasscorner = cornerPosition;
 	this->_glassSize = Vec2f(width/2, height/2);
 }

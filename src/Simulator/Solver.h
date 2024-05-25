@@ -92,8 +92,8 @@ private:
 	void computePressure();	
 
 	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
 
 	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
 
