@@ -40,7 +40,11 @@ Real CubicSpline::derivative_f(const Real l) const
 Real CubicSpline::W(const Vec2f& r) const
 {
 	const Real l = r.length();
-	return f(l);
+	if (l >= _sr) return 0.0;
+	
+	return lookup_f[(int) (l / _sr * LOOKUP_SIZE)];
+
+	//return f(l);
 }
 
 Vec2f CubicSpline::gradW(const Vec2f& r) const
@@ -54,7 +58,11 @@ Vec2f CubicSpline::gradW(const Vec2f& r, const Real l) const
 	if (l == 0){
 		return Vec2f(0.0f);
 	}
-	return derivative_f(l) * r / l;
+	if (l >= _sr) return Vec2f(0.0);
+	
+	return lookup_df[(int) (l / _sr * LOOKUP_SIZE)] * r / l;
+
+	//return derivative_f(l) * r / l;
 }
 
 Real CubicSpline::laplW(const Vec2f& r) const {
@@ -72,4 +80,11 @@ Real CubicSpline::laplW(const Vec2f& r) const {
 		val = Vec2f(0);
 
 	return val.x + val.y;
+}
+
+void CubicSpline::generateLookup(){
+	for (int i=0; i<LOOKUP_SIZE; i++){
+		lookup_f[i] = f(2.0*_h/LOOKUP_SIZE * i);
+		lookup_df[i] = derivative_f(2.0*_h/LOOKUP_SIZE * i);
+	}
 }

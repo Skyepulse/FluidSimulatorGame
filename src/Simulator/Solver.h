@@ -97,7 +97,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
-	const Real DEFAULT_DT = 0.05f;
+	const Real DEFAULT_DT = 0.1f;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
