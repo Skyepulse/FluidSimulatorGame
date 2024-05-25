@@ -72,7 +72,7 @@ int main() {
 	solver.init();
 	
 	
-	int numUpdates = 3;
+	int numUpdates = 1000;
 	while (!window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
 
@@ -91,7 +91,7 @@ int main() {
 		Renderer::EndScene();
 
 		window->OnUpdate();
-		numUpdates--;
+		//numUpdates--;
 	}
 
 	return 0;

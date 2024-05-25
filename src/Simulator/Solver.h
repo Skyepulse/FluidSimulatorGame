@@ -50,7 +50,6 @@ public:
 		_c  = std::fabs(_g.y) / _eta;
 		_k = _d0 * _c * _c / _gamma;
 
-		CORE_DEBUG("{0}", _c);
 		switch (kt)
 		{
 			case KernelType::CUBIC_SPLINE:
@@ -94,7 +93,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
-	const Real DEFAULT_DT = 0.005f;
+	const Real DEFAULT_DT = 0.05f;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;

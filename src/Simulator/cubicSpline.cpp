@@ -51,6 +51,9 @@ Vec2f CubicSpline::gradW(const Vec2f& r) const
 
 Vec2f CubicSpline::gradW(const Vec2f& r, const Real l) const
 {
+	if (l == 0){
+		return Vec2f(0.0f);
+	}
 	return derivative_f(l) * r / l;
 }
 
