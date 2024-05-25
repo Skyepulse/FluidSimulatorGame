@@ -38,14 +38,14 @@ Application::~Application()
 
 void Application::Start()
 {
-  CORE_TRACE("Applications started");
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 48.0f, 0.0f, 36.0f); // Multiply by h
+	CORE_TRACE("Applications started");
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 96.0f, 0.0f, 72.0f); // Multiply by h
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
 	t_Game = std::make_shared<Game>();
 	t_Game->Init();
 
-  while (!m_Window->ShouldClose()) {
+	while (!m_Window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
 
 		// TEMP : TODO PASS CAMERA SHARED PTR
@@ -57,9 +57,9 @@ void Application::Start()
 		// TEMP
 		t_Game->Update();
 
-    // TODO : Update layers for events
+		// TODO : Update layers for events
 
-    // TODO : Update layers for rendering (reverse order)
+		// TODO : Update layers for rendering (reverse order)
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();

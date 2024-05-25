@@ -12,17 +12,17 @@ Game::~Game()
 
 void Game::Init()
 {
-  circle  = std::make_shared<Circle>();
+	circle  = std::make_shared<Circle>();
 	float circleRadius = 0.2f;
 	circle->Transform->Scale2D(circleRadius);
 	circle->SetColor(glm::vec3(1.0f));
 
-	solver.initSimulation(48.0f, 36.0f);
+	solver.initSimulation(96.0f, 72.0f);
 }
 
 void Game::Update()
 {
-  solver.update(0.005f);
+	solver.update(0.005f);
 	ParticleManager particleManager = solver.getParticleManager();
 
 	Renderer::DrawShapeDuplicate(circle, particleManager.pos);
