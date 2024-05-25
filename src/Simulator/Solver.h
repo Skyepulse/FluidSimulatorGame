@@ -72,6 +72,7 @@ public:
 	ParticleManager& getParticleManager() { return _pm; }
 
 	int getParticlesInGlass() { return _particlesInGlass; }
+	int getWinningGlass() { return _winningGlass; }
 	
 
 private:
@@ -108,6 +109,7 @@ private:
 	Vec2f _glasscorner;
 	Vec2f _glassSize;
 	int _particlesInGlass = 0;
+	int _winningGlass = 0;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;

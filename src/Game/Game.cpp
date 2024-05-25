@@ -29,6 +29,7 @@ void Game::Init()
 	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
 
 	solver.initSimulation(36.0f, 36.0f);
+	winningGlassParticles = solver.getWinningGlass();
 }
 
 void Game::Update()
@@ -56,6 +57,13 @@ void Game::Update()
 	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
 	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
 	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
+
+	int particlesInGlass = solver.getParticlesInGlass();
+	if (particlesInGlass >= winningGlassParticles)
+	{
+		circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
+	}
+	
 }
 
 bool Game::OnEvent(Event& e)

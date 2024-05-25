@@ -17,6 +17,7 @@ public:
   bool OnEvent(Event& e);
 private:
   Solver solver;
+  int winningGlassParticles;
 
   std::shared_ptr<Circle> circleWalls;
   std::shared_ptr<Circle> circleLiquid;
