@@ -103,7 +103,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
-	const Real DEFAULT_DT = 0.1f;
+	const Real DEFAULT_DT = 0.05f;
 
 	Vec2f _glasscorner;
 	Vec2f _glassSize;
