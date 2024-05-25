@@ -3,6 +3,7 @@
 
 // TEMP
 #include "../Core/Log.h"
+#include <limits.h>
 
 
 void Solver::initSimulation(const Real resX, const Real resY)
@@ -16,6 +17,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_pm.density.clear();
 	_pm.type.clear();
 	_neighbors.clear();
+	_pm.alpha.clear();
 
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(resX * resY);
@@ -41,7 +43,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	}
 }
 
-void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density)
+void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
 {
 	_pm.pos.push_back(pos);
 	_pm.vel.push_back(vel);
@@ -49,6 +51,7 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	_pm.press.push_back(press);
 	_pm.density.push_back(density);
 	_pm.type.push_back(type);
+	_pm.alpha.push_back(alpha);
 	if(type == 1) _immovableParticleCount++;
 	_neighbors.push_back(vector<tIndex>());
 	_particleCount++;
@@ -63,6 +66,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	p.press = _pm.press[index];
 	p.density = _pm.density[index];
 	p.type = _pm.type[index];
+	p.alpha = _pm.alpha[index];
 
 	_pm.pos.erase(_pm.pos.begin() + index);
 	_pm.vel.erase(_pm.vel.begin() + index);
@@ -70,6 +74,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	_pm.press.erase(_pm.press.begin() + index);
 	_pm.density.erase(_pm.density.begin() + index);
 	_pm.type.erase(_pm.type.begin() + index);
+	_pm.alpha.erase(_pm.alpha.begin() + index);
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
@@ -77,14 +82,26 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	return p;
 }
 
-void Solver::update(const Real dt) {
-	
+void Solver::init() {
 	buildNeighbors();
 	computeDensity();
-	computePressure();
+	computeAlpha();
+	CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
+}
 
-	updateVel(dt);
-	updatePos(dt);
+void Solver::update() {
+	CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
+
+	computeNPforces();
+	adaptDt();
+	predictVel(_dt);
+
+	correctDensityError(_dt);
+	updatePos(_dt);
+	buildNeighbors();
+	computeDensity();
+	computeAlpha();
+	correctDivergenceError(_dt);
 }
 
 void Solver::buildNeighbors() {
@@ -97,7 +114,7 @@ void Solver::buildNeighbors() {
 		int x = _pm.pos[i].x / R;
 		int y = _pm.pos[i].y / R;
 		tIndex idx = idx1d(x, y);
-		if (idx >= 0 && idx < _resX * _resY) {
+		if (x >= 0 && y >= 0 && x < _resX && y < _resY) {
 			_particlesInGrid[idx].push_back(i);
 		}
 	}
@@ -121,7 +138,7 @@ void Solver::buildNeighbors() {
 				}
 			}
 		}
-		//CORE_DEBUG("neighbors {}", _neighbors[i].size());
+		// CORE_DEBUG("neighbors {} {}", i, _neighbors[i].size());
 	}
 }
 
@@ -133,10 +150,47 @@ void Solver::computeDensity() {
 			_pm.density[i] += _m0 * _kernel->W(_pm.pos[i] - _pm.pos[p]);
 
 		//CORE_DEBUG("dens {} {}", i, _kernel->W(_pm.pos[i] - _pm.pos[p]));
-
 		}
 		//CORE_DEBUG("dens {}", _pm.density[i]);
+	}
+}
 
+void Solver::computeAlpha() {
+	for (int i = 0; i < _particleCount; i++) {
+		Vec2f a = Vec2f(0e0);
+		Real b = 0e0;
+		for (int j = 0; j < _neighbors[i].size(); j++) {
+			tIndex p = _neighbors[i][j];
+			Vec2f factor = _m0 * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
+			//b += _pm.type[p] == 1 ? 0 : factor.lengthSquare();
+			a += factor;
+			b += factor.lengthSquare();
+		}
+
+		_pm.alpha[i] = 1.0/max(b + a.lengthSquare(), 1.0e-6f);
+		//CORE_DEBUG("alpha {}", _pm.alpha[i]);
+	}
+}
+
+void Solver::computeNPforces() {
+	for (int i = 0; i < _particleCount; i++) {
+		if(_pm.type[i] == 1) continue;
+		// gravity
+		_pm.acc[i] = _g;
+		//_pm.acc[i] = Vec2f(0e0);
+		//Vec2f debugViscosity = Vec2f(0e0);
+
+		for (int j=0; j<_neighbors[i].size(); j++){
+			// suppose all masses are equal
+			tIndex p = _neighbors[i][j];
+
+			// viscosity force
+			Vec2f x = (_pm.pos[i] - _pm.pos[p]);
+            Vec2f u = (_pm.vel[i] - _pm.vel[p]);
+            _pm.acc[i] += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
+			//debugViscosity += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
+		}
+		//CORE_DEBUG("viscosity debug term {0} {1} {2}", debugViscosity.x, debugViscosity.y, i);
 	}
 }
 
@@ -148,34 +202,26 @@ void Solver::computePressure(){
 		//CORE_DEBUG("press {0}", _pm.density[i]/_d0);}
 		//CORE_DEBUG("press {0}", _pm.press[i]);
 	}
-	
 }
 
-
-void Solver::updateVel(const Real dt) {
+void Solver::predictVel(const Real dt){
 	for (int i = 0; i < _particleCount; i++) {
-		if(_pm.type[i] == 1) continue;
-		_pm.acc[i] = _g;
-
-		for (int j=0; j<_neighbors[i].size(); j++){
-			// suppose all masses are equal
-			// pressure force
-			tIndex p = _neighbors[i][j];
-			if (i == p) continue;
-
-			_pm.acc[i] += - 1.0/_m0 * (_pm.press[i]+_pm.press[p])/(2.0*_pm.density[p]) * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
-
-			// viscosity force
-			//_pm.acc[i] += _nu * (_pm.vel[p]-_pm.vel[i]) / _pm.density[p] * _kernel->laplW(_pm.pos[i] - _pm.pos[p]);
-
-			Vec2f x = (_pm.pos[i] - _pm.pos[p]);
-            Vec2f u = (_pm.vel[i] - _pm.vel[p]);
-            _pm.acc[i] += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
-		}
-
-		_pm.vel[i] += dt * (_pm.acc[i]);
-		//DEBUG("{0}", _pm.vel);
+		if (_pm.type[i] == 0)
+			_pm.vel[i] += dt * (_pm.acc[i]);
+		//CORE_DEBUG("Predicted vel for particle {0} : {1} {2}", i, _pm.vel[i].x, _pm.vel[i].y);
 	}
+}
+
+void Solver::adaptDt() {
+	Real maxVel2 = 0e0;
+	for (int i = 0; i < _particleCount; i++) {
+		maxVel2 = max(maxVel2, _pm.vel[i].lengthSquare());
+	}
+	Real maxVel = sqrt(maxVel2);
+	if(maxVel == 0e0) _dt = DEFAULT_DT;
+	else _dt = 0.4*_h/maxVel;
+	_dt = min(_dt, DEFAULT_DT);
+	//CORE_DEBUG("dt {}", _dt);
 }
 
 void Solver::updatePos(const Real dt) {
@@ -183,14 +229,84 @@ void Solver::updatePos(const Real dt) {
 	for (int i = 0; i < _particleCount; i++) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
-		/*if (_pm.pos[i].x < 0 || _pm.pos[i].x > _resX * _h || _pm.pos[i].y < 0 || _pm.pos[i].y > _resY * _h) {
-			toRemove.push_back(i);
-		}*/
+		//CORE_DEBUG("vel {0} {1} {2} {3} {4} {5}", dt*_pm.vel[i].x, dt*_pm.vel[i].y, i, dt, _pm.vel[i].x, _pm.vel[i].y);
 	}
+}
 
-	/*for (int i = 0; i < toRemove.size(); i++) {
-		removeParticle(toRemove[i]);
-	}*/
+void Solver::correctDivergenceError(const Real dt){
+	vector<Real> dp(_particleCount);
+	Real dpAvg = (Real)INT_MAX;
+	Real eta = 10.0f;
+	Real dtInv = (Real)1.0f / dt;
+
+	int iter = 0;
+
+	while ((abs(dpAvg) > eta || iter < 1) && iter < 100){
+		//CORE_DEBUG("dpAvg {}", dpAvg);
+		dpAvg = 0.0f;
+		for (tIndex i=0; i<_particleCount; i++){
+			dp[i] = 0e0f;
+			for (int p = 0; p < _neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
+				dp[i] += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
+				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
+			}
+			dpAvg += dp[i];
+		}
+		dpAvg /= _particleCount;
+
+		for (tIndex i=0; i<_particleCount; i++){
+			Real ki = dtInv * dp[i] * _pm.alpha[i];
+			for (int p=0; p<_neighbors[i].size(); p++){
+				tIndex j = _neighbors[i][p];
+				Real kj = dtInv * dp[j] * _pm.alpha[j];
+				_pm.vel[i] += -dt*_m0 * (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+			}
+		}
+		// CORE_DEBUG("dpAvg {}", dpAvg);
+		iter++;
+	}
+	// CORE_DEBUG("Final dpAvg {}", dpAvg);
+}
+
+void Solver::correctDensityError(const Real dt){
+	vector<Real> dens(_particleCount);
+	Real densAvg = (Real)INT_MAX;
+	Real eta = 0.01 * 0.01 * _d0;
+	Real dt2Inv = (Real)1.0f / (dt*dt);
+
+	int iter = 0;
+
+	while ((iter < 2 || abs(densAvg - _d0) > eta) && iter < 100){
+		//CORE_DEBUG("densAvg {} {}", densAvg, _d0);
+		densAvg = 0.0f;
+		for (tIndex i=0; i<_particleCount; i++){
+			Real factor = 0e0f;
+			for (int p = 0; p < _neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
+				factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
+				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
+			}
+			dens[i] = max(_pm.density[i] + dt * factor, _d0);
+			//CORE_DEBUG("factor {} {}", factor, i);
+			//CORE_DEBUG("dens {} {}", dens[i], i);
+			densAvg += dens[i];
+		}
+		densAvg /= _particleCount;
+
+		for (tIndex i=0; i<_particleCount; i++){
+			if (_pm.type[i] == 1) continue;
+			Real ki = max(dt2Inv*(dens[i] - _d0) * _pm.alpha[i], 0.0f);
+			for (int p=0; p<_neighbors[i].size(); p++){
+				tIndex j = _neighbors[i][p];
+				Real kj = max(dt2Inv*(dens[j] - _d0) * _pm.alpha[j], 0.0f);
+				_pm.vel[i] += - dt * _m0 * (ki + kj) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+				//CORE_DEBUG("vel {} {} | {} {}", _kernel->gradW(_pm.pos[i] - _pm.pos[j]).x, _kernel->gradW(_pm.pos[i] - _pm.pos[j]).y,i, j);
+			}
+		}
+		iter++;
+	}
+	//CORE_DEBUG("Final densAvg {} {}", densAvg, _d0);
 }
 
 void Solver::drawWalls(int resX, int resY) {

@@ -18,6 +18,7 @@ struct ParticleManager {
 	vector<Real> press; // pressure
 	vector<Real> density; // density
 	vector<int> type; // type of particle
+	vector<Real> alpha; // alpha
 };
 
 struct Particle {
@@ -26,6 +27,7 @@ struct Particle {
 	Vec2f acc; // acceleration
 	Real press; // pressure
 	Real density; // density
+	Real alpha; // alpha
 	int type; // type of particle
 };
 
@@ -48,7 +50,6 @@ public:
 		_c  = std::fabs(_g.y) / _eta;
 		_k = _d0 * _c * _c / _gamma;
 
-		CORE_DEBUG("{0}", _c);
 		switch (kt)
 		{
 			case KernelType::CUBIC_SPLINE:
@@ -61,7 +62,8 @@ public:
 	}
 
 	void initSimulation(const Real resX, const Real resY);
-	void update(const Real dt);
+	void init();
+	void update();
 
 	Real getH() const { return _h; }
 
@@ -70,14 +72,20 @@ public:
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX;}
-	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0);
+	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
 	void computeDensity();
-	void computePressure();
-	void updateVel(const Real dt);
+	void computeAlpha();
+
+	void computeNPforces();
+	void adaptDt();
+	void predictVel(const Real dt);
+	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
+	void correctDivergenceError(const Real dt);
+	void computePressure();	
 
 	void drawWalls(int resX, int resY);
 	void drawStraightLineWall(const Vec2f& p1, int particleLength);
@@ -89,6 +97,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
+	const Real DEFAULT_DT = 0.05f;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
