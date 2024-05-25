@@ -19,6 +19,7 @@ struct ParticleManager {
 	vector<Real> density; // density
 	vector<int> type; // type of particle
 	vector<Real> alpha; // alpha
+	vector<bool> isInGlass; // is particle in glass
 };
 
 struct Particle {
@@ -29,6 +30,7 @@ struct Particle {
 	Real density; // density
 	Real alpha; // alpha
 	int type; // type of particle
+	bool isInGlass; // is particle in glass
 };
 
 enum KernelType
@@ -68,6 +70,8 @@ public:
 	Real getH() const { return _h; }
 
 	ParticleManager& getParticleManager() { return _pm; }
+
+	int getParticlesInGlass() { return _particlesInGlass; }
 	
 
 private:
@@ -88,8 +92,10 @@ private:
 	void computePressure();	
 
 	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
+
+	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -98,6 +104,10 @@ private:
 	Vec2f _g;
 	Real _c;
 	const Real DEFAULT_DT = 0.1f;
+
+	Vec2f _glasscorner;
+	Vec2f _glassSize;
+	int _particlesInGlass = 0;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
