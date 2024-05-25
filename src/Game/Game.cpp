@@ -61,7 +61,7 @@ void Game::Update()
 	int particlesInGlass = solver.getParticlesInGlass();
 	if (particlesInGlass >= winningGlassParticles)
 	{
-		circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
+		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 	}
 	
 }
