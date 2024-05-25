@@ -29,7 +29,7 @@ void Game::Init()
 
 void Game::Update()
 {
-	solver.update(0.005f);
+	solver.update();
 	ParticleManager particleManager = solver.getParticleManager();
 	vector<Vec2f> positions = particleManager.pos;
 	vector<int> types = particleManager.type;
