@@ -24,12 +24,12 @@ void Game::Init()
 	circleWalls->SetColor(glm::vec3(0.6f));
 	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 0.8f));
 
-	solver.initSimulation(36.0f, 72.0f);
+	solver.initSimulation(36.0f, 36.0f);
 }
 
 void Game::Update()
 {
-	solver.update(0.005f);
+	solver.update();
 	ParticleManager particleManager = solver.getParticleManager();
 	vector<Vec2f> positions = particleManager.pos;
 	vector<int> types = particleManager.type;

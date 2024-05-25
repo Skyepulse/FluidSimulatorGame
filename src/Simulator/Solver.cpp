@@ -29,12 +29,14 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	Real sr = _kernel->getSupportRad();
 
 	drawWalls(resX, resY);
-	drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
-	drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
+	//drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
+	//drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
+
+	drawWinningGlass(10, 10, Vec2f(10, 1));
 
 	//We add particles in the top right corner
-	for (int i = 1; i < 21; i++) {
-		for (int j = resY-12; j < resY-2; j++) {
+	for (int i = 1; i < 9; i++) {
+		for (int j = resY-9; j < resY-2; j++) {
 			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
@@ -52,6 +54,7 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	_pm.density.push_back(density);
 	_pm.type.push_back(type);
 	_pm.alpha.push_back(alpha);
+	_pm.isInGlass.push_back(false);
 	if(type == 1) _immovableParticleCount++;
 	_neighbors.push_back(vector<tIndex>());
 	_particleCount++;
@@ -67,6 +70,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	p.density = _pm.density[index];
 	p.type = _pm.type[index];
 	p.alpha = _pm.alpha[index];
+	p.isInGlass = _pm.isInGlass[index];
 
 	_pm.pos.erase(_pm.pos.begin() + index);
 	_pm.vel.erase(_pm.vel.begin() + index);
@@ -75,6 +79,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	_pm.density.erase(_pm.density.begin() + index);
 	_pm.type.erase(_pm.type.begin() + index);
 	_pm.alpha.erase(_pm.alpha.begin() + index);
+	_pm.isInGlass.erase(_pm.isInGlass.begin() + index);
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
@@ -91,7 +96,7 @@ void Solver::init() {
 
 void Solver::update() {
 	CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
-
+    CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
 	computeNPforces();
 	adaptDt();
 	predictVel(_dt);
@@ -230,6 +235,16 @@ void Solver::updatePos(const Real dt) {
 		if(_pm.type[i] == 1) continue;
 		_pm.pos[i] += dt * _pm.vel[i];
 		//CORE_DEBUG("vel {0} {1} {2} {3} {4} {5}", dt*_pm.vel[i].x, dt*_pm.vel[i].y, i, dt, _pm.vel[i].x, _pm.vel[i].y);
+
+		//We check if the particle is inside the glass
+		if (_pm.pos[i].x >= _glasscorner.x && _pm.pos[i].x <= _glasscorner.x + _glassSize.x && _pm.pos[i].y >= _glasscorner.y && _pm.pos[i].y <= _glasscorner.y + _glassSize.y) {
+			if (!_pm.isInGlass[i]) _particlesInGlass++;
+			_pm.isInGlass[i] = true;
+		}
+		else {
+			if (_pm.isInGlass[i]) _particlesInGlass--;
+			_pm.isInGlass[i] = false;
+		}	
 	}
 }
 
@@ -339,7 +354,7 @@ void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength) {
 	for (int i = 0; i < particleLength; i++) {
 		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
 		addParticle(sr * pos1, 1);
-		Vec2f pos2 = p1 + Vec2f(0.25, -0.25) + Vec2f(0.5, 0.0) * i;
+		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		addParticle(sr * pos2, 1);
 	}
 }
@@ -357,8 +372,16 @@ void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle) 
 		Vec2f newPos1 = Vec2f(cosAngle * (pos1.x - p1.x) - sinAngle * (pos1.y - p1.y) + p1.x, sinAngle * (pos1.x - p1.x) + cosAngle * (pos1.y - p1.y) + p1.y);
 		addParticle(sr * newPos1, 1);
 
-		Vec2f pos2 = p1 + Vec2f(0.25, -0.25) + Vec2f(0.5, 0.0) * i;
+		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
 		addParticle(sr * newPos2, 1);	
 	}
+}
+
+void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
+	drawAngleLineWall(cornerPosition, width, 0);
+	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90);
+	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90);
+	this->_glasscorner = cornerPosition;
+	this->_glassSize = Vec2f(width/2, height/2);
 }
