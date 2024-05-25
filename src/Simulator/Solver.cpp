@@ -34,7 +34,10 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
 	drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
 
-	drawWinningGlass(10, 10, Vec2f(1, 1));
+	int width = 10;
+	int height = 10;
+	drawWinningGlass(width, height, Vec2f(1, 1));
+	this->_winningGlass = (width - 2) * (height - 1) / 2;
 
 	//We add particles in the top right corner
 	for (int i = 1; i < 9; i++) {
