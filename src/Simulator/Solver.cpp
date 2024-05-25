@@ -5,6 +5,8 @@
 #include "../Core/Log.h"
 #include <limits.h>
 
+#include "../Core/Time.h"
+
 
 void Solver::initSimulation(const Real resX, const Real resY)
 {
@@ -29,12 +31,12 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	Real sr = _kernel->getSupportRad();
 
 	drawWalls(resX, resY);
-	//drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
-	//drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
+	drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
+	drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
 
 	int width = 10;
 	int height = 10;
-	drawWinningGlass(width, height, Vec2f(10, 1));
+	drawWinningGlass(width, height, Vec2f(1, 1));
 	this->_winningGlass = (width - 2) * (height - 1) / 2;
 
 	//We add particles in the top right corner
@@ -101,15 +103,24 @@ void Solver::update() {
 	CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
     CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
 	computeNPforces();
+	//CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
+	//CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
 	predictVel(_dt);
+	//CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
 
 	correctDensityError(_dt);
+	//CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
+	//CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
+	//CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
 	computeDensity();
+	//CORE_DEBUG("Compute density: {}", Time::GetDeltaTime());
 	computeAlpha();
+	//CORE_DEBUG("Compute alpha: {}", Time::GetDeltaTime());
 	correctDivergenceError(_dt);
+	//CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
 }
 
 void Solver::buildNeighbors() {
@@ -170,9 +181,9 @@ void Solver::computeAlpha() {
 		for (int j = 0; j < _neighbors[i].size(); j++) {
 			tIndex p = _neighbors[i][j];
 			Vec2f factor = _m0 * _kernel->gradW(_pm.pos[i] - _pm.pos[p]);
-			//b += _pm.type[p] == 1 ? 0 : factor.lengthSquare();
+			b += _pm.type[p] == 1 ? 0 : factor.lengthSquare();
 			a += factor;
-			b += factor.lengthSquare();
+			//b += factor.lengthSquare();
 		}
 
 		_pm.alpha[i] = 1.0/max(b + a.lengthSquare(), 1.0e-6f);
@@ -259,7 +270,7 @@ void Solver::correctDivergenceError(const Real dt){
 
 	int iter = 0;
 
-	while ((abs(dpAvg) > eta || iter < 1) && iter < 100){
+	while ((abs(dpAvg) > eta || iter < 1) && iter < 10){
 		//CORE_DEBUG("dpAvg {}", dpAvg);
 		dpAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
@@ -269,11 +280,12 @@ void Solver::correctDivergenceError(const Real dt){
 				dp[i] += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
 				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
 			}
-			dpAvg += dp[i];
+			if (_pm.type[i] == 0) dpAvg += dp[i];
 		}
 		dpAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
+			if (_pm.type[i] == 1) continue;
 			Real ki = dtInv * dp[i] * _pm.alpha[i];
 			for (int p=0; p<_neighbors[i].size(); p++){
 				tIndex j = _neighbors[i][p];
@@ -295,22 +307,28 @@ void Solver::correctDensityError(const Real dt){
 
 	int iter = 0;
 
-	while ((iter < 2 || abs(densAvg - _d0) > eta) && iter < 100){
+	float firstCount=0;
+	float secondCount=0;
+
+	while ((iter < 2 || abs(densAvg - _d0) > eta) && iter < 10){
+		Time::GetDeltaTime();
 		//CORE_DEBUG("densAvg {} {}", densAvg, _d0);
 		densAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
 			Real factor = 0e0f;
 			for (int p = 0; p < _neighbors[i].size(); p++) {
 				tIndex j = _neighbors[i][p];
-				factor += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
+				factor += (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
 				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
 			}
-			dens[i] = max(_pm.density[i] + dt * factor, _d0);
+			dens[i] = max(_pm.density[i] + dt * _m0 * factor, _d0);
 			//CORE_DEBUG("factor {} {}", factor, i);
 			//CORE_DEBUG("dens {} {}", dens[i], i);
-			densAvg += dens[i];
+			if (_pm.type[i] == 0) densAvg += dens[i];
 		}
 		densAvg /= _particleCount;
+
+		firstCount += Time::GetDeltaTime();
 
 		for (tIndex i=0; i<_particleCount; i++){
 			if (_pm.type[i] == 1 || _pm.type[i] == 2) continue;
@@ -323,8 +341,11 @@ void Solver::correctDensityError(const Real dt){
 			}
 		}
 		iter++;
+		secondCount += Time::GetDeltaTime();
 	}
 	//CORE_DEBUG("Final densAvg {} {}", densAvg, _d0);
+
+	CORE_DEBUG("First: {}, Second: {}", firstCount, secondCount);
 }
 
 void Solver::drawWalls(int resX, int resY) {

@@ -28,7 +28,7 @@ void Game::Init()
 	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 0.8f));
 	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
 
-	solver.initSimulation(36.0f, 36.0f);
+	solver.initSimulation(36.0f, 72.0f);
 	winningGlassParticles = solver.getWinningGlass();
 }
 

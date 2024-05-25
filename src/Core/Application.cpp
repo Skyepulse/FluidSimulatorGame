@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#include "Time.h"
+//#include "Time.h"
 
 #include "Rendering/Camera.h"
 #include "Rendering/Renderer.h"
@@ -15,7 +15,7 @@ Application::Application()
 
 	WindowProperties windowProps;
 	windowProps.Width = 360;
-	windowProps.Height = 360;
+	windowProps.Height = 720;
 
 	// We bind a non-static method, so we have to pass this as argument of the OnEvent method
 	// The std::placeholders::_1 specify that if eventCallback(e) is executed, OnEvent(this, e) is executed
@@ -39,7 +39,7 @@ Application::~Application()
 void Application::Start()
 {
   CORE_TRACE("Applications started");
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 36.0f); // Multiply by h
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f); // Multiply by h
 	t_Controller = std::make_shared<CameraController>(camera, 0.3f);
 
 	t_Game = std::make_shared<Game>();
