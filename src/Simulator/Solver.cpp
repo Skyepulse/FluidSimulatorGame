@@ -26,31 +26,13 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	Real sr = _kernel->getSupportRad();
 
-	for (int i = 0; i < resX; i++) {
-		addParticle(sr * Vec2f(i + 0.25,0.25), 1);
-		addParticle(sr * Vec2f(i + 0.75,0.25), 1);
-		addParticle(sr * Vec2f(i + 0.25,0.75), 1);
-		addParticle(sr * Vec2f(i + 0.75,0.75), 1);
-		addParticle(sr * Vec2f(i + 0.25, resY-1 + 0.25), 1);
-		addParticle(sr * Vec2f(i + 0.75, resY-1 + 0.25), 1);
-		addParticle(sr * Vec2f(i + 0.25, resY-1 + 0.75), 1);
-		addParticle(sr * Vec2f(i + 0.75, resY-1 + 0.75), 1);
-	}
+	drawWalls(resX, resY);
+	drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
+	drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
 
-	for (int j = 1; j < resY-1; j++) {
-		addParticle(sr * Vec2f(0.25, j + 0.25), 1);
-		addParticle(sr * Vec2f(0.75, j + 0.25), 1);
-		addParticle(sr * Vec2f(0.25, j + 0.75), 1);
-		addParticle(sr * Vec2f(0.75, j + 0.75), 1);
-		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.25), 1);
-		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.75), 1);
-		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.75), 1);
-		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.25), 1);
-	}
-
-	//We add particles in the bottom right corner
+	//We add particles in the top right corner
 	for (int i = 1; i < 21; i++) {
-		for (int j = 1; j < 21; j++) {
+		for (int j = resY-12; j < resY-2; j++) {
 			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
@@ -209,4 +191,58 @@ void Solver::updatePos(const Real dt) {
 	/*for (int i = 0; i < toRemove.size(); i++) {
 		removeParticle(toRemove[i]);
 	}*/
+}
+
+void Solver::drawWalls(int resX, int resY) {
+	Real sr = _kernel->getSupportRad();
+	for (int i = 0; i < resX; i++) {
+		addParticle(sr * Vec2f(i + 0.25, 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.75, 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.25, 0.75), 1);
+		addParticle(sr * Vec2f(i + 0.75, 0.75), 1);
+		addParticle(sr * Vec2f(i + 0.25, resY - 1 + 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.75, resY - 1 + 0.25), 1);
+		addParticle(sr * Vec2f(i + 0.25, resY - 1 + 0.75), 1);
+		addParticle(sr * Vec2f(i + 0.75, resY - 1 + 0.75), 1);
+	}
+
+	for (int j = 1; j < resY - 1; j++) {
+		addParticle(sr * Vec2f(0.25, j + 0.25), 1);
+		addParticle(sr * Vec2f(0.75, j + 0.25), 1);
+		addParticle(sr * Vec2f(0.25, j + 0.75), 1);
+		addParticle(sr * Vec2f(0.75, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.25), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.75, j + 0.75), 1);
+		addParticle(sr * Vec2f(resX - 1 + 0.25, j + 0.25), 1);
+	}
+}
+
+void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength) {
+	Real sr = _kernel->getSupportRad(); 
+	for (int i = 0; i < particleLength; i++) {
+		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
+		addParticle(sr * pos1, 1);
+		Vec2f pos2 = p1 + Vec2f(0.25, -0.25) + Vec2f(0.5, 0.0) * i;
+		addParticle(sr * pos2, 1);
+	}
+}
+
+void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle) {
+	Real sr = _kernel->getSupportRad();
+	Real radAngle = angle * M_PI / 180.0;
+	Real cosAngle = cos(radAngle);
+	Real sinAngle = sin(radAngle);
+
+
+	//Turn the line by angle
+	for (int i = 0; i < particleLength; i++) {
+		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
+		Vec2f newPos1 = Vec2f(cosAngle * (pos1.x - p1.x) - sinAngle * (pos1.y - p1.y) + p1.x, sinAngle * (pos1.x - p1.x) + cosAngle * (pos1.y - p1.y) + p1.y);
+		addParticle(sr * newPos1, 1);
+
+		Vec2f pos2 = p1 + Vec2f(0.25, -0.25) + Vec2f(0.5, 0.0) * i;
+		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
+		addParticle(sr * newPos2, 1);	
+	}
 }

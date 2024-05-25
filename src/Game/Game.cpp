@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <algorithm>
 
 #include "../Core/Rendering/Renderer.h"
 #include "../Core/Event/ApplicationEvent.h"
@@ -14,20 +15,38 @@ Game::~Game()
 
 void Game::Init()
 {
-  circle  = std::make_shared<Circle>();
-	float circleRadius = 0.2f;
-	circle->Transform->Scale2D(circleRadius);
-	circle->SetColor(glm::vec3(1.0f));
+	circleWalls  = std::make_shared<Circle>();
+	circleLiquid = std::make_shared<Circle>();
 
-	solver.initSimulation(48.0f, 100.0f);
+	float circleRadius = 0.2f;
+	circleWalls->Transform->Scale2D(circleRadius);
+	circleLiquid->Transform->Scale2D(circleRadius);
+	circleWalls->SetColor(glm::vec3(0.6f));
+	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 0.8f));
+
+	solver.initSimulation(36.0f, 72.0f);
 }
 
 void Game::Update()
 {
-  solver.update(0.005f);
+	solver.update(0.005f);
 	ParticleManager particleManager = solver.getParticleManager();
+	vector<Vec2f> positions = particleManager.pos;
+	vector<int> types = particleManager.type;
 
-	Renderer::DrawShapeDuplicate(circle, particleManager.pos);
+	vector<Vec2f> wallsPositions;
+	vector<Vec2f> liquidPositions;
+
+	for (size_t i = 0; i < positions.size(); i++)
+	{
+		if (types[i] == 1)
+			wallsPositions.push_back(positions[i]);
+		else
+			liquidPositions.push_back(positions[i]);
+	}
+
+	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
+	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
 }
 
 bool Game::OnEvent(Event& e)

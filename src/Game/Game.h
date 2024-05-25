@@ -18,5 +18,6 @@ public:
 private:
   Solver solver;
 
-  std::shared_ptr<Circle> circle;
+  std::shared_ptr<Circle> circleWalls;
+  std::shared_ptr<Circle> circleLiquid;
 };

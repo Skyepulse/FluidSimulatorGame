@@ -79,6 +79,10 @@ private:
 	void updateVel(const Real dt);
 	void updatePos(const Real dt);
 
+	void drawWalls(int resX, int resY);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle);
+
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
 	Real _resX, _resY;
