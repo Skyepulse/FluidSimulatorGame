@@ -267,6 +267,10 @@ void Solver::correctDivergenceError(const Real dt){
 
 	int iter = 0;
 
+	for (int i=0; i<_particleCount; i++){
+		_pm.alpha[i] *= dtInv;
+	}
+
 	while ((abs(dpAvg) > eta || iter < 1) && iter < 10){
 		//CORE_DEBUG("dpAvg {}", dpAvg);
 		dpAvg = 0.0f;
@@ -274,25 +278,32 @@ void Solver::correctDivergenceError(const Real dt){
 			dp[i] = 0e0f;
 			for (int p = 0; p < _neighbors[i].size(); p++) {
 				tIndex j = _neighbors[i][p];
-				dp[i] += _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
+				dp[i] += (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j]));
 				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
 			}
-			if (_pm.type[i] == 0) dpAvg += dp[i];
+			if (_pm.type[i] == 0) dpAvg += _m0 * dp[i];
 		}
 		dpAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
 			if (_pm.type[i] == 1) continue;
-			Real ki = dtInv * dp[i] * _pm.alpha[i];
+			Real ki = dp[i] * _pm.alpha[i];
+			Vec2f sum(0);
 			for (int p=0; p<_neighbors[i].size(); p++){
 				tIndex j = _neighbors[i][p];
-				Real kj = dtInv * dp[j] * _pm.alpha[j];
-				_pm.vel[i] += -dt*_m0 * (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+				Real kj = dp[j] * _pm.alpha[j];
+				sum += (ki/_pm.density[i] + kj/_pm.density[j]) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
 			}
+			_pm.vel[i] += -dt*_m0 * sum;
 		}
 		// CORE_DEBUG("dpAvg {}", dpAvg);
 		iter++;
 	}
+
+	for (int i=0; i<_particleCount; i++){
+		_pm.alpha[i] *= dt;
+	}
+
 	// CORE_DEBUG("Final dpAvg {}", dpAvg);
 }
 
@@ -306,6 +317,10 @@ void Solver::correctDensityError(const Real dt){
 
 	float firstCount=0;
 	float secondCount=0;
+
+	for (int i=0; i<_particleCount; i++){
+		_pm.alpha[i] *= dt2Inv;
+	}
 
 	while ((iter < 2 || abs(densAvg - _d0) > eta) && iter < 10){
 		Time::GetDeltaTime();
@@ -329,18 +344,26 @@ void Solver::correctDensityError(const Real dt){
 
 		for (tIndex i=0; i<_particleCount; i++){
 			if (_pm.type[i] == 1 || _pm.type[i] == 2) continue;
-			Real ki = max(dt2Inv*(dens[i] - _d0) * _pm.alpha[i], 0.0f);
+			Real ki = max((dens[i] - _d0) * _pm.alpha[i], 0.0f);
+			Vec2f sum(0);
 			for (int p=0; p<_neighbors[i].size(); p++){
 				tIndex j = _neighbors[i][p];
-				Real kj = max(dt2Inv*(dens[j] - _d0) * _pm.alpha[j], 0.0f);
-				_pm.vel[i] += - dt * _m0 * (ki + kj) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
+				Real kj = max((dens[j] - _d0) * _pm.alpha[j], 0.0f);
+				sum += (ki + kj) * _kernel->gradW(_pm.pos[i] - _pm.pos[j]);
 				//CORE_DEBUG("vel {} {} | {} {}", _kernel->gradW(_pm.pos[i] - _pm.pos[j]).x, _kernel->gradW(_pm.pos[i] - _pm.pos[j]).y,i, j);
 			}
+			_pm.vel[i] += - dt * _m0 * sum;
 		}
+
+
 		iter++;
 		secondCount += Time::GetDeltaTime();
 	}
 	//CORE_DEBUG("Final densAvg {} {}", densAvg, _d0);
+
+	for (int i=0; i<_particleCount; i++){
+		_pm.alpha[i] *= dt*dt;
+	}
 
 	CORE_DEBUG("First: {}, Second: {}", firstCount, secondCount);
 }
