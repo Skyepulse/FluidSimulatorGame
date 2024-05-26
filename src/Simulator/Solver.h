@@ -78,6 +78,19 @@ public:
 	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
 	Vec2f getSpawnPosition() { return _spawnPosition; }
 	void spawnParticle(Vec2f position);
+	void drawWalls(int resX, int resY);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
+
+	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
+	void setSpawnPosition(Vec2f position);
+
+	void moveGlassLeft(bool move) { _moveGlassLeft = move; }
+	void moveGlassRight(bool move) { _moveGlassRight = move; }
+	void moveGlassUp(bool move) { _moveGlassUp = move; }
+	void moveGlassDown(bool move) { _moveGlassDown = move; }
+
+	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
 	
 
 private:
@@ -96,13 +109,6 @@ private:
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
 	void computePressure();	
-
-	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
-
-	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
-	inline void setSpawnPosition(Vec2f position) { this->_spawnPosition = position; };
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -127,6 +133,14 @@ private:
 	ParticleManager _pm;
 	vector<vector<tIndex>> _particlesInGrid;
 	vector<vector<tIndex>> _neighbors;
+
+	Real _moveGlassSpeedX = 1.0f; // per second so dt 1000
+	Real _moveGlassSpeedY = 1.0f; // per second so dt 1000
+
+	bool _moveGlassLeft = false;
+	bool _moveGlassRight = false;
+	bool _moveGlassUp = false;
+	bool _moveGlassDown = false;
 };
 
 #endif // !_SOLVER_H_

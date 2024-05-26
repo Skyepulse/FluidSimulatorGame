@@ -30,18 +30,6 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_immovableGlassParticleCount = 0;
 
 	Real sr = _kernel->getSupportRad();
-
-	drawWalls(resX, resY);
-	drawAngleLineWall(Vec2f(0, 7*resY/10), 45, -30);
-	drawAngleLineWall(Vec2f(resX, 4*resY/10), 45, -160);
-
-	int width = 10;
-	int height = 10;
-	drawWinningGlass(width, height, Vec2f(1, 1));
-	this->_winningGlass = (width - 2) * (height - 1) / 2;
-
-	//We add particles in the top right corner
-	setSpawnPosition(sr*Vec2f(2, resY-2));
 	/*
 	for (int i = 1; i < 20; i++) {
 		for (int j = resY-9; j < resY-2; j++) {
@@ -251,7 +239,22 @@ void Solver::adaptDt() {
 void Solver::updatePos(const Real dt) {
 	//vector<int> toRemove;
 	for (int i = 0; i < _particleCount; i++) {
-		if(_pm.type[i] == 1 || _pm.type[i] == 2) continue;
+		if(_pm.type[i] == 1) continue;
+		if (_pm.type[i] == 2) {
+			if (this->_moveGlassRight) {
+				_pm.pos[i] += dt * _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
+			}
+			if (this->_moveGlassLeft) {
+				_pm.pos[i] += dt * _moveGlassSpeedX * Vec2f(-1.0f, 0.0f);
+			}
+			if (this->_moveGlassUp) {
+				_pm.pos[i] += dt * _moveGlassSpeedY * Vec2f(0.0f, 1.0f);
+			}
+			if (this->_moveGlassDown) {
+				_pm.pos[i] += dt * _moveGlassSpeedY * Vec2f(0.0f, -1.0f);
+			}
+			continue;
+		}
 		_pm.pos[i] += dt * _pm.vel[i];
 		//CORE_DEBUG("vel {0} {1} {2} {3} {4} {5}", dt*_pm.vel[i].x, dt*_pm.vel[i].y, i, dt, _pm.vel[i].x, _pm.vel[i].y);
 
@@ -436,6 +439,7 @@ void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
 	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2);
 	this->_glasscorner = cornerPosition;
 	this->_glassSize = Vec2f(width/2, height/2);
+	this->_winningGlass = (width - 2) * (height - 1) / 2;
 }
 
 void Solver::spawnParticle(Vec2f position) {
@@ -457,4 +461,20 @@ void Solver::spawnParticle(Vec2f position) {
 		}
 	}
 	addParticle(position, 0);
+}
+
+void Solver::setSpawnPosition(Vec2f position) {
+	_spawnPosition = this->_kernel->getSupportRad()*position;
+}
+
+void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int type) {
+	Real sr = _kernel->getSupportRad();
+	for (int i = position.x; i < position.x + width; i++) {
+		for (int j = position.y; j < position.y + height; j++) {
+			addParticle(sr * Vec2f(i + 0.25, j + 0.25));
+			addParticle(sr * Vec2f(i + 0.75, j + 0.25));
+			addParticle(sr * Vec2f(i + 0.25, j + 0.75));
+			addParticle(sr * Vec2f(i + 0.75, j + 0.75));
+		}
+	}
 }
