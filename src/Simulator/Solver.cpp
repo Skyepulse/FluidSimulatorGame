@@ -27,6 +27,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_neighbors.clear();
 	_particleCount = 0;
 	_immovableParticleCount = 0;
+	_immovableGlassParticleCount = 0;
 
 	Real sr = _kernel->getSupportRad();
 
@@ -40,14 +41,16 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	this->_winningGlass = (width - 2) * (height - 1) / 2;
 
 	//We add particles in the top right corner
-	for (int i = 1; i < 9; i++) {
+	setSpawnPosition(sr*Vec2f(2, resY-2));
+	/*
+	for (int i = 1; i < 20; i++) {
 		for (int j = resY-9; j < resY-2; j++) {
 			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
 			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
 			addParticle(sr*Vec2f(i + 0.75, j + 0.75));
 		}
-	}
+	}*/
 }
 
 void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
@@ -61,6 +64,7 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	_pm.alpha.push_back(alpha);
 	_pm.isInGlass.push_back(false);
 	if(type == 1) _immovableParticleCount++;
+	if(type == 2) _immovableGlassParticleCount++;
 	_neighbors.push_back(vector<tIndex>());
 	_particleCount++;
 }
@@ -88,7 +92,8 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 
 	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
-	if(p.type == 1 || p.type == 2) _immovableParticleCount--;	
+	if(p.type == 1) _immovableParticleCount--;
+	if(p.type == 2) _immovableGlassParticleCount--;
 	return p;
 }
 
@@ -96,12 +101,12 @@ void Solver::init() {
 	buildNeighbors();
 	computeDensity();
 	computeAlpha();
-	CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
+	//CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
 }
 
 void Solver::update() {
-	CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
-    CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
+	//CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
+    //CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
 	computeNPforces();
 	//CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
@@ -368,7 +373,7 @@ void Solver::correctDensityError(const Real dt){
 		_pm.alpha[i] *= dt*dt;
 	}
 
-	CORE_DEBUG("First: {}, Second: {}", firstCount, secondCount);
+	//CORE_DEBUG("First: {}, Second: {}", firstCount, secondCount);
 }
 
 void Solver::drawWalls(int resX, int resY) {
@@ -431,4 +436,25 @@ void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
 	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2);
 	this->_glasscorner = cornerPosition;
 	this->_glassSize = Vec2f(width/2, height/2);
+}
+
+void Solver::spawnParticle(Vec2f position) {
+	//We check the potential neighbors for this particle. If we find a neighbor too close, we don't spawn the particle
+	int x = position.x;
+	int y = position.y;
+	Real sr = _kernel->getSupportRad();
+	for (int dx = -1; dx <= 1; dx++) {
+		for (int dy = -1; dy <= 1; dy++) {
+			tIndex idx = idx1d(x + dx, y + dy);
+			if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
+				for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
+					tIndex p = _particlesInGrid[idx][j];
+					if ((position - _pm.pos[p]).length() <= sr/2) {
+						return;
+					}
+				}
+			}
+		}
+	}
+	addParticle(position, 0);
 }

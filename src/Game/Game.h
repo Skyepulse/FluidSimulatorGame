@@ -16,10 +16,14 @@ public:
 
   bool OnEvent(Event& e);
 private:
+	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
   Solver solver;
   int winningGlassParticles;
 
   std::shared_ptr<Circle> circleWalls;
   std::shared_ptr<Circle> circleLiquid;
   std::shared_ptr<Circle> circleGlass;
+
+  Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
+  Real particleSpawnRadius = 1.0f;
 };

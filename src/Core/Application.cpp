@@ -14,8 +14,8 @@ Application::Application()
  	Logger::Init();
 
 	WindowProperties windowProps;
-	windowProps.Width = 360;
-	windowProps.Height = 720;
+	windowProps.Width = 500;
+	windowProps.Height = 1000;
 
 	// We bind a non-static method, so we have to pass this as argument of the OnEvent method
 	// The std::placeholders::_1 specify that if eventCallback(e) is executed, OnEvent(this, e) is executed

@@ -73,6 +73,11 @@ public:
 
 	int getParticlesInGlass() { return _particlesInGlass; }
 	int getWinningGlass() { return _winningGlass; }
+	int getParticleCount() { return _particleCount; }
+	int getImmovableParticleCount() { return _immovableParticleCount; }
+	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
+	Vec2f getSpawnPosition() { return _spawnPosition; }
+	void spawnParticle(Vec2f position);
 	
 
 private:
@@ -97,6 +102,7 @@ private:
 	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
 
 	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
+	inline void setSpawnPosition(Vec2f position) { this->_spawnPosition = position; };
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -113,6 +119,10 @@ private:
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
+	tIndex _immovableGlassParticleCount;
+
+	Vec2f _spawnPosition;
+	Real _minDistance = 0.25f;
 
 	ParticleManager _pm;
 	vector<vector<tIndex>> _particlesInGrid;

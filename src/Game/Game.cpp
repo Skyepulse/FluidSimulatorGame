@@ -19,17 +19,19 @@ void Game::Init()
 	circleLiquid = std::make_shared<Circle>();
 	circleGlass  = std::make_shared<Circle>();
 
-	float circleRadius = 0.2f;
+	float circleRadius = 0.5f;
 	circleWalls->Transform->Scale2D(circleRadius);
 	circleLiquid->Transform->Scale2D(circleRadius);
 	circleGlass->Transform->Scale2D(circleRadius);
 
 	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 0.8f));
+	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
 	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
 
 	solver.initSimulation(36.0f, 72.0f);
 	winningGlassParticles = solver.getWinningGlass();
+
+	particleSpawnPosition = solver.getSpawnPosition();
 }
 
 void Game::Update()
@@ -77,7 +79,16 @@ bool Game::OnEvent(Event& e)
     return false;
   
   CORE_DEBUG("Particle Spawned")
-  // TODO : Spawn particles
-
+  solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
   return true;
+}
+
+Vec2f Game::getRandomPointInCircle(const Vec2f& center, const Real radius)
+{
+	Real angle = (Real)rand() / RAND_MAX * 2 * M_PI;
+	Real r = radius * sqrt((Real)rand() / RAND_MAX);
+	Real x = r * cos(angle);
+	Real y = r * sin(angle);
+
+	return Vec2f(center.x + x, center.y + y);
 }
