@@ -39,10 +39,13 @@ $$\nabla^2 W_\text{vis}(r, h) = \frac{45}{\pi h^6}(h-|r|)$$
 
 ### DONE
 - Solver: update, viscosity, density, pressure, acc + vel, pos update, time integration, kernels.
-- Engine: Circles, arrow, shape abstraction
+- Engine: Circles, arrow, shape abstraction, events added, scene and camera, application time game loop.
 - We have a correct sph demo ! Now we have to implement DFSph.
+- DFSPH completed and correct!
+- Optimisation done with compiler
+- Prototype UI, level and game design.
+- Game engine abstraction for communication with solver
 ### TODO
-- Game Design: UI prototype, level design prototype
-- Implement time integration with dfsph
 - Implement paralelisation with compute shaders.
-- Engine: Add events, scene, application time game loop, some unit tests.
+- Engine: some unit tests.
+- Implement more levels and main menu.
