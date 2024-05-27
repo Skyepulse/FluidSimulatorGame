@@ -39,7 +39,7 @@ void Game::Init()
 	int width = 10;
 	int height = 10;
 	solver.drawWinningGlass(width, height, Vec2f(1, 1));
-	solver.setSpawnPosition(Vec2f(2, resY - 2));
+	solver.setSpawnPosition(Vec2f(4, resY - 4));
 
 	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
 

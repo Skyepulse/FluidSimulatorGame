@@ -25,5 +25,5 @@ private:
   std::shared_ptr<Circle> circleGlass;
 
   Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
-  Real particleSpawnRadius = 1.0f;
+  Real particleSpawnRadius = 4.0f;
 };

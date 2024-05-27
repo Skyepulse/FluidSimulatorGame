@@ -134,7 +134,7 @@ private:
 	vector<vector<tIndex>> _particlesInGrid;
 	vector<vector<tIndex>> _neighbors;
 
-	Real _moveGlassSpeedX = 1.0f; // per second so dt 1000
+	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
 	Real _moveGlassSpeedY = 1.0f; // per second so dt 1000
 
 	bool _moveGlassLeft = false;

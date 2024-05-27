@@ -231,7 +231,7 @@ void Solver::adaptDt() {
 	}
 	Real maxVel = sqrt(maxVel2);
 	if(maxVel == 0e0) _dt = DEFAULT_DT;
-	else _dt = 0.4*_h/maxVel;
+	else _dt = 0.6*_h/maxVel;
 	_dt = min(_dt, DEFAULT_DT);
 	//CORE_DEBUG("dt {}", _dt);
 }
