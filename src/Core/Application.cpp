@@ -45,7 +45,7 @@ void Application::Start()
 	t_Game = std::make_shared<Game>();
 	t_Game->Init();
 
-  while (!m_Window->ShouldClose()) {
+	while (!m_Window->ShouldClose()) {
 		//CORE_INFO(Time::GetDeltaTime());
 
 		// TEMP : TODO PASS CAMERA SHARED PTR
@@ -57,9 +57,9 @@ void Application::Start()
 		// TEMP
 		t_Game->Update();
 
-    // TODO : Update layers for events
+		// TODO : Update layers for events
 
-    // TODO : Update layers for rendering (reverse order)
+		// TODO : Update layers for rendering (reverse order)
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();
