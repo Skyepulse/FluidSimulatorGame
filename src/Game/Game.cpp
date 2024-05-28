@@ -1,10 +1,6 @@
 #include "Game.h"
 #include <algorithm>
 
-#include "../Core/Rendering/Renderer.h"
-#include "../Core/Event/ApplicationEvent.h"
-#include "../Core/Event/KeyCode.h"
-
 Game::Game()
 {
 }

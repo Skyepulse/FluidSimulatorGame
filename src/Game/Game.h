@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Simulator/Solver.h"
-#include "../Core/Scene/Circle.h"
-#include "../Core/Event/Event.h"
+#include "../Core/Engine.h"
+
 
 // TEMP : TODO : REPLACE BY LAYERS
 class Game
