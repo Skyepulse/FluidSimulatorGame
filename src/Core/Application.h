@@ -11,6 +11,8 @@
 // TEMP
 #include "../Game/Game.h"
 
+#include "UI/InGameUI.h"
+
 
 class Application 
 {
@@ -39,4 +41,6 @@ private:
   // TEMP
   std::shared_ptr<CameraController> t_Controller;
   std::shared_ptr<Game> t_Game;
+
+  InGameUI inGameUI;
 };

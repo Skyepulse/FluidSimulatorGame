@@ -5,6 +5,7 @@
 #include "imgui_impl_opengl3.h"
 
 class InGameUI {
+public:
     InGameUI() {};
     ~InGameUI();
     
