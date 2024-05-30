@@ -38,9 +38,9 @@ Application::~Application()
 
 void Application::Start()
 {
-  CORE_TRACE("Applications started");
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f); // Multiply by h
-	t_Controller = std::make_shared<CameraController>(camera, 0.3f);
+	CORE_TRACE("Applications started");
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 96.0f, 0.0f, 72.0f); // Multiply by h
+	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
 	t_Game = std::make_shared<Game>();
 	t_Game->Init();
