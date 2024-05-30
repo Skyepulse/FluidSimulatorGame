@@ -9,6 +9,10 @@
 #include <functional>
 #include <iostream>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 Application::Application()
 {
  	Logger::Init();
@@ -27,6 +31,17 @@ Application::Application()
 	m_Window = std::make_shared<Window>(windowProps, eventCallback);
 	m_Window->EnableVSync(true);
 
+
+	// Configuration ImGui
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+
+	// Initialisation backend (GLFW et OpenGL3)
+	ImGui_ImplGlfw_InitForOpenGL(m_Window->Get(), true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
+
   // TEMP A CHANGER
 	// Enable Blending
 	RendererCommand::EnableBlending(true);
@@ -34,6 +49,9 @@ Application::Application()
 
 Application::~Application()
 {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void Application::Start()
@@ -51,6 +69,10 @@ void Application::Start()
 		// TEMP : TODO PASS CAMERA SHARED PTR
 		Renderer::BeginScene(*camera.get());
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -60,6 +82,19 @@ void Application::Start()
     // TODO : Update layers for events
 
     // TODO : Update layers for rendering (reverse order)
+
+		ImGui::Begin("Overlay", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
+		ImGui::Text("Hello, world!");
+		if (ImGui::Button("Button"))
+		{
+			// Action du bouton
+		}
+		ImGui::End();
+
+		// Rendre ImGui par-dessus la scène OpenGL
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();
