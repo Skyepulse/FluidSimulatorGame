@@ -144,10 +144,11 @@ private:
 	//OpenGL compute shader variables
 
 	GLuint particleBuffer;
-	GLuint computeShaderProgram;
+	GLuint computeShaderProgramPredictVel;
 	GLuint particleSSBO;
 
-	void setupComputeShader(const string& shaderFilePath);
+	void setupComputeShaderPredictVel();
+	void setupComputeShaderDensityAlpha();
 	void setupBuffers();
 };
 

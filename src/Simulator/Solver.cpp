@@ -69,7 +69,7 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 
 void Solver::init() {
 	buildNeighbors();
-	computeDensityAlphaCS();
+	computeDensityAlpha();
 	//CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
 }
 
@@ -89,7 +89,7 @@ void Solver::update() {
 	CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
 	CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
-	computeDensityAlphaCS();
+	computeDensityAlpha();
 	CORE_DEBUG("Compute density and alpha: {}", Time::GetDeltaTime());
 	correctDivergenceError(_dt);
 	CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
@@ -419,16 +419,17 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 
 void Solver::initOpenGL() {
 	setupBuffers();
+	setupComputeShaderPredictVel();
 }
 
 void Solver::cleanupOpenGL() {
 	glDeleteBuffers(1, &particleSSBO);
-	glDeleteProgram(computeShaderProgram);
+	glDeleteProgram(computeShaderProgramPredictVel);
 }
 
-void Solver::setupComputeShader(const string& shaderFilePath) {
+void Solver::setupComputeShaderPredictVel() {
 
-	string path = "src/Simulator/computeShaders/" + shaderFilePath + ".comp";
+	string path = "src/Simulator/computeShaders/predictVel.comp";
 	
 	ifstream shaderFile(path);
 	if (!shaderFile.is_open()) {
@@ -454,14 +455,14 @@ void Solver::setupComputeShader(const string& shaderFilePath) {
 		glDeleteShader(shader);
 	}
 
-	computeShaderProgram = glCreateProgram();
-	glAttachShader(computeShaderProgram, shader);
-	glLinkProgram(computeShaderProgram);
+	computeShaderProgramPredictVel = glCreateProgram();
+	glAttachShader(computeShaderProgramPredictVel, shader);
+	glLinkProgram(computeShaderProgramPredictVel);
 
-	glGetProgramiv(computeShaderProgram, GL_LINK_STATUS, &success);
+	glGetProgramiv(computeShaderProgramPredictVel, GL_LINK_STATUS, &success);
 	if (!success) {
 		char infoLog[512];
-		glGetProgramInfoLog(computeShaderProgram, 512, NULL, infoLog);
+		glGetProgramInfoLog(computeShaderProgramPredictVel, 512, NULL, infoLog);
 		CORE_ERROR("ERROR::SHADER::COMPUTE::LINKING_FAILED\n{}", infoLog);
 		glDeleteShader(shader);
 	}
@@ -476,6 +477,7 @@ void Solver::setupBuffers() {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleSSBO);
 }
 
+/*
 void Solver::computeDensityAlphaCS() {
 	setupComputeShader("computeDensityAlpha");
 
@@ -624,64 +626,18 @@ void Solver::computeDensityAlphaCS() {
 	glDeleteBuffers(1, &neighborOffsetsBuffer);
 
 }
+*/
 
 void Solver::predictVelCS(const Real dt) {
-	setupComputeShader("predictVel");
-
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
-	GLenum err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glBindBuffer: {}", err);
-		return;
-	}
-
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glBufferSubData: {}", err);
-		return;
-	}
-
-	glUseProgram(computeShaderProgram);
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glUseProgram: {}", err);
-		return;
-	}
-
-	GLint dtLocation = glGetUniformLocation(computeShaderProgram, "dt");
-	if (dtLocation == -1) {
-		CORE_ERROR("Failed to get uniform location for dt");
-		return;
-	}
+	glUseProgram(computeShaderProgramPredictVel);
+	GLint dtLocation = glGetUniformLocation(computeShaderProgramPredictVel, "dt");
 	glUniform1f(dtLocation, dt);
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glUniform1f: {}", err);
-		return;
-	}
-
 	GLuint numGroups = (_particleData.size() + 127) / 128;
 	glDispatchCompute(numGroups, 1, 1);
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glDispatchCompute: {}", err);
-		return;
-	}
-
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glMemoryBarrier: {}", err);
-		return;
-	}
-
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
-	err = glGetError();
-	if (err != GL_NO_ERROR) {
-		CORE_ERROR("OpenGL error after glGetBufferSubData: {}", err);
-		return;
-	}
 }
 
 void Solver::resizeSSBO() {
