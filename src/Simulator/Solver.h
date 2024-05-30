@@ -7,23 +7,12 @@
 #include <memory>
 #include <vector>
 #include "../Core/Log.h"
+#include <glad/glad.h>
 
 
 using namespace std;
 
-struct ParticleManager {
-	vector<Vec2f> pos; // position
-	vector<Vec2f> vel; // velocity
-	vector<Vec2f> acc; // acceleration
-	vector<Real> press; // pressure
-	vector<Real> density; // density
-	vector<int> type; // type of particle
-	vector<Real> alpha; // alpha
-	vector<bool> isInGlass; // is particle in glass
-};
-
 struct Particle {
-	vector<tIndex> neighbors;
 	Vec2f pos; // position
 	Vec2f vel; // velocity
 	Vec2f acc; // acceleration
@@ -62,11 +51,20 @@ public:
 				_kernel = make_shared<CubicSpline>(h);
 				break;
 		}
+
+		initOpenGL();
 	}
+
+
 
 	void initSimulation(const Real resX, const Real resY);
 	void init();
 	void update();
+
+	//OpenGL compute shader methods
+	void initOpenGL();
+	void cleanupOpenGL();
+	void predictVelCS(const Real dt);	
 
 	Real getH() const { return _h; }
 
@@ -131,6 +129,7 @@ private:
 	Real _minDistance = 0.25f;
 
 	vector<Particle> _particleData;
+	vector<vector<tIndex>> _neighbors;
 	vector<vector<tIndex>> _particlesInGrid;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
@@ -140,6 +139,15 @@ private:
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
 	bool _moveGlassDown = false;
+
+	//OpenGL compute shader variables
+
+	GLuint particleBuffer;
+	GLuint computeShaderProgram;
+	GLuint particleSSBO;
+
+	void setupComputeShader();
+	void setupBuffers();
 };
 
 #endif // !_SOLVER_H_

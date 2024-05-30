@@ -2,20 +2,19 @@
 
 layout(local_size_x = 256) in; // Define the number of work items per work group
 
-// Define the buffer structures to match your particle system
-struct ParticleData {
-    vec2 pos;
-    vec2 vel;
-    vec2 acc;
-    float press;
-    float density;
-    int type;
-    float alpha;
-    bool isInGlass;
+struct Particle {
+    vec2 pos; // position
+    vec2 vel; // velocity
+    vec2 acc; // acceleration
+    float press; // pressure
+    float density; // density
+    float alpha; // alpha
+    int type; // type of particle
+    bool isInGlass; // is particle in glass
 };
 
 layout(std430, binding = 0) buffer ParticleBuffer {
-    ParticleData particles[];
+    Particle particles[];
 };
 
 uniform float dt;
