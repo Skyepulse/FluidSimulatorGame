@@ -23,6 +23,7 @@ struct ParticleManager {
 };
 
 struct Particle {
+	vector<tIndex> neighbors;
 	Vec2f pos; // position
 	Vec2f vel; // velocity
 	Vec2f acc; // acceleration
@@ -69,7 +70,7 @@ public:
 
 	Real getH() const { return _h; }
 
-	ParticleManager& getParticleManager() { return _pm; }
+	vector<Particle>& getParticleManager() { return _particleData; }
 
 	int getParticlesInGlass() { return _particlesInGlass; }
 	int getWinningGlass() { return _winningGlass; }
@@ -108,7 +109,6 @@ private:
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
-	void computePressure();	
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -130,9 +130,8 @@ private:
 	Vec2f _spawnPosition;
 	Real _minDistance = 0.25f;
 
-	ParticleManager _pm;
+	vector<Particle> _particleData;
 	vector<vector<tIndex>> _particlesInGrid;
-	vector<vector<tIndex>> _neighbors;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
 	Real _moveGlassSpeedY = 1.0f; // per second so dt 1000
