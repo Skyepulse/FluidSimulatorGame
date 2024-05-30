@@ -25,6 +25,10 @@ public:
 
 	Real getSupportRad() const override {return _sr;}
 
+	//Get lookup table
+	Real* getLookupF() override {return lookup_f;}
+	Real* getLookupDF() override {return lookup_df;}
+
 private:
 	unsigned int _dim;
 	Real _c[3], _gc[3], _lc[3];

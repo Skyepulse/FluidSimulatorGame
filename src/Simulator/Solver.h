@@ -16,7 +16,6 @@ struct Particle {
 	Vec2f pos; // position
 	Vec2f vel; // velocity
 	Vec2f acc; // acceleration
-	Real press; // pressure
 	Real density; // density
 	Real alpha; // alpha
 	int type; // type of particle
@@ -65,6 +64,7 @@ public:
 	void initOpenGL();
 	void cleanupOpenGL();
 	void predictVelCS(const Real dt);	
+	void computeDensityAlphaCS();
 
 	Real getH() const { return _h; }
 
@@ -98,8 +98,7 @@ private:
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
-	void computeDensity();
-	void computeAlpha();
+	void computeDensityAlpha();
 
 	void computeNPforces();
 	void adaptDt();
@@ -107,6 +106,8 @@ private:
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
+
+	void resizeSSBO();
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -146,7 +147,7 @@ private:
 	GLuint computeShaderProgram;
 	GLuint particleSSBO;
 
-	void setupComputeShader();
+	void setupComputeShader(const string& shaderFilePath);
 	void setupBuffers();
 };
 
