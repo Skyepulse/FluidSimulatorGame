@@ -53,3 +53,28 @@ void IndexBuffer::Unbind() const
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
+// SSBO Class
+
+DataBufferObject::DataBufferObject(const std::shared_ptr<void>& data, size_t size) : m_Size(size)
+{
+	glGenBuffers(1, &m_RendererID);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_RendererID);
+	UpdateData(data);
+	Unbind();
+}
+
+void DataBufferObject::Bind(unsigned int index) const
+{
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, m_RendererID);
+}
+
+void DataBufferObject::Unbind() const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void DataBufferObject::UpdateData(const std::shared_ptr<void>& data) const
+{
+	glBufferData(GL_SHADER_STORAGE_BUFFER, m_Size, data.get(), GL_DYNAMIC_READ);
+}

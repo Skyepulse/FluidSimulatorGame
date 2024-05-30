@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 enum class ShaderDataType
 {
@@ -130,3 +131,19 @@ private:
 	uint32_t m_RendererID;
 	uint32_t m_Count;
 };
+
+class DataBufferObject
+	{
+	public:
+		DataBufferObject(const std::shared_ptr<void>& data, size_t size);
+		~DataBufferObject() {}
+
+		void Bind(unsigned int index = 0) const;
+		void Unbind() const;
+
+		void UpdateData(const std::shared_ptr<void>& data) const;
+
+	private:
+		unsigned int m_RendererID; 
+		unsigned int m_Size;
+	};
