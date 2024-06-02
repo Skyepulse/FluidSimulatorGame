@@ -58,6 +58,11 @@ void Window::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	glfwSetErrorCallback([](int err, const char* msg)
+	{
+		CORE_ERROR("GLFW [{}] {}", err, msg)
+	});
+
 	m_Window = glfwCreateWindow(m_Data->Width, m_Data->Height, "GlassOverFlow", NULL, NULL);
 	if (m_Window == NULL) {
 		glfwTerminate();
