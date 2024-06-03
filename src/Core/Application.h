@@ -9,6 +9,8 @@
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
 
+#include "UI/UserInterface.h"
+
 class Application 
 {
 public:
@@ -34,4 +36,6 @@ private:
 
   // TEMP
   std::shared_ptr<CameraController> t_Controller;
+
+  UserInterface userInterface;
 };

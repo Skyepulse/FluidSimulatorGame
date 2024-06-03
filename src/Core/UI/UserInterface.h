@@ -4,12 +4,12 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-class InGameUI {
+class UserInterface {
 public:
-    InGameUI() {};
-    ~InGameUI();
+    UserInterface() {};
+    ~UserInterface();
     
     void init(GLFWwindow *window);
     void newFrame();
-    void draw();
+    void show();
 };

@@ -1,12 +1,12 @@
-#include "InGameUI.h"
+#include "UserInterface.h"
 
-InGameUI::~InGameUI(){
+UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void InGameUI::init(GLFWwindow *window){
+void UserInterface::init(GLFWwindow *window){
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
@@ -16,13 +16,13 @@ void InGameUI::init(GLFWwindow *window){
 	ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void InGameUI::newFrame(){
+void UserInterface::newFrame(){
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
-void InGameUI::draw(){
+void UserInterface::show(){
 
     ImGui::Begin("Overlay", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
     ImGui::Text("Hello, world!");
