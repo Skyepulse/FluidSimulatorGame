@@ -7,6 +7,8 @@
 #include "Core.h"
 #include "Log.h"
 #include "Time.h"
+#include "Layer.h"
+#include "Application.h"
 
 #include "Event/ApplicationEvent.h"
 #include "Event/KeyCode.h"

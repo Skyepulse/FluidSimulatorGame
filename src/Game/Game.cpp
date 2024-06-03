@@ -1,7 +1,7 @@
 #include "Game.h"
 #include <algorithm>
 
-Game::Game()
+Game::Game() : Layer("Game Layer")
 {
 }
 
@@ -76,7 +76,7 @@ void Game::Update()
 	{
 		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 	}
-	
+
 }
 
 bool Game::OnEvent(Event& e)
@@ -108,7 +108,15 @@ bool Game::OnEvent(Event& e)
 	return false;
 }
 
-Vec2f Game::getRandomPointInCircle(const Vec2f& center, const Real radius)
+void Game::OnAttach()
+{
+}
+
+void Game::OnDetach()
+{
+}
+
+Vec2f Game::getRandomPointInCircle(const Vec2f &center, const Real radius)
 {
 	Real angle = (Real)rand() / RAND_MAX * 2 * M_PI;
 	Real r = radius * sqrt((Real)rand() / RAND_MAX);

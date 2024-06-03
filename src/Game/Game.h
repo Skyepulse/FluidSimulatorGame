@@ -3,18 +3,20 @@
 #include "../Simulator/Solver.h"
 #include "../Core/Engine.h"
 
-
 // TEMP : TODO : REPLACE BY LAYERS
-class Game
+class Game : public Layer
 {
 public:
   Game();
   ~Game();
 
-  void Init();
-  void Update();
+  virtual void Init() override;
+  virtual void Update() override;
 
-  bool OnEvent(Event& e);
+  virtual bool OnEvent(Event& e) override;
+
+  virtual void OnAttach() override;
+  virtual void OnDetach() override;
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
   Solver solver;

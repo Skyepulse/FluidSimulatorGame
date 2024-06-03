@@ -2,41 +2,36 @@
 
 #include "Window.h"
 #include "Log.h"
+#include "Layer.h"
 
 #include "Rendering/CameraController.h"
 
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
 
-// TEMP
-#include "../Game/Game.h"
-
-
 class Application 
 {
-  friend class EventEnqueuer;
 public:
-  static Application* Create();
+  static Application* Create(); // Must be implemented in the Game Application
 
   void Start();
   void OnEvent(Event& e);
 
-  bool OnKeyPressed(KeyPressedEvent& e);
-  bool OnKeyReleased(KeyReleasedEvent& e);
-  bool OnKeyTyped(KeyTypedEvent& e);
+  void PushOverlay(Layer* overlay) { m_Layers.PushOverlay(overlay); }
+	void PushLayer(Layer* layer) { m_Layers.PushLayer(layer); }
 
-  bool OnMousePressed(MousePressedEvent& e);
-  bool OnMouseReleased(MouseReleasedEvent& e);
-  bool OnMouseTyped(MouseTypedEvent& e);
+  static inline Application* Get() { return s_Instance;} 
+  std::shared_ptr<Window> GetWindow() { return m_Window; }
 
   ~Application();
-private:
+protected:
   Application();
 
 private:
+  static Application* s_Instance; 
   std::shared_ptr<Window> m_Window;
+  LayerStack m_Layers;
 
   // TEMP
   std::shared_ptr<CameraController> t_Controller;
-  std::shared_ptr<Game> t_Game;
 };
