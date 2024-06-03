@@ -9,7 +9,7 @@ Game::~Game()
 {
 }
 
-void Game::Init()
+void Game::OnAttach()
 {
 	circleWalls  = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
@@ -43,6 +43,10 @@ void Game::Init()
 
 	winningGlassParticles = solver.getWinningGlass();
 	particleSpawnPosition = solver.getSpawnPosition();
+}
+
+void Game::OnDetach()
+{
 }
 
 void Game::Update()
@@ -104,14 +108,6 @@ bool Game::OnEvent(Event& e)
 	}
 	
 	return false;
-}
-
-void Game::OnAttach()
-{
-}
-
-void Game::OnDetach()
-{
 }
 
 Vec2f Game::getRandomPointInCircle(const Vec2f &center, const Real radius)

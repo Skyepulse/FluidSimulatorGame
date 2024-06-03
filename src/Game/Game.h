@@ -10,13 +10,12 @@ public:
   Game();
   ~Game();
 
-  virtual void Init() override;
-  virtual void Update() override;
-
-  virtual bool OnEvent(Event& e) override;
-
   virtual void OnAttach() override;
   virtual void OnDetach() override;
+
+  virtual void Update() override;
+  virtual bool OnEvent(Event& e) override;
+
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
   Solver solver;

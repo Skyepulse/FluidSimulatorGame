@@ -11,13 +11,12 @@ class Layer
 public:
     Layer(const std::string& name) : m_Name(name) {}
 
-    virtual void Init() = 0; 
+    virtual void OnAttach() = 0;
+    virtual void OnDetach() = 0;
+
     virtual void Update() = 0;
 
     virtual bool OnEvent(Event& e) = 0;
-
-    virtual void OnAttach() = 0;
-    virtual void OnDetach() = 0;
 
     const std::string& GetName() {return m_Name; }
 private:

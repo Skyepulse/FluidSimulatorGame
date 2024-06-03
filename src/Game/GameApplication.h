@@ -10,7 +10,7 @@ public:
     GameApplication() 
     {
         Application::PushLayer(new Game());
-    }
+    }    
 };
 
 Application* Application::Create() { return new GameApplication(); } 
