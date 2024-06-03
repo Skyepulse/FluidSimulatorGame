@@ -1,7 +1,5 @@
 
-#include "Core/Application.h"
-
-Application* Application::Create() { return new Application(); }
+#include "Game/GameApplication.h"
 
 int main() 
 {

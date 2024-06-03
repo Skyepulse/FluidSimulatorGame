@@ -1,11 +1,7 @@
 #include "Game.h"
 #include <algorithm>
 
-#include "../Core/Rendering/Renderer.h"
-#include "../Core/Event/ApplicationEvent.h"
-#include "../Core/Event/KeyCode.h"
-
-Game::Game()
+Game::Game() : Layer("Game Layer")
 {
 }
 
@@ -13,7 +9,7 @@ Game::~Game()
 {
 }
 
-void Game::Init()
+void Game::OnAttach()
 {
 	circleWalls  = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
@@ -49,6 +45,10 @@ void Game::Init()
 	particleSpawnPosition = solver.getSpawnPosition();
 }
 
+void Game::OnDetach()
+{
+}
+
 void Game::Update()
 {
 	solver.update();
@@ -78,7 +78,7 @@ void Game::Update()
 	{
 		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 	}
-	
+
 }
 
 bool Game::OnEvent(Event& e)
@@ -110,7 +110,7 @@ bool Game::OnEvent(Event& e)
 	return false;
 }
 
-Vec2f Game::getRandomPointInCircle(const Vec2f& center, const Real radius)
+Vec2f Game::getRandomPointInCircle(const Vec2f &center, const Real radius)
 {
 	Real angle = (Real)rand() / RAND_MAX * 2 * M_PI;
 	Real r = radius * sqrt((Real)rand() / RAND_MAX);

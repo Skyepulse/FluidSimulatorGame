@@ -19,6 +19,9 @@ public:
 	virtual Real laplW(const Vec2f& r) const = 0;
 	virtual Real getSupportRad() const = 0;
 
+	virtual Real* getLookupF() = 0;
+	virtual Real* getLookupDF() = 0;
+
 protected:
 	Real _h;
 };

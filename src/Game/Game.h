@@ -1,20 +1,21 @@
 #pragma once
 
 #include "../Simulator/Solver.h"
-#include "../Core/Scene/Circle.h"
-#include "../Core/Event/Event.h"
+#include "../Core/Engine.h"
 
 // TEMP : TODO : REPLACE BY LAYERS
-class Game
+class Game : public Layer
 {
 public:
   Game();
   ~Game();
 
-  void Init();
-  void Update();
+  virtual void OnAttach() override;
+  virtual void OnDetach() override;
 
-  bool OnEvent(Event& e);
+  virtual void Update() override;
+  virtual bool OnEvent(Event& e) override;
+
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
   Solver solver;

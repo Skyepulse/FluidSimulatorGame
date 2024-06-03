@@ -1,5 +1,8 @@
 #include "Solver.h"
 #include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 
 // TEMP
 #include "../Core/Log.h"
@@ -15,6 +18,8 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	_particleData.clear();
 
+	_neighbors.clear();
+
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(resX * resY);
 
@@ -23,35 +28,27 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_immovableGlassParticleCount = 0;
 
 	Real sr = _kernel->getSupportRad();
-	/*
-	for (int i = 1; i < 20; i++) {
-		for (int j = resY-9; j < resY-2; j++) {
-			addParticle(sr*Vec2f(i + 0.25, j + 0.25));
-			addParticle(sr*Vec2f(i + 0.75, j + 0.25));
-			addParticle(sr*Vec2f(i + 0.25, j + 0.75));
-			addParticle(sr*Vec2f(i + 0.75, j + 0.75));
-		}
-	}*/
 }
 
 void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
 {
 	Particle p;
-	p.neighbors = vector<tIndex>();
 	p.pos = pos;
 	p.vel = vel;
 	p.acc = acc;
-	p.press = press;
 	p.density = density;
 	p.type = type;
 	p.alpha = alpha;
 	p.isInGlass = false;
 
 	_particleData.push_back(p);
+	_neighbors.push_back(vector<tIndex>());
 
 	if(type == 1) _immovableParticleCount++;
 	if(type == 2) _immovableGlassParticleCount++;
 	_particleCount++;
+
+	resizeSSBO();
 }
 
 Particle Solver::removeParticle(const tIndex index) //Erase the particles at the end of the simulation stepsize
@@ -59,16 +56,20 @@ Particle Solver::removeParticle(const tIndex index) //Erase the particles at the
 	Particle p;
 	p = _particleData[index];
 	_particleData.erase(_particleData.begin() + index);	
+	_neighbors.erase(_neighbors.begin() + index);
 	_particleCount--;
 	if(p.type == 1) _immovableParticleCount--;
 	if(p.type == 2) _immovableGlassParticleCount--;
+
+	resizeSSBO();
+
 	return p;
+
 }
 
 void Solver::init() {
 	buildNeighbors();
-	computeDensity();
-	computeAlpha();
+	computeDensityAlpha();
 	//CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
 }
 
@@ -81,17 +82,14 @@ void Solver::update() {
 	//CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
 	predictVel(_dt);
 	//CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
-
 	correctDensityError(_dt);
 	//CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
 	//CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
 	//CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
-	computeDensity();
-	//CORE_DEBUG("Compute density: {}", Time::GetDeltaTime());
-	computeAlpha();
-	//CORE_DEBUG("Compute alpha: {}", Time::GetDeltaTime());
+	computeDensityAlpha();
+	//CORE_DEBUG("Compute density and alpha: {}", Time::GetDeltaTime());
 	correctDivergenceError(_dt);
 	//CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
 }
@@ -111,9 +109,11 @@ void Solver::buildNeighbors() {
 		}
 	}
 
+	_neighbors.clear();
+	_neighbors.resize(_particleCount);
+
 	// Then we build the neighbors
 	for (int i = 0; i < _particleCount; i++) {
-		_particleData[i].neighbors.clear();
 		int x = _particleData[i].pos.x / R;
 		int y = _particleData[i].pos.y / R;
 		for (int dx = -1; dx <= 1; dx++) {
@@ -123,43 +123,30 @@ void Solver::buildNeighbors() {
 					for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
 						tIndex p = _particlesInGrid[idx][j];
 						if ((_particleData[i].pos - _particleData[p].pos).length() <= R) {
-							_particleData[i].neighbors.push_back(p);
+							_neighbors[i].push_back(p);
 						}
 					}
 				}
 			}
 		}
-		// CORE_DEBUG("neighbors {} {}", i, _neighbors[i].size());
 	}
 }
 
-void Solver::computeDensity() {
+void Solver::computeDensityAlpha() {
 	for (int i = 0; i < _particleCount; i++) {
 		_particleData[i].density = 0;
-		for (int j = 0; j < _particleData[i].neighbors.size(); j++) {
-			tIndex p = _particleData[i].neighbors[j];
-			_particleData[i].density += _m0 * _kernel->W(_particleData[i].pos - _particleData[p].pos);
-
-		//CORE_DEBUG("dens {} {}", i, _kernel->W(_pm.pos[i] - _pm.pos[p]));
-		}
-		//CORE_DEBUG("dens {}", _pm.density[i]);
-	}
-}
-
-void Solver::computeAlpha() {
-	for (int i = 0; i < _particleCount; i++) {
 		Vec2f a = Vec2f(0e0);
 		Real b = 0e0;
-		for (int j = 0; j < _particleData[i].neighbors.size(); j++) {
-			tIndex p = _particleData[i].neighbors[j];
+
+		for (int j = 0; j < _neighbors[i].size(); j++) {
+			tIndex p = _neighbors[i][j];
+			_particleData[i].density += _m0 * _kernel->W(_particleData[i].pos - _particleData[p].pos);
+
 			Vec2f factor = _m0 * _kernel->gradW(_particleData[i].pos - _particleData[p].pos);
 			b += _particleData[p].type == 1 ? 0 : factor.lengthSquare();
 			a += factor;
-			//b += factor.lengthSquare();
 		}
-
-		_particleData[i].alpha = 1.0/max(b + a.lengthSquare(), 1.0e-6f);
-		//CORE_DEBUG("alpha {}", _pm.alpha[i]);
+		_particleData[i].alpha = 1.0 / max(b + a.lengthSquare(), 1.0e-6f);
 	}
 }
 
@@ -168,20 +155,16 @@ void Solver::computeNPforces() {
 		if(_particleData[i].type == 1 || _particleData[i].type == 2) continue;
 		// gravity
 		_particleData[i].acc = _g;
-		//_pm.acc[i] = Vec2f(0e0);
-		//Vec2f debugViscosity = Vec2f(0e0);
 
-		for (int j=0; j<_particleData[i].neighbors.size(); j++){
+		for (int j=0; j<_neighbors[i].size(); j++) {
 			// suppose all masses are equal
-			tIndex p = _particleData[i].neighbors[j];
+			tIndex p = _neighbors[i][j];
 
 			// viscosity force
 			Vec2f x = (_particleData[i].pos - _particleData[p].pos);
             Vec2f u = (_particleData[i].vel - _particleData[p].vel);
             _particleData[i].acc += 2.0f * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
-			//debugViscosity += 2.0f*_nu * _m0/_pm.density[p] * u  * x.dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[p])) / (x.dotProduct(x) + 0.01f*_h*_h);
 		}
-		//CORE_DEBUG("viscosity debug term {0} {1} {2}", debugViscosity.x, debugViscosity.y, i);
 	}
 }
 
@@ -189,7 +172,6 @@ void Solver::predictVel(const Real dt){
 	for (int i = 0; i < _particleCount; i++) {
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
-		//CORE_DEBUG("Predicted vel for particle {0} : {1} {2}", i, _pm.vel[i].x, _pm.vel[i].y);
 	}
 }
 
@@ -202,11 +184,9 @@ void Solver::adaptDt() {
 	if(maxVel == 0e0) _dt = DEFAULT_DT;
 	else _dt = 0.6*_h/maxVel;
 	_dt = min(_dt, DEFAULT_DT);
-	//CORE_DEBUG("dt {}", _dt);
 }
 
 void Solver::updatePos(const Real dt) {
-	//vector<int> toRemove;
 	for (int i = 0; i < _particleCount; i++) {
 		if(_particleData[i].type == 1) continue;
 		if (_particleData[i].type == 2) {
@@ -225,7 +205,6 @@ void Solver::updatePos(const Real dt) {
 			continue;
 		}
 		_particleData[i].pos += dt * _particleData[i].vel;
-		//CORE_DEBUG("vel {0} {1} {2} {3} {4} {5}", dt*_pm.vel[i].x, dt*_pm.vel[i].y, i, dt, _pm.vel[i].x, _pm.vel[i].y);
 
 		//We check if the particle is inside the glass
 		if (_particleData[i].pos.x >= _glasscorner.x && _particleData[i].pos.x <= _glasscorner.x + _glassSize.x && _particleData[i].pos.y >= _glasscorner.y && _particleData[i].pos.y <= _glasscorner.y + _glassSize.y) {
@@ -252,14 +231,12 @@ void Solver::correctDivergenceError(const Real dt){
 	}
 
 	while ((abs(dpAvg) > eta || iter < 1) && iter < 10){
-		//CORE_DEBUG("dpAvg {}", dpAvg);
 		dpAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
 			dp[i] = 0e0f;
-			for (int p = 0; p < _particleData[i].neighbors.size(); p++) {
-				tIndex j = _particleData[i].neighbors[p];
+			for (int p = 0; p < _neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
 				dp[i] += (_particleData[i].vel - _particleData[j].vel).dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[j].pos));
-				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
 			}
 			if (_particleData[i].type == 0) dpAvg += _m0 * dp[i];
 		}
@@ -269,22 +246,19 @@ void Solver::correctDivergenceError(const Real dt){
 			if (_particleData[i].type == 1) continue;
 			Real ki = dp[i] * _particleData[i].alpha;
 			Vec2f sum(0);
-			for (int p=0; p<_particleData[i].neighbors.size(); p++){
-				tIndex j = _particleData[i].neighbors[p];
+			for (int p=0; p<_neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
 				Real kj = dp[j] * _particleData[j].alpha;
 				sum += (ki/_particleData[i].density + kj/_particleData[j].density) * _kernel->gradW(_particleData[i].pos - _particleData[j].pos);
 			}
 			_particleData[i].vel += -dt*_m0 * sum;
 		}
-		// CORE_DEBUG("dpAvg {}", dpAvg);
 		iter++;
 	}
 
 	for (int i=0; i<_particleCount; i++){
 		_particleData[i].alpha *= dt;
 	}
-
-	// CORE_DEBUG("Final dpAvg {}", dpAvg);
 }
 
 void Solver::correctDensityError(const Real dt){
@@ -304,18 +278,14 @@ void Solver::correctDensityError(const Real dt){
 
 	while ((iter < 2 || abs(densAvg - _d0) > eta) && iter < 10){
 		Time::GetDeltaTime();
-		//CORE_DEBUG("densAvg {} {}", densAvg, _d0);
 		densAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
 			Real factor = 0e0f;
-			for (int p = 0; p < _particleData[i].neighbors.size(); p++) {
-				tIndex j = _particleData[i].neighbors[p];
+			for (int p = 0; p < _neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
 				factor += (_particleData[i].vel - _particleData[j].vel).dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[j].pos));
-				//CORE_DEBUG("factor {0} {1}-{2}", _m0 * (_pm.vel[i] - _pm.vel[j]).dotProduct(_kernel->gradW(_pm.pos[i] - _pm.pos[j])), i, j);
 			}
 			dens[i] = max(_particleData[i].density + dt * _m0 * factor, _d0);
-			//CORE_DEBUG("factor {} {}", factor, i);
-			//CORE_DEBUG("dens {} {}", dens[i], i);
 			if (_particleData[i].type == 0) densAvg += dens[i];
 		}
 		densAvg /= _particleCount;
@@ -326,11 +296,10 @@ void Solver::correctDensityError(const Real dt){
 			if (_particleData[i].type == 1 || _particleData[i].type == 2) continue;
 			Real ki = max((dens[i] - _d0) * _particleData[i].alpha, 0.0f);
 			Vec2f sum(0);
-			for (int p=0; p<_particleData[i].neighbors.size(); p++) {
-				tIndex j = _particleData[i].neighbors[p];
+			for (int p=0; p<_neighbors[i].size(); p++) {
+				tIndex j = _neighbors[i][p];
 				Real kj = max((dens[j] - _d0) * _particleData[j].alpha, 0.0f);
 				sum += (ki + kj) * _kernel->gradW(_particleData[i].pos - _particleData[j].pos);
-				//CORE_DEBUG("vel {} {} | {} {}", _kernel->gradW(_pm.pos[i] - _pm.pos[j]).x, _kernel->gradW(_pm.pos[i] - _pm.pos[j]).y,i, j);
 			}
 			_particleData[i].vel += -dt * _m0 * sum;
 		}
@@ -339,13 +308,10 @@ void Solver::correctDensityError(const Real dt){
 		iter++;
 		secondCount += Time::GetDeltaTime();
 	}
-	//CORE_DEBUG("Final densAvg {} {}", densAvg, _d0);
 
 	for (int i=0; i<_particleCount; i++){
 		_particleData[i].alpha *= dt*dt;
 	}
-
-	//CORE_DEBUG("First: {}, Second: {}", firstCount, secondCount);
 }
 
 void Solver::drawWalls(int resX, int resY) {
@@ -447,3 +413,275 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 		}
 	}
 }
+
+//OPENGL
+
+void Solver::initOpenGL() {
+	setupBuffers();
+	setupComputeShaderPredictVel();
+	setupComputeShaderDensityAlpha();
+}
+
+void Solver::cleanupOpenGL() {
+	glDeleteBuffers(1, &particleSSBO);
+	glDeleteProgram(computeShaderProgramPredictVel);
+	glDeleteProgram(computeShaderProgramDensityAlpha);
+}
+
+void Solver::setupComputeShaderPredictVel() {
+
+	string path = "src/Simulator/computeShaders/predictVel.comp";
+	
+	ifstream shaderFile(path);
+	if (!shaderFile.is_open()) {
+		CORE_ERROR("Failed to open file: {}", path);
+		return;
+	}
+
+	stringstream shaderStream;
+	shaderStream << shaderFile.rdbuf();
+	string shaderCode = shaderStream.str();
+	const char* computeShaderSource = shaderCode.c_str();
+
+	GLuint shader = glCreateShader(GL_COMPUTE_SHADER);
+	glShaderSource(shader, 1, &computeShaderSource, NULL);
+	glCompileShader(shader);
+
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	computeShaderProgramPredictVel = glCreateProgram();
+	glAttachShader(computeShaderProgramPredictVel, shader);
+	glLinkProgram(computeShaderProgramPredictVel);
+
+	glGetProgramiv(computeShaderProgramPredictVel, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(computeShaderProgramPredictVel, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::LINKING_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	glDeleteShader(shader);
+}
+
+void Solver::setupComputeShaderDensityAlpha() {
+	string path = "src/Simulator/computeShaders/computeDensityAlpha.comp";
+
+	ifstream shaderFile(path);
+	if (!shaderFile.is_open()) {
+		CORE_ERROR("Failed to open file: {}", path);
+		return;
+	}
+
+	stringstream shaderStream;
+	shaderStream << shaderFile.rdbuf();
+	string shaderCode = shaderStream.str();
+	const char* computeShaderSource = shaderCode.c_str();
+
+	GLuint shader = glCreateShader(GL_COMPUTE_SHADER);
+	glShaderSource(shader, 1, &computeShaderSource, NULL);
+	glCompileShader(shader);
+
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	computeShaderProgramDensityAlpha = glCreateProgram();
+	glAttachShader(computeShaderProgramDensityAlpha, shader);
+	glLinkProgram(computeShaderProgramDensityAlpha);
+
+	glGetProgramiv(computeShaderProgramDensityAlpha, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(computeShaderProgramDensityAlpha, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::LINKING_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	glDeleteShader(shader);
+}
+
+void Solver::setupBuffers() {
+	glGenBuffers(1, &particleSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 0, nullptr, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleSSBO);
+}
+
+
+void Solver::computeDensityAlphaCS() {
+
+	_neighborsFlat.clear();
+	_neighborsCount.clear();
+	_neighborOffsets.clear();
+
+	for (int i = 0; i < _neighbors.size(); i++) {
+		_neighborOffsets.push_back(_neighborsFlat.size());
+		_neighborsFlat.insert(_neighborsFlat.end(), _neighbors[i].begin(), _neighbors[i].end());
+		_neighborsCount.push_back(_neighbors[i].size());
+	}
+
+	GLuint neighborsBuffer;
+	glGenBuffers(1, &neighborsBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborsBuffer);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborsFlat.size() * sizeof(int), _neighborsFlat.data(), GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, neighborsBuffer);
+
+	GLuint neighborsCountBuffer;
+	glGenBuffers(1, &neighborsCountBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborsCountBuffer);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborsCount.size() * sizeof(int), _neighborsCount.data(), GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, neighborsCountBuffer);
+
+	GLuint neighborOffsetsBuffer;
+	glGenBuffers(1, &neighborOffsetsBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborOffsetsBuffer);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborOffsets.size() * sizeof(int), _neighborOffsets.data(), GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, neighborOffsetsBuffer);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glBindBuffer in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glBufferSubData in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	glUseProgram(computeShaderProgramDensityAlpha);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glUseProgram in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	GLint m0Location = glGetUniformLocation(computeShaderProgramDensityAlpha, "m0");
+	if (m0Location == -1) {
+		CORE_ERROR("Failed to get uniform location for m0");
+		return;
+	}
+	glUniform1f(m0Location, _m0);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glUniform1f in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	GLint supportRadLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "supportRadius");
+	if (supportRadLocation == -1) {
+		CORE_ERROR("Failed to get uniform location for supportRadius");
+		return;
+	}
+	glUniform1f(supportRadLocation, _kernel->getSupportRad());
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glUniform1f in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	GLint particleCountLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "particleCount");
+	if (particleCountLocation == -1) {
+		CORE_ERROR("Failed to get uniform location for particleCount");
+		return;
+	}
+	glUniform1i(particleCountLocation, _particleCount);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glUniform1i in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	GLint lookup_fLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "lookup_f");
+	if (lookup_fLocation == -1) {
+		CORE_ERROR("Failed to get uniform location for lookup_f");
+		return;
+	}
+	glUniform1i(lookup_fLocation, 3); // texture unit 3
+
+	GLint lookup_dfLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "lookup_df");
+	if (lookup_dfLocation == -1) {
+		CORE_ERROR("Failed to get uniform location for lookup_df");
+		return;
+	}
+	glUniform1i(lookup_dfLocation, 4); // texture unit 4
+
+	GLuint lookup_fTexture;
+	glGenTextures(1, &lookup_fTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_1D, lookup_fTexture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, LOOKUP_SIZE, 0, GL_RED, GL_FLOAT, _kernel->getLookupF());
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	GLuint lookup_dfTexture;
+	glGenTextures(1, &lookup_dfTexture);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_1D, lookup_dfTexture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, LOOKUP_SIZE, 0, GL_RED, GL_FLOAT, _kernel->getLookupDF());
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	GLuint numGroups = (_particleData.size() + 127) / 128;
+	glDispatchCompute(numGroups, 1, 1);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glDispatchCompute in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glMemoryBarrier in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		CORE_ERROR("OpenGL error after glGetBufferSubData in computeDensityAlpha: {}", err);
+		return;
+	}
+
+	glDeleteTextures(1, &lookup_fTexture);
+	glDeleteTextures(1, &lookup_dfTexture);
+	glDeleteBuffers(1, &neighborsBuffer);
+	glDeleteBuffers(1, &neighborsCountBuffer);
+	glDeleteBuffers(1, &neighborOffsetsBuffer);
+
+}
+
+void Solver::predictVelCS(const Real dt) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
+	glUseProgram(computeShaderProgramPredictVel);
+	GLint dtLocation = glGetUniformLocation(computeShaderProgramPredictVel, "dt");
+	glUniform1f(dtLocation, dt);
+	GLuint numGroups = (_particleData.size() + 127) / 128;
+	glDispatchCompute(numGroups, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, _particleData.size() * sizeof(Particle), _particleData.data());
+}
+
+void Solver::resizeSSBO() {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _particleData.size() * sizeof(Particle), _particleData.data(), GL_DYNAMIC_COPY);
+}
+	

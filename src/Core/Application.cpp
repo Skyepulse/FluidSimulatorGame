@@ -1,23 +1,26 @@
 #include "Application.h"
 
-//#include "Time.h"
-
 #include "Rendering/Camera.h"
 #include "Rendering/Renderer.h"
 #include "Rendering/RendererCommand.h"
 
+#include "Layer.h"
+
+#include "Log.h"
+
 #include <functional>
 #include <iostream>
+
+Application* Application::s_Instance;
 
 Application::Application()
 {
  	Logger::Init();
 
-
 	WindowProperties windowProps;
 	windowProps.Width = 500;
 	windowProps.Height = 1000;
-	
+
 	// We bind a non-static method, so we have to pass this as argument of the OnEvent method
 	// The std::placeholders::_1 specify that if eventCallback(e) is executed, OnEvent(this, e) is executed
 	// So the 'this' OnEvent method 
@@ -27,8 +30,6 @@ Application::Application()
 
 	m_Window = std::make_shared<Window>(windowProps, eventCallback);
 	m_Window->EnableVSync(true);
-
-	inGameUI.init(m_Window->Get());
 
   // TEMP A CHANGER
 	// Enable Blending
@@ -41,32 +42,22 @@ Application::~Application()
 
 void Application::Start()
 {
-  CORE_TRACE("Applications started");
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f); // Multiply by h
-	t_Controller = std::make_shared<CameraController>(camera, 0.3f);
+	CORE_TRACE("Applications started")
 
-	t_Game = std::make_shared<Game>();
-	t_Game->Init();
+	// TEMP ?
+  	std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
+	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
-  	while (!m_Window->ShouldClose()) {
-		//CORE_INFO(Time::GetDeltaTime());
-
+	while (!m_Window->ShouldClose()) 
+	{
 		// TEMP : TODO PASS CAMERA SHARED PTR
 		Renderer::BeginScene(*camera.get());
-
-		inGameUI.newFrame();
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-		// TEMP
-		t_Game->Update();
-
-    // TODO : Update layers for events
-
-    // TODO : Update layers for rendering (reverse order)
-
-		inGameUI.draw();
+		for(auto& layer : m_Layers)
+			layer->Update();
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();
@@ -75,54 +66,10 @@ void Application::Start()
 
 void Application::OnEvent(Event &e)
 {
-	// TEMP
-	if(t_Game->OnEvent(e))
-		return;
+	for(auto it = m_Layers.end() - 1; it != m_Layers.begin(); it--)
+		(*it)->OnEvent(e);
 
+	// TEMP ?
 	if(t_Controller->OnEvent(e))
 		return;
-}
-
-// DEBUG METHODS
-
-bool Application::OnKeyPressed(KeyPressedEvent &e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
-}
-
-bool Application::OnKeyReleased(KeyReleasedEvent &e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
-}
-
-bool Application::OnKeyTyped(KeyTypedEvent &e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
-}
-
-bool Application::OnMousePressed(MousePressedEvent &e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
-}
-
-bool Application::OnMouseReleased(MouseReleasedEvent &e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
-}
-
-bool Application::OnMouseTyped(MouseTypedEvent & e)
-{
-	CORE_DEBUG(e.ToString())
-
-	return true;
 }

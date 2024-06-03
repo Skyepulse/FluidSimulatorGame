@@ -22,17 +22,10 @@ public:
   static double GetMicros()   { return CORE_TIME_IN_UNIT(nanoseconds)   / 1000.0; }
   static double GetSeconds()  { return CORE_TIME_IN_UNIT(milliseconds)  / 1000.0; }
 
-  static double GetDeltaTime(TimeUnit timeUnit = TimeUnit::Milliseconds) { double temp = m_LastSampledMilliseconds; m_LastSampledMilliseconds = GetMillis(); return ConvertToTimeUnit(m_LastSampledMilliseconds - temp, TimeUnit::Milliseconds, timeUnit); }
+  static double GetDeltaTime(TimeUnit timeUnit = TimeUnit::Milliseconds);
 private:
-  static double ConvertToTimeUnit(double time, TimeUnit fromUnit, TimeUnit toUnit) 
-  {
-    double factor = pow(10.0, 3.0 * ((int)toUnit - (int)fromUnit));
-    return time * factor;
-  }
+  static double ConvertToTimeUnit(double time, TimeUnit fromUnit, TimeUnit toUnit);
 private:
   static ClockType m_Clock;
   static double m_LastSampledMilliseconds;
 };
-
-ClockType Time::m_Clock;
-double Time::m_LastSampledMilliseconds;

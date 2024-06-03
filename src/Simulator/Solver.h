@@ -7,27 +7,15 @@
 #include <memory>
 #include <vector>
 #include "../Core/Log.h"
+#include <glad/glad.h>
 
 
 using namespace std;
 
-struct ParticleManager {
-	vector<Vec2f> pos; // position
-	vector<Vec2f> vel; // velocity
-	vector<Vec2f> acc; // acceleration
-	vector<Real> press; // pressure
-	vector<Real> density; // density
-	vector<int> type; // type of particle
-	vector<Real> alpha; // alpha
-	vector<bool> isInGlass; // is particle in glass
-};
-
 struct Particle {
-	vector<tIndex> neighbors;
 	Vec2f pos; // position
 	Vec2f vel; // velocity
 	Vec2f acc; // acceleration
-	Real press; // pressure
 	Real density; // density
 	Real alpha; // alpha
 	int type; // type of particle
@@ -50,23 +38,33 @@ public:
 		_nu(nu), _d0(density), _g(g), _eta(eta), _gamma(gamma), _dt(dt), _h(h)
 	{
 		_m0 = _d0 * _h * _h;
-		_c  = std::fabs(_g.y) / _eta;
+		_c = std::fabs(_g.y) / _eta;
 		_k = _d0 * _c * _c / _gamma;
 
 		switch (kt)
 		{
-			case KernelType::CUBIC_SPLINE:
-				_kernel = make_shared<CubicSpline>(h);
-				break;
-			default:
-				_kernel = make_shared<CubicSpline>(h);
-				break;
+		case KernelType::CUBIC_SPLINE:
+			_kernel = make_shared<CubicSpline>(h);
+			break;
+		default:
+			_kernel = make_shared<CubicSpline>(h);
+			break;
 		}
+
+		initOpenGL();
 	}
+
+
 
 	void initSimulation(const Real resX, const Real resY);
 	void init();
 	void update();
+
+	//OpenGL compute shader methods
+	void initOpenGL();
+	void cleanupOpenGL();
+	void predictVelCS(const Real dt);
+	void computeDensityAlphaCS();
 
 	Real getH() const { return _h; }
 
@@ -92,16 +90,15 @@ public:
 	void moveGlassDown(bool move) { _moveGlassDown = move; }
 
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
-	
+
 
 private:
-	inline tIndex idx1d(const int i, const int j) { return i + j * _resX;}
-	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0	), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
+	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
+	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
-	void computeDensity();
-	void computeAlpha();
+	void computeDensityAlpha();
 
 	void computeNPforces();
 	void adaptDt();
@@ -109,6 +106,8 @@ private:
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
+
+	void resizeSSBO();
 
 	shared_ptr<Kernel> _kernel;
 	Real _nu, _d0, _m0, _k, _eta, _gamma, _dt;
@@ -131,6 +130,11 @@ private:
 	Real _minDistance = 0.25f;
 
 	vector<Particle> _particleData;
+	vector<vector<tIndex>> _neighbors;
+	vector<int> _neighborsFlat;
+	vector<int> _neighborsCount;
+	vector<int> _neighborOffsets;
+
 	vector<vector<tIndex>> _particlesInGrid;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
@@ -140,6 +144,17 @@ private:
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
 	bool _moveGlassDown = false;
+
+	//OpenGL compute shader variables
+
+	GLuint particleBuffer;
+	GLuint computeShaderProgramPredictVel;
+	GLuint computeShaderProgramDensityAlpha;
+	GLuint particleSSBO;
+
+	void setupComputeShaderPredictVel();
+	void setupComputeShaderDensityAlpha();
+	void setupBuffers();
 };
 
 #endif // !_SOLVER_H_
