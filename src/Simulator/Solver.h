@@ -77,9 +77,11 @@ public:
 	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
 	Vec2f getSpawnPosition() { return _spawnPosition; }
 	void spawnParticle(Vec2f position);
+
 	void drawWalls(int resX, int resY);
 	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
 	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
+	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1);
 
 	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
 	void setSpawnPosition(Vec2f position);

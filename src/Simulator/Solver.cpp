@@ -143,7 +143,7 @@ void Solver::computeDensityAlpha() {
 			_particleData[i].density += _m0 * _kernel->W(_particleData[i].pos - _particleData[p].pos);
 
 			Vec2f factor = _m0 * _kernel->gradW(_particleData[i].pos - _particleData[p].pos);
-			b += _particleData[p].type == 1 ? 0 : factor.lengthSquare();
+			b += factor.lengthSquare();
 			a += factor;
 		}
 		_particleData[i].alpha = 1.0 / max(b + a.lengthSquare(), 1.0e-6f);
@@ -243,7 +243,7 @@ void Solver::correctDivergenceError(const Real dt){
 		dpAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
-			if (_particleData[i].type == 1) continue;
+			if (_particleData[i].type != 0) continue;
 			Real ki = dp[i] * _particleData[i].alpha;
 			Vec2f sum(0);
 			for (int p=0; p<_neighbors[i].size(); p++) {
@@ -365,6 +365,21 @@ void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, 
 		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
 		addParticle(sr * newPos2, type);	
+	}
+}
+
+void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type) {
+	Real sr = _kernel->getSupportRad();
+	Real radAngle = angle * M_PI / 180.0;
+	Real cosAngle = cos(radAngle);
+	Real sinAngle = sin(radAngle);
+
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			Vec2f pos = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i + Vec2f(0.0, 0.5) * j;
+			Vec2f newPos = Vec2f(cosAngle * (pos.x - p1.x) - sinAngle * (pos.y - p1.y) + p1.x, sinAngle * (pos.x - p1.x) + cosAngle * (pos.y - p1.y) + p1.y);
+			addParticle(sr * newPos, type);
+		}
 	}
 }
 

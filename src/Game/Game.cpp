@@ -11,9 +11,9 @@ Game::~Game()
 
 void Game::OnAttach()
 {
-	circleWalls  = std::make_shared<Circle>();
+	circleWalls = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
-	circleGlass  = std::make_shared<Circle>();
+	circleGlass = std::make_shared<Circle>();
 
 	float circleRadius = 0.5f;
 	circleWalls->Transform->Scale2D(circleRadius);
@@ -30,8 +30,8 @@ void Game::OnAttach()
 
 	//Draw level
 	solver.drawWalls(resX, resY);
-	solver.drawAngleLineWall(Vec2f(0, 7 * resY / 10), 45, -30);
-	solver.drawAngleLineWall(Vec2f(resX, 4 * resY / 10), 45, -160);
+	solver.drawAngleRectangleWall(Vec2f(0, 7 * resY / 10 + 1), 45, 3, 0, 1);
+	//solver.drawAngleLineWall(Vec2f(0, 1), 60, 0, 1);
 	int width = 10;
 	int height = 10;
 	solver.drawWinningGlass(width, height, Vec2f(1, 1));
