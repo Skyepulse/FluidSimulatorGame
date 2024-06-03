@@ -45,7 +45,7 @@ void Application::Start()
 	CORE_TRACE("Applications started")
 
 	// TEMP ?
-  	std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
 	while (!m_Window->ShouldClose()) 
@@ -66,7 +66,7 @@ void Application::Start()
 
 void Application::OnEvent(Event &e)
 {
-	for(auto it = m_Layers.end() - 1; it != m_Layers.begin(); it--)
+	for(auto it = m_Layers.begin(); it != m_Layers.end(); it++)
 		(*it)->OnEvent(e);
 
 	// TEMP ?
