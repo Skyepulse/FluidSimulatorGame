@@ -1,0 +1,68 @@
+#version 430
+layout(local_size_x = 128) in;
+
+struct Particle {
+    vec2 pos;
+    vec2 vel;
+    vec2 acc;
+    float density;
+    float alpha;
+    int type;
+    bool isInGlass;
+};
+
+layout(std430, binding = 0) buffer ParticleBuffer {
+    Particle particles[];
+};
+
+layout(std430, binding = 1) buffer NeighborBuffer {
+    int neighbors[];
+};
+
+layout(std430, binding = 2) buffer NeighborCountBuffer {
+    int neighborCounts[];
+};
+
+layout(std430, binding = 3) buffer NeighborOffset {
+	int neighborOffsets[];
+};
+
+uniform float m0;
+uniform float supportRadius;
+uniform int particleCount;
+uniform sampler1D lookup_f;
+uniform sampler1D lookup_df;
+
+float W(vec2 r) {
+    float l = length(r);
+    if (l >= supportRadius) return 0.0;
+    return texelFetch(lookup_f, int(l / supportRadius * 1000.0), 0).r;
+}
+
+vec2 gradW(vec2 r) {
+    float l = length(r);
+    if (l == 0.0 || l >= supportRadius) return vec2(0.0);
+    float derivative = texelFetch(lookup_df, int(l / supportRadius * 1000.0), 0).r;
+    return derivative * r / l;
+}
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= particleCount) return;
+
+    particles[idx].density = 0.0;
+    vec2 a = vec2(0.0);
+    float b = 0.0;
+
+    int neighborCount = neighborCounts[idx];
+    int offset = neighborOffsets[idx];
+    for (int n = 0; n < neighborCount; n++) {
+        int p = neighbors[offset + n];
+        particles[idx].density += m0 * W(particles[idx].pos - particles[p].pos);
+
+        vec2 factor = m0 * gradW(particles[idx].pos - particles[p].pos);
+        b += (particles[p].type == 1 ? 0.0 : dot(factor, factor));
+        a += factor;
+    }
+    particles[idx].alpha = 1.0 / max(b + dot(a, a), 1.0e-6);
+}

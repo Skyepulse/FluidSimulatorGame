@@ -1,0 +1,30 @@
+#version 430
+
+layout(local_size_x = 256) in; // Define the number of work items per work group
+
+struct Particle {
+    vec2 pos; // position
+    vec2 vel; // velocity
+    vec2 acc; // acceleration
+    float press; // pressure
+    float density; // density
+    float alpha; // alpha
+    int type; // type of particle
+    bool isInGlass; // is particle in glass
+};
+
+layout(std430, binding = 0) buffer ParticleBuffer {
+    Particle particles[];
+};
+
+uniform float dt;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x; // Get the global index of the work item
+    // Ensure we do not exceed the number of particles
+    if (index < particles.length()) {
+        if (particles[index].type == 0) {
+            particles[index].vel += dt * particles[index].acc;
+        }
+    }
+}

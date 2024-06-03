@@ -48,22 +48,20 @@ void Game::Init()
 void Game::Update()
 {
 	solver.update();
-	ParticleManager particleManager = solver.getParticleManager();
-	vector<Vec2f> positions = particleManager.pos;
-	vector<int> types = particleManager.type;
+	vector<Particle> particleManager = solver.getParticleManager();
 
 	vector<Vec2f> wallsPositions;
 	vector<Vec2f> liquidPositions;
 	vector<Vec2f> glassPositions;
 
-	for (size_t i = 0; i < positions.size(); i++)
+	for (size_t i = 0; i < particleManager.size(); i++)
 	{
-		if (types[i] == 1)
-			wallsPositions.push_back(positions[i]);
-		else if(types[i] == 0)
-			liquidPositions.push_back(positions[i]);
+		if (particleManager[i].type == 1)
+			wallsPositions.push_back(particleManager[i].pos);
+		else if(particleManager[i].type == 0)
+			liquidPositions.push_back(particleManager[i].pos);
 		else
-			glassPositions.push_back(positions[i]);
+			glassPositions.push_back(particleManager[i].pos);
 
 	}
 
