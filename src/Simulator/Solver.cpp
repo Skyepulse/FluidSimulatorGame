@@ -80,9 +80,8 @@ void Solver::update() {
 	CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
 	CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
-	predictVelCS(_dt);
+	predictVel(_dt);
 	CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
-
 	correctDensityError(_dt);
 	CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
@@ -420,11 +419,13 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 void Solver::initOpenGL() {
 	setupBuffers();
 	setupComputeShaderPredictVel();
+	setupComputeShaderDensityAlpha();
 }
 
 void Solver::cleanupOpenGL() {
 	glDeleteBuffers(1, &particleSSBO);
 	glDeleteProgram(computeShaderProgramPredictVel);
+	glDeleteProgram(computeShaderProgramDensityAlpha);
 }
 
 void Solver::setupComputeShaderPredictVel() {
@@ -470,6 +471,48 @@ void Solver::setupComputeShaderPredictVel() {
 	glDeleteShader(shader);
 }
 
+void Solver::setupComputeShaderDensityAlpha() {
+	string path = "src/Simulator/computeShaders/computeDensityAlpha.comp";
+
+	ifstream shaderFile(path);
+	if (!shaderFile.is_open()) {
+		CORE_ERROR("Failed to open file: {}", path);
+		return;
+	}
+
+	stringstream shaderStream;
+	shaderStream << shaderFile.rdbuf();
+	string shaderCode = shaderStream.str();
+	const char* computeShaderSource = shaderCode.c_str();
+
+	GLuint shader = glCreateShader(GL_COMPUTE_SHADER);
+	glShaderSource(shader, 1, &computeShaderSource, NULL);
+	glCompileShader(shader);
+
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	computeShaderProgramDensityAlpha = glCreateProgram();
+	glAttachShader(computeShaderProgramDensityAlpha, shader);
+	glLinkProgram(computeShaderProgramDensityAlpha);
+
+	glGetProgramiv(computeShaderProgramDensityAlpha, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(computeShaderProgramDensityAlpha, 512, NULL, infoLog);
+		CORE_ERROR("ERROR::SHADER::COMPUTE::LINKING_FAILED\n{}", infoLog);
+		glDeleteShader(shader);
+	}
+
+	glDeleteShader(shader);
+}
+
 void Solver::setupBuffers() {
 	glGenBuffers(1, &particleSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
@@ -477,37 +520,35 @@ void Solver::setupBuffers() {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleSSBO);
 }
 
-/*
-void Solver::computeDensityAlphaCS() {
-	setupComputeShader("computeDensityAlpha");
 
-	vector<int> flatNeighbors;
-	vector<int> neighborsCount(_particleCount);
-	vector<int> neighborOffsets(_particleCount);
-	int offset = 0;
-	for (int i = 0; i < _particleCount; i++) {
-		neighborsCount[i] = _neighbors[i].size();
-		neighborOffsets[i] = offset;
-		flatNeighbors.insert(flatNeighbors.end(), _neighbors[i].begin(), _neighbors[i].end());
-		offset += neighborsCount[i];
+void Solver::computeDensityAlphaCS() {
+
+	_neighborsFlat.clear();
+	_neighborsCount.clear();
+	_neighborOffsets.clear();
+
+	for (int i = 0; i < _neighbors.size(); i++) {
+		_neighborOffsets.push_back(_neighborsFlat.size());
+		_neighborsFlat.insert(_neighborsFlat.end(), _neighbors[i].begin(), _neighbors[i].end());
+		_neighborsCount.push_back(_neighbors[i].size());
 	}
 
 	GLuint neighborsBuffer;
 	glGenBuffers(1, &neighborsBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborsBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, flatNeighbors.size() * sizeof(int), flatNeighbors.data(), GL_DYNAMIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborsFlat.size() * sizeof(int), _neighborsFlat.data(), GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, neighborsBuffer);
 
 	GLuint neighborsCountBuffer;
 	glGenBuffers(1, &neighborsCountBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborsCountBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, neighborsCount.size() * sizeof(int), neighborsCount.data(), GL_DYNAMIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborsCount.size() * sizeof(int), _neighborsCount.data(), GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, neighborsCountBuffer);
 
 	GLuint neighborOffsetsBuffer;
 	glGenBuffers(1, &neighborOffsetsBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, neighborOffsetsBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, neighborOffsets.size() * sizeof(int), neighborOffsets.data(), GL_DYNAMIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, _neighborOffsets.size() * sizeof(int), _neighborOffsets.data(), GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, neighborOffsetsBuffer);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
@@ -524,14 +565,14 @@ void Solver::computeDensityAlphaCS() {
 		return;
 	}
 
-	glUseProgram(computeShaderProgram);
+	glUseProgram(computeShaderProgramDensityAlpha);
 	err = glGetError();
 	if (err != GL_NO_ERROR) {
 		CORE_ERROR("OpenGL error after glUseProgram in computeDensityAlpha: {}", err);
 		return;
 	}
 
-	GLint m0Location = glGetUniformLocation(computeShaderProgram, "m0");
+	GLint m0Location = glGetUniformLocation(computeShaderProgramDensityAlpha, "m0");
 	if (m0Location == -1) {
 		CORE_ERROR("Failed to get uniform location for m0");
 		return;
@@ -543,7 +584,7 @@ void Solver::computeDensityAlphaCS() {
 		return;
 	}
 
-	GLint supportRadLocation = glGetUniformLocation(computeShaderProgram, "supportRadius");
+	GLint supportRadLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "supportRadius");
 	if (supportRadLocation == -1) {
 		CORE_ERROR("Failed to get uniform location for supportRadius");
 		return;
@@ -555,7 +596,7 @@ void Solver::computeDensityAlphaCS() {
 		return;
 	}
 
-	GLint particleCountLocation = glGetUniformLocation(computeShaderProgram, "particleCount");
+	GLint particleCountLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "particleCount");
 	if (particleCountLocation == -1) {
 		CORE_ERROR("Failed to get uniform location for particleCount");
 		return;
@@ -567,14 +608,14 @@ void Solver::computeDensityAlphaCS() {
 		return;
 	}
 
-	GLint lookup_fLocation = glGetUniformLocation(computeShaderProgram, "lookup_f");
+	GLint lookup_fLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "lookup_f");
 	if (lookup_fLocation == -1) {
 		CORE_ERROR("Failed to get uniform location for lookup_f");
 		return;
 	}
 	glUniform1i(lookup_fLocation, 3); // texture unit 3
 
-	GLint lookup_dfLocation = glGetUniformLocation(computeShaderProgram, "lookup_df");
+	GLint lookup_dfLocation = glGetUniformLocation(computeShaderProgramDensityAlpha, "lookup_df");
 	if (lookup_dfLocation == -1) {
 		CORE_ERROR("Failed to get uniform location for lookup_df");
 		return;
@@ -626,7 +667,6 @@ void Solver::computeDensityAlphaCS() {
 	glDeleteBuffers(1, &neighborOffsetsBuffer);
 
 }
-*/
 
 void Solver::predictVelCS(const Real dt) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
