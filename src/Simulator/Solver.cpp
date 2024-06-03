@@ -74,24 +74,24 @@ void Solver::init() {
 }
 
 void Solver::update() {
-	CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
-    CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
+	//CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
+    //CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
 	computeNPforces();
-	CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
-	CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
 	predictVel(_dt);
-	CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
 	correctDensityError(_dt);
-	CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
-	CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
-	CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
 	computeDensityAlpha();
-	CORE_DEBUG("Compute density and alpha: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Compute density and alpha: {}", Time::GetDeltaTime());
 	correctDivergenceError(_dt);
-	CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
 }
 
 void Solver::buildNeighbors() {
