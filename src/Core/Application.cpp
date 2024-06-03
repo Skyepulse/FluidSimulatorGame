@@ -48,9 +48,6 @@ void Application::Start()
   	std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
-	for(auto& layer : m_Layers)
-		layer->Init();
-
 	while (!m_Window->ShouldClose()) 
 	{
 		// TEMP : TODO PASS CAMERA SHARED PTR
