@@ -27,6 +27,12 @@ enum KernelType
 	CUBIC_SPLINE = 0
 };
 
+enum ViscosityType
+{
+	FLUID = 0,
+	VISCOUS = 1
+};
+
 
 class Solver
 {
@@ -91,6 +97,13 @@ public:
 	void moveGlassUp(bool move) { _moveGlassUp = move; }
 	void moveGlassDown(bool move) { _moveGlassDown = move; }
 
+	Vec2f getGlassPosition();
+	void setGlassSpeed(Real speedX, Real speedY);
+	void setMaxParticles(int maxParticles) { _maxParticles = maxParticles; }
+	void setViscosityType(ViscosityType viscosityType) { _viscosityType = viscosityType; }
+
+
+
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
 
 
@@ -140,13 +153,16 @@ private:
 	vector<vector<tIndex>> _particlesInGrid;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
-	Real _moveGlassSpeedY = 1.0f; // per second so dt 1000
+	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
 
 	bool _moveGlassLeft = false;
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
 	bool _moveGlassDown = false;
 
+	ViscosityType _viscosityType = ViscosityType::FLUID;
+	
+	int _maxParticles = 10000;
 	//OpenGL compute shader variables
 
 	GLuint particleBuffer;

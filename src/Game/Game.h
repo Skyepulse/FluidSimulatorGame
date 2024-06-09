@@ -17,7 +17,7 @@ public:
   virtual bool OnEvent(Event& e) override;
 
 private:
-	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
+  Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
   Solver solver;
   int winningGlassParticles;
 

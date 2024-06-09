@@ -19,7 +19,7 @@ Application::Application()
 
 	WindowProperties windowProps;
 	windowProps.Width = 500;
-	windowProps.Height = 1000;
+	windowProps.Height = 694.4;
 
 	// We bind a non-static method, so we have to pass this as argument of the OnEvent method
 	// The std::placeholders::_1 specify that if eventCallback(e) is executed, OnEvent(this, e) is executed
@@ -45,7 +45,7 @@ void Application::Start()
 	CORE_TRACE("Applications started")
 
 	// TEMP ?
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 50.0f);
 	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
 
 	while (!m_Window->ShouldClose()) 

@@ -151,6 +151,15 @@ void Solver::computeDensityAlpha() {
 }
 
 void Solver::computeNPforces() {
+	Real visc = 2.0f;
+	switch (_viscosityType) {
+		case ViscosityType::VISCOUS:
+			visc = 60.0f;
+			break;
+		case ViscosityType::FLUID:
+			visc = 2.0f;
+			break;
+	}
 	for (int i = 0; i < _particleCount; i++) {
 		if(_particleData[i].type == 1 || _particleData[i].type == 2) continue;
 		// gravity
@@ -163,13 +172,31 @@ void Solver::computeNPforces() {
 			// viscosity force
 			Vec2f x = (_particleData[i].pos - _particleData[p].pos);
             Vec2f u = (_particleData[i].vel - _particleData[p].vel);
-            _particleData[i].acc += 2.0f * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
+            _particleData[i].acc += visc * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
 		}
 	}
 }
 
 void Solver::predictVel(const Real dt){
 	for (int i = 0; i < _particleCount; i++) {
+		if (_particleData[i].type == 2) {
+			if (this->_moveGlassRight) {
+				_particleData[i].vel = _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
+			}
+			else if (this->_moveGlassLeft) {
+				_particleData[i].vel = _moveGlassSpeedX * Vec2f(-1.0f, 0.0f);
+			}
+			else if (this->_moveGlassUp) {
+				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, 1.0f);
+			}
+			else if (this->_moveGlassDown) {
+				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, -1.0f);
+			}
+			else {
+				_particleData[i].vel = Vec2f(0.0f, 0.0f);
+			}
+			continue;
+		}
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
 	}
@@ -187,24 +214,22 @@ void Solver::adaptDt() {
 }
 
 void Solver::updatePos(const Real dt) {
-	for (int i = 0; i < _particleCount; i++) {
+	Vec2f glassVel = Vec2f(0.0f, 0.0f);
+	for (int i = _particleCount - 1; i >= 0; i--) {
 		if(_particleData[i].type == 1) continue;
 		if (_particleData[i].type == 2) {
-			if (this->_moveGlassRight) {
-				_particleData[i].pos += dt * _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
-			}
-			if (this->_moveGlassLeft) {
-				_particleData[i].pos += dt * _moveGlassSpeedX * Vec2f(-1.0f, 0.0f);
-			}
-			if (this->_moveGlassUp) {
-				_particleData[i].pos += dt * _moveGlassSpeedY * Vec2f(0.0f, 1.0f);
-			}
-			if (this->_moveGlassDown) {
-				_particleData[i].pos += dt * _moveGlassSpeedY * Vec2f(0.0f, -1.0f);
-			}
+			_particleData[i].pos += dt * _particleData[i].vel;
+			glassVel = _particleData[i].vel;
 			continue;
 		}
 		_particleData[i].pos += dt * _particleData[i].vel;
+
+		//We check if the particle is out of bounds
+		Vec2f pos = _particleData[i].pos;
+		if (pos.x < 0 || pos.x >= _resX * _kernel->getSupportRad() || pos.y < 0 || pos.y >= _resY * _kernel->getSupportRad()) {
+			removeParticle(i);
+			continue;
+		}
 
 		//We check if the particle is inside the glass
 		if (_particleData[i].pos.x >= _glasscorner.x && _particleData[i].pos.x <= _glasscorner.x + _glassSize.x && _particleData[i].pos.y >= _glasscorner.y && _particleData[i].pos.y <= _glasscorner.y + _glassSize.y) {
@@ -216,6 +241,7 @@ void Solver::updatePos(const Real dt) {
 			_particleData[i].isInGlass = false;
 		}	
 	}
+	_glasscorner += dt * glassVel;
 }
 
 void Solver::correctDivergenceError(const Real dt){
@@ -393,6 +419,7 @@ void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
 }
 
 void Solver::spawnParticle(Vec2f position) {
+	if(_maxParticles == 0) return;
 	//We check the potential neighbors for this particle. If we find a neighbor too close, we don't spawn the particle
 	int x = position.x;
 	int y = position.y;
@@ -411,6 +438,7 @@ void Solver::spawnParticle(Vec2f position) {
 		}
 	}
 	addParticle(position, 0);
+	_maxParticles--;
 }
 
 void Solver::setSpawnPosition(Vec2f position) {
@@ -427,6 +455,15 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 			addParticle(sr * Vec2f(i + 0.75, j + 0.75));
 		}
 	}
+}
+
+Vec2f Solver::getGlassPosition() {
+	return _glasscorner;
+}
+
+void Solver::setGlassSpeed(Real speedX, Real speedY) {
+	_moveGlassSpeedX = speedX;
+	_moveGlassSpeedY = speedY;
 }
 
 //OPENGL
@@ -699,4 +736,3 @@ void Solver::resizeSSBO() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleSSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, _particleData.size() * sizeof(Particle), _particleData.data(), GL_DYNAMIC_COPY);
 }
-	
