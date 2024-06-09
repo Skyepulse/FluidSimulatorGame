@@ -31,7 +31,7 @@ Application::Application()
 	m_Window = std::make_shared<Window>(windowProps, eventCallback);
 	m_Window->EnableVSync(true);
 
-	userInterface.init(m_Window->Get());
+	userInterface.init(m_Window.get());
 
   // TEMP A CHANGER
 	// Enable Blending
