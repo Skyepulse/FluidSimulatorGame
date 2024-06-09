@@ -30,7 +30,7 @@ void Game::OnAttach()
 
 	//Draw level
 	solver.drawWalls(resX, resY);
-	solver.drawAngleRectangleWall(Vec2f(0, 7 * resY / 10 + 1), 45, 3, 0, 1);
+	solver.drawAngleLineWall(Vec2f(0, 7 * resY/10), 45, -30, 1);
 	//solver.drawAngleLineWall(Vec2f(0, 1), 60, 0, 1);
 	int width = 10;
 	int height = 10;
