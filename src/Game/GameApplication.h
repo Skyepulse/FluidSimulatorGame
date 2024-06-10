@@ -57,6 +57,10 @@ public:
 		m_game->setRunning();
 	}
 
+	GameState getGameState() override {
+		return m_game->getState();
+	}
+
 private:
 	Layer* m_game = nullptr;
 	int game_index = 0;
