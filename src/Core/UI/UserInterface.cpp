@@ -1,6 +1,7 @@
 #include "UserInterface.h"
 #include <cstdio>
 #include "../Application.h"
+#include <cmath>
 
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
@@ -117,7 +118,7 @@ void UserInterface::buildInGame(){
         state = 2;
     }
 
-    int timer = 50;
+    int timer = ceil(Application::Get()->getGameTime());
 
     char numberText[8];
     snprintf(numberText, sizeof(numberText), "%d", timer);
