@@ -21,6 +21,6 @@ private:
     void buildPause();
 
     // 0: Menu, 1: Game, 2: Pause
-    int state=1;
+    int state=0;
     int windowWidth, windowHeight;
 };

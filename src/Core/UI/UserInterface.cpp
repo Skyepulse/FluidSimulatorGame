@@ -1,6 +1,10 @@
 #include "UserInterface.h"
 #include <cstdio>
 #include "../Application.h"
+#include <memory>;
+extern class GameApplication;
+
+using namespace std;
 
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
@@ -97,6 +101,10 @@ void UserInterface::buildMenu(){
             if (ImGui::Button(buttonLabel, buttonSize))
             {
                 state = 1;
+                CORE_DEBUG("Loading game {0} {1}", buttonIndex, buttonLabel);
+                Application* app = Application::Get();
+                if(app != nullptr) app->loadGame(buttonIndex);
+                CORE_DEBUG("Game loaded");
             }
 
             ++buttonIndex;
@@ -139,12 +147,14 @@ void UserInterface::buildPause(){
     ImGui::SetCursorPos(ImVec2(startPos.x, startPos.y + buttonSize.y + buttonSpacing));
     if (ImGui::Button("Restart", buttonSize))
     {
+        Application::Get()->restartGame();
         state = 1;
     }
 
     ImGui::SetCursorPos(ImVec2(startPos.x, startPos.y + 2 * (buttonSize.y + buttonSpacing)));
     if (ImGui::Button("Menu", buttonSize))
     {
+        Application::Get()->unloadGame();
         state = 0;
     }
 }

@@ -20,9 +20,14 @@ public:
   void OnEvent(Event& e);
 
   void PushOverlay(Layer* overlay) { m_Layers.PushOverlay(overlay); }
-	void PushLayer(Layer* layer) { m_Layers.PushLayer(layer); }
+  void PushLayer(Layer* layer) { m_Layers.PushLayer(layer); }
+  void PopLayer(Layer* layer ) { m_Layers.PopLayer(layer); }
 
-  static inline Application* Get() { return s_Instance;} 
+  virtual void loadGame(int index) = 0;
+  virtual void unloadGame() = 0;
+  virtual void restartGame() = 0;
+
+  static inline Application* Get() { return s_Instance; }
   std::shared_ptr<Window> GetWindow() { return m_Window; }
 
   ~Application();
