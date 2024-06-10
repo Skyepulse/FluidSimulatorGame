@@ -131,6 +131,7 @@ private:
 	Vec2f _g;
 	Real _c;
 	const Real DEFAULT_DT = 0.05f;
+	const Real MAX_PARTICLE_VEL = 25.0f;
 
 	Vec2f _glasscorner;
 	Vec2f _glassSize;

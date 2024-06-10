@@ -206,9 +206,15 @@ void Solver::predictVel(const Real dt){
 void Solver::adaptDt() {
 	Real maxVel2 = 0e0;
 	for (int i = 0; i < _particleCount; i++) {
-		maxVel2 = max(maxVel2, _particleData[i].vel.lengthSquare());
+		Real particleVel2 = _particleData[i].vel.lengthSquare();
+		if (particleVel2 > MAX_PARTICLE_VEL * MAX_PARTICLE_VEL) {
+			_particleData[i].vel *= MAX_PARTICLE_VEL / sqrt(particleVel2);
+			particleVel2 = MAX_PARTICLE_VEL * MAX_PARTICLE_VEL;
+		}
+		maxVel2 = max(maxVel2, particleVel2);
 	}
 	Real maxVel = sqrt(maxVel2);
+	CORE_DEBUG("Max velocity: {}", maxVel);
 	if(maxVel == 0e0) _dt = DEFAULT_DT;
 	else _dt = 0.6*_h/maxVel;
 	_dt = min(_dt, DEFAULT_DT);
