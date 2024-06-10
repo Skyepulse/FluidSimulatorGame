@@ -116,6 +116,14 @@ void UserInterface::buildInGame(){
     if (ImGui::Button("| |", ImVec2(60, 60))) {
         state = 2;
     }
+
+    int timer = 50;
+
+    char numberText[8];
+    snprintf(numberText, sizeof(numberText), "%d", timer);
+    ImVec2 textSize = ImGui::CalcTextSize(numberText);
+    ImGui::SetCursorPos(ImVec2((windowWidth - textSize.x) / 2, 10));
+    ImGui::Text("%s", numberText);
 }
 
 void UserInterface::buildPause(){
