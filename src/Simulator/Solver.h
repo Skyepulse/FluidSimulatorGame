@@ -64,7 +64,7 @@ public:
 
 	void initSimulation(const Real resX, const Real resY);
 	void init();
-	void update();
+	Real update();
 
 	//OpenGL compute shader methods
 	void initOpenGL();

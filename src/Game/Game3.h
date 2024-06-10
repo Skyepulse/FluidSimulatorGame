@@ -16,6 +16,8 @@ public:
 	virtual void Update() override;
 	virtual bool OnEvent(Event& e) override;
 
+	float getTime() const override { return maxTime; }
+
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
 	Solver solver;
@@ -33,4 +35,5 @@ private:
 	Real glassWidth = 0.0f;
 
 	int _maxParticles;
+	float maxTime = 100.0f;
 };

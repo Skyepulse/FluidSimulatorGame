@@ -45,6 +45,10 @@ public:
 		loadGame(game_index);
 	}
 
+	float getGameTime() override {
+		return m_game->getTime();
+	}
+
 private:
 	Layer* m_game = nullptr;
 	int game_index = 0;

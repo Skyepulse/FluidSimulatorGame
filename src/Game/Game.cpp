@@ -53,7 +53,9 @@ void Game::OnDetach()
 
 void Game::Update()
 {
-	solver.update();
+	Real _dt = solver.update();
+	maxTime -= _dt;
+
 	vector<Particle> particleManager = solver.getParticleManager();
 
 	vector<Vec2f> wallsPositions;

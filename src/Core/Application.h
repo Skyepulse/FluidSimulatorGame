@@ -26,6 +26,7 @@ public:
   virtual void loadGame(int index) = 0;
   virtual void unloadGame() = 0;
   virtual void restartGame() = 0;
+  virtual float getGameTime() = 0;
 
   static inline Application* Get() { return s_Instance; }
   std::shared_ptr<Window> GetWindow() { return m_Window; }

@@ -18,6 +18,8 @@ public:
 
     virtual bool OnEvent(Event& e) = 0;
 
+    virtual float getTime() const = 0;
+
     const std::string& GetName() {return m_Name; }
 private:
     const std::string m_Name;

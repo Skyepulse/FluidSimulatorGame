@@ -73,7 +73,7 @@ void Solver::init() {
 	//CORE_DEBUG("///////////////////////////////////init done/////////////////////////////////");
 }
 
-void Solver::update() {
+Real Solver::update() {
 	//CORE_DEBUG("///////////////////////////////////UPDATE/////////////////////////////////");	
     //CORE_DEBUG("Particle count in glass: {}", _particlesInGlass);
 	computeNPforces();
@@ -92,6 +92,7 @@ void Solver::update() {
 	//CORE_DEBUG("Compute density and alpha: {}", Time::GetDeltaTime());
 	correctDivergenceError(_dt);
 	//CORE_DEBUG("Correct divergence: {}", Time::GetDeltaTime());
+	return _dt;
 }
 
 void Solver::buildNeighbors() {
