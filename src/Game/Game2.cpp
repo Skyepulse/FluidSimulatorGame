@@ -1,15 +1,15 @@
-#include "Game.h"
+#include "Game2.h"
 #include <algorithm>
 
-Game::Game() : Layer("Game Layer")
+Game2::Game2() : Layer("Game Layer")
 {
 }
 
-Game::~Game()
+Game2::~Game2()
 {
 }
 
-void Game::OnAttach()
+void Game2::OnAttach()
 {
 	circleWalls = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
@@ -26,33 +26,59 @@ void Game::OnAttach()
 
 	Real resX = 36.0f;
 	Real resY = 50.0f;
+	_resX = resX;
+	_resY = resY;
+
+	_maxParticles = 100;
+	solver.setMaxParticles(_maxParticles);
+
+
 	solver.initSimulation(resX, resY);
 
 	//Draw level
-	solver.drawWalls(resX, resY);
-	solver.drawAngleLineWall(Vec2f(0, 7 * resY/10), 45, -30, 1);
-	solver.drawAngleLineWall(Vec2f(20, 3 * resY / 10), 45, 30, 1);
-	int width = 10;
+	//solver.drawWalls(resX, resY);
+	//solver.drawAngleLineWall(Vec2f(0, 0), resX*2, 0, 1);
+	solver.drawAngleLineWall(Vec2f(0, resY-1), resX*2, 0, 1);
+	solver.drawAngleLineWall(Vec2f(1, 1), resY*2 - 4, 90, 1);
+	solver.drawAngleLineWall(Vec2f(resX, 1), resY*2 - 4, 90, 1);
+	solver.drawAngleLineWall(Vec2f(20, 5 * resY / 10), 45, 30, 1);
+	int width = 16;
 	int height = 10;
-	solver.drawWinningGlass(width, height, Vec2f(1, 1));
-	solver.setSpawnPosition(Vec2f(4, resY - 4));
+	glassWidth = width;
+	glassHeight = height;
+	solver.drawWinningGlass(width, height, Vec2f(6, 1));
+	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 
-	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
-
-	solver.setGlassSpeed(4.0f, 0.0f);
+	//solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
+	solver.setGlassSpeed(0.0f, 4.0f);
 
 	solver.init();
 
 	winningGlassParticles = solver.getWinningGlass();
 	particleSpawnPosition = solver.getSpawnPosition();
+
+	solver.moveGlassUp(true);
 }
 
-void Game::OnDetach()
+void Game2::OnDetach()
 {
 }
 
-void Game::Update()
+void Game2::Update()
 {
+
+	Vec2f glassPosition = solver.getGlassPosition();
+	if (glassPosition.y >= _resY - glassHeight)
+	{
+		solver.moveGlassUp(false);
+		solver.moveGlassDown(true);
+	}
+	else if (glassPosition.y <= 1)
+	{
+		solver.moveGlassDown(false);
+		solver.moveGlassUp(true);
+	}
+
 	solver.update();
 	vector<Particle> particleManager = solver.getParticleManager();
 
@@ -64,7 +90,7 @@ void Game::Update()
 	{
 		if (particleManager[i].type == 1)
 			wallsPositions.push_back(particleManager[i].pos);
-		else if(particleManager[i].type == 0)
+		else if (particleManager[i].type == 0)
 			liquidPositions.push_back(particleManager[i].pos);
 		else
 			glassPositions.push_back(particleManager[i].pos);
@@ -83,36 +109,24 @@ void Game::Update()
 
 }
 
-bool Game::OnEvent(Event& e)
+bool Game2::OnEvent(Event& e)
 {
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT)
+		if (keypressed.GetKey() != CORE_KEY_P)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
-		if (keypressed.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(true);
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(true);
-
-
-		return true;
-	} else if(e.GetEventType() == EventType::KeyReleased) {
-		KeyReleasedEvent& keyreleased = dynamic_cast<KeyReleasedEvent&>(e);
-
-		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
-			return false;
-
-		if (keyreleased.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(false);
-		if (keyreleased.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(false);
+		if (keypressed.GetKey() == CORE_KEY_P) {
+			solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
+		}
 
 		return true;
 	}
-	
 	return false;
 }
 
-Vec2f Game::getRandomPointInCircle(const Vec2f &center, const Real radius)
+Vec2f Game2::getRandomPointInCircle(const Vec2f& center, const Real radius)
 {
 	Real angle = (Real)rand() / RAND_MAX * 2 * M_PI;
 	Real r = radius * sqrt((Real)rand() / RAND_MAX);

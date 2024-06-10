@@ -1,15 +1,15 @@
-#include "Game.h"
+#include "Game3.h"
 #include <algorithm>
 
-Game::Game() : Layer("Game Layer")
+Game3::Game3() : Layer("Game3 Layer")
 {
 }
 
-Game::~Game()
+Game3::~Game3()
 {
 }
 
-void Game::OnAttach()
+void Game3::OnAttach()
 {
 	circleWalls = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
@@ -21,7 +21,7 @@ void Game::OnAttach()
 	circleGlass->Transform->Scale2D(circleRadius);
 
 	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
+	circleLiquid->SetColor(glm::vec3(0.2f, 0.7f, 0.3f));
 	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
 
 	Real resX = 36.0f;
@@ -30,7 +30,7 @@ void Game::OnAttach()
 
 	//Draw level
 	solver.drawWalls(resX, resY);
-	solver.drawAngleLineWall(Vec2f(0, 7 * resY/10), 45, -30, 1);
+	solver.drawAngleLineWall(Vec2f(0, 7 * resY / 10), 45, -30, 1);
 	solver.drawAngleLineWall(Vec2f(20, 3 * resY / 10), 45, 30, 1);
 	int width = 10;
 	int height = 10;
@@ -40,6 +40,7 @@ void Game::OnAttach()
 	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
 
 	solver.setGlassSpeed(4.0f, 0.0f);
+	solver.setViscosityType(ViscosityType::VISCOUS);
 
 	solver.init();
 
@@ -47,11 +48,11 @@ void Game::OnAttach()
 	particleSpawnPosition = solver.getSpawnPosition();
 }
 
-void Game::OnDetach()
+void Game3::OnDetach()
 {
 }
 
-void Game::Update()
+void Game3::Update()
 {
 	solver.update();
 	vector<Particle> particleManager = solver.getParticleManager();
@@ -64,7 +65,7 @@ void Game::Update()
 	{
 		if (particleManager[i].type == 1)
 			wallsPositions.push_back(particleManager[i].pos);
-		else if(particleManager[i].type == 0)
+		else if (particleManager[i].type == 0)
 			liquidPositions.push_back(particleManager[i].pos);
 		else
 			glassPositions.push_back(particleManager[i].pos);
@@ -83,7 +84,7 @@ void Game::Update()
 
 }
 
-bool Game::OnEvent(Event& e)
+bool Game3::OnEvent(Event& e)
 {
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
@@ -97,7 +98,8 @@ bool Game::OnEvent(Event& e)
 
 
 		return true;
-	} else if(e.GetEventType() == EventType::KeyReleased) {
+	}
+	else if (e.GetEventType() == EventType::KeyReleased) {
 		KeyReleasedEvent& keyreleased = dynamic_cast<KeyReleasedEvent&>(e);
 
 		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
@@ -108,11 +110,11 @@ bool Game::OnEvent(Event& e)
 
 		return true;
 	}
-	
+
 	return false;
 }
 
-Vec2f Game::getRandomPointInCircle(const Vec2f &center, const Real radius)
+Vec2f Game3::getRandomPointInCircle(const Vec2f& center, const Real radius)
 {
 	Real angle = (Real)rand() / RAND_MAX * 2 * M_PI;
 	Real r = radius * sqrt((Real)rand() / RAND_MAX);
