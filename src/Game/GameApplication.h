@@ -11,7 +11,7 @@ class GameApplication : public Application
 public: 
     GameApplication() 
     {
-        Application::PushLayer(new Game3());
+        Application::PushLayer(new Game());
     }    
 };
 
