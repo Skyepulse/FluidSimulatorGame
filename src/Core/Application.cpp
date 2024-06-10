@@ -45,13 +45,12 @@ void Application::Start()
 	CORE_TRACE("Applications started")
 
 	// TEMP ?
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(0.0f, 36.0f, 0.0f, 72.0f);
-	t_Controller = std::make_shared<CameraController>(camera, 0.1f);
+	t_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 100.0f, 0.1f);
 
 	while (!m_Window->ShouldClose()) 
 	{
 		// TEMP : TODO PASS CAMERA SHARED PTR
-		Renderer::BeginScene(*camera.get());
+		Renderer::BeginScene(t_Controller->GetCamera());
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);

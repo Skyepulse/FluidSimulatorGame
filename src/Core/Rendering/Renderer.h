@@ -18,7 +18,7 @@
 class Renderer
 {
 public:
-  static void BeginScene(Camera& camera);
+  static void BeginScene(std::shared_ptr<Camera> camera);
   static void EndScene();
 
   static void Draw(const Transform& transform, const RendererData& rendererData);

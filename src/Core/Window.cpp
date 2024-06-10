@@ -121,6 +121,14 @@ void Window::Init()
 		windowData->eventCallback(e);
 	});
 
+	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
+	{
+		WindowData* windowData = (WindowData*)glfwGetWindowUserPointer(window);
+
+		MouseScrolledEvent e(xoffset, yoffset);
+		windowData->eventCallback(e);
+	});
+
 	glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 		{
 		static int previousButton = -1;

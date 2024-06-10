@@ -27,7 +27,7 @@ enum class EventType
   WindowResized, WindowClosed ,
   KeyInputEvent, KeyPressed   , KeyReleased  , KeyTyped  ,
   MousePressed , MouseReleased, MouseTyped, 
-  MouseMoved   ,  
+  MouseMoved   , MouseScrolled, 
 };
 
 inline EventType operator|(EventType a, EventType b)

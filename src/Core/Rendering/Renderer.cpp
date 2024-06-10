@@ -2,9 +2,9 @@
 
 glm::mat4 Renderer::m_VPMatrix = glm::mat4(1.0);
 
-void Renderer::BeginScene(Camera& camera)
+void Renderer::BeginScene(std::shared_ptr<Camera> camera)
 {
-  m_VPMatrix = camera.GetVPMatrix();
+  m_VPMatrix = camera->GetVPMatrix();
 }
 
 void Renderer::EndScene() {}

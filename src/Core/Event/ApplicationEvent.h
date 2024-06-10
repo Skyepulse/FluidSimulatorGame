@@ -107,6 +107,30 @@ public:
   } 
 };
 
+class MouseScrolledEvent : public Event
+{
+public:
+    MouseScrolledEvent(const double xOffset, const double yOffset)
+        : m_XOffset(xOffset), m_YOffset(yOffset) { }
+
+    std::string ToString() const override
+    {
+        std::stringstream ss;
+        ss << "MouseScrolled: " << "(" << m_XOffset << "," << m_YOffset << ")";
+        return ss.str();
+    }
+
+    double GetXOffset() const { return m_XOffset; }
+    double GetYOffset() const { return m_YOffset; }
+
+    CORE_CREATE_EVENT_CATEGORY_METHODS(EventCategory::MouseEventCategory)
+    CORE_CREATE_EVENT_TYPE_METHODS(EventType::MouseScrolled)
+
+private:
+    const double m_XOffset;
+    const double m_YOffset;
+};
+
 class MouseInputEvent : public MouseEvent
 {
 public:

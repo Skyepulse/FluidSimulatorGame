@@ -10,10 +10,15 @@ Camera::Camera(float left, float right, float bottom, float top, float nearPlane
   // Translate camera so that it can render object with z = 0
   m_Transform2D.Translate(glm::vec3(0.0, 0.0f, 1.0f));
 
-  m_ProjectionMatrix = glm::ortho(left, right, bottom, top, nearPlane, farPlane);
-  RecalculateViewMatrix();
+  SetProjection(left, right, bottom, top, nearPlane, farPlane);
 }
 
 Camera::~Camera()
 {
+}
+
+void Camera::SetProjection(float left, float right, float bottom, float top, float nearPlane, float farPlane)
+{
+	m_ProjectionMatrix = glm::ortho(left, right, bottom, top, nearPlane, farPlane);
+	RecalculateViewMatrix();
 }
