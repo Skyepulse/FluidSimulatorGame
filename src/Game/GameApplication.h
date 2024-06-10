@@ -57,6 +57,10 @@ public:
 		m_game->setRunning();
 	}
 
+	void loadNextGame() override {
+		loadGame(++game_index);
+	}
+
 	GameState getGameState() override {
 		return m_game->getState();
 	}

@@ -29,6 +29,7 @@ public:
   virtual float getGameTime() = 0;
   virtual void pauseGame() = 0;
   virtual void resumeGame() = 0;
+  virtual void loadNextGame() = 0;
 
   virtual GameState getGameState() = 0;
   static inline Application* Get() { return s_Instance; }
