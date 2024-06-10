@@ -115,6 +115,7 @@ void UserInterface::buildInGame(){
     ImGuiStyle& style = ImGui::GetStyle();
     style.FrameRounding = 30.0f;
     if (ImGui::Button("| |", ImVec2(60, 60))) {
+        Application::Get()->pauseGame();
         state = 2;
     }
 
@@ -146,6 +147,7 @@ void UserInterface::buildPause(){
     ImGui::SetCursorPos(startPos);
     if (ImGui::Button("Resume", buttonSize))
     {
+        Application::Get()->resumeGame();
         state = 1;
     }
 

@@ -49,6 +49,14 @@ public:
 		return m_game->getTime();
 	}
 
+	void pauseGame() override {
+		m_game->setPaused();
+	}
+
+	void resumeGame() override {
+		m_game->setRunning();
+	}
+
 private:
 	Layer* m_game = nullptr;
 	int game_index = 0;

@@ -6,6 +6,14 @@
 #include <vector>
 #include <string>
 
+enum class GameState {
+    LOSE = 2,
+    WIN = 3,
+    PAUSED = 1,
+    RUNNING = 0
+};
+
+
 class Layer
 {
 public:
@@ -20,7 +28,16 @@ public:
 
     virtual float getTime() const = 0;
 
+    GameState getState() const { return state; }
+
+    void setPaused() { state = GameState::PAUSED; }
+    void setRunning() { state = GameState::RUNNING; }
+
+
     const std::string& GetName() {return m_Name; }
+protected:
+    GameState state = GameState::RUNNING;
+
 private:
     const std::string m_Name;
 };
@@ -50,4 +67,5 @@ public:
 private:
     std::vector<Layer*> m_Layers;
     uint32_t m_OverlayStartIndex;
+
 };
