@@ -31,6 +31,8 @@ Application::Application()
 	m_Window = std::make_shared<Window>(windowProps, eventCallback);
 	m_Window->EnableVSync(true);
 
+	userInterface.init(m_Window.get());
+
   // TEMP A CHANGER
 	// Enable Blending
 	RendererCommand::EnableBlending(true);
@@ -52,11 +54,15 @@ void Application::Start()
 		// TEMP : TODO PASS CAMERA SHARED PTR
 		Renderer::BeginScene(t_Controller->GetCamera());
 
+		userInterface.newFrame();
+
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 		for(auto& layer : m_Layers)
 			layer->Update();
+
+		userInterface.show();
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();
