@@ -19,19 +19,19 @@ private:
 };
 
 #ifdef NDEBUG
-  #define CORE_TRACE
-  #define CORE_DEBUG
-  #define CORE_INFO
-  #define CORE_WARN
-  #define CORE_ERROR
-  #define CORE_CRITICAL
+  #define CORE_TRACE(...) ;
+  #define CORE_DEBUG(...) ;
+  #define CORE_INFO(...) ;
+  #define CORE_WARN(...) ;
+  #define CORE_ERROR(...) ;
+  #define CORE_CRITICAL(...) ;
 
-  #define TRACE
-  #define DEBUG
-  #define INFO
-  #define WARN
-  #define ERROR
-  #define CRITICAL
+  #define TRACE(...) ;
+  #define DEBUG(...) ;
+  #define INFO(...) ;
+  #define WARN(...) ;
+  #define ERROR(...) ;
+  #define CRITICAL(...) ;
 #else
   #define CORE_TRACE(...)    Logger::GetCoreLogger()->trace(__VA_ARGS__);
   #define CORE_DEBUG(...)    Logger::GetCoreLogger()->debug(__VA_ARGS__);
