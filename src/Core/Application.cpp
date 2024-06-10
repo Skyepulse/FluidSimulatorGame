@@ -47,7 +47,7 @@ void Application::Start()
 	CORE_TRACE("Applications started")
 
 	// TEMP ?
-	t_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 100.0f, 0.1f);
+	t_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 100.0f, 2.0f);
 
 	while (!m_Window->ShouldClose()) 
 	{
