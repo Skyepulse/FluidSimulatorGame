@@ -1,10 +1,6 @@
 #include "UserInterface.h"
 #include <cstdio>
 #include "../Application.h"
-#include <memory>;
-extern class GameApplication;
-
-using namespace std;
 
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
