@@ -74,6 +74,8 @@ void Application::OnEvent(Event &e)
 	for(auto it = m_Layers.begin(); it != m_Layers.end(); it++)
 		(*it)->OnEvent(e);
 
+	userInterface.onEvent(e);
+
 	// TEMP ?
 	if(t_Controller->OnEvent(e))
 		return;

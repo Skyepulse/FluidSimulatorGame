@@ -220,3 +220,13 @@ void UserInterface::buildPause(){
         state = 0;
     }
 }
+
+void UserInterface::onEvent(Event &e){
+    if (e.GetEventType() == EventType::WindowResized) {
+		WindowResizedEvent& e_win = dynamic_cast<WindowResizedEvent&>(e);
+        glm::vec2 size = e_win.GetSize();
+
+        windowWidth = size.x;
+        windowHeight = size.y;
+    }
+}
