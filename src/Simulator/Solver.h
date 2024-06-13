@@ -20,6 +20,7 @@ struct Particle {
 	Real alpha; // alpha
 	int type; // type of particle
 	bool isInGlass; // is particle in glass
+	bool needUpdate=true;
 };
 
 
@@ -117,7 +118,8 @@ public:
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
 
 	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
-
+	bool isIdxValid(int x, int y);
+	void extendGridUpdate(vector<bool> &grid);
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
