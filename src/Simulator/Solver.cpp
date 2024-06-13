@@ -505,6 +505,14 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 	}
 }
 
+void Solver::rotateWall(int wallIdx, float angle, Vec2f orig){
+	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + orig;
+	}
+}
+
 Vec2f Solver::getGlassPosition() {
 	return _glasscorner;
 }

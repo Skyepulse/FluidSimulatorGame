@@ -116,6 +116,8 @@ public:
 
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
 
+	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
+
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
