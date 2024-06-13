@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../Simulator/Solver.h"
-#include "../Core/Engine.h"
+#include "GameLayer.h"
 
-// TEMP : TODO : REPLACE BY LAYERS
-class Game : public Layer
+class Game : public LevelLayer
 {
 public:
   Game();
@@ -26,6 +24,8 @@ private:
   std::shared_ptr<Circle> circleWalls;
   std::shared_ptr<Circle> circleLiquid;
   std::shared_ptr<Circle> circleGlass;
+
+  std::shared_ptr<Rectangle> rectangle;
 
   Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
   Real particleSpawnRadius = 4.0f;

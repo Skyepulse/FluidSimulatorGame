@@ -36,3 +36,9 @@
 #include "Scene/Line.h"
 #include "Scene/Circle.h"
 #include "Scene/Rectangle.h"
+
+// ----------------------------------------
+//					UTILS
+// ----------------------------------------
+
+#include "Utils/Bounds.h"

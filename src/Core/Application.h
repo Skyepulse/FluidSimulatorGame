@@ -11,6 +11,13 @@
 
 #include "UI/UserInterface.h"
 
+enum class GameState {
+	LOSE = 2,
+	WIN = 3,
+	PAUSED = 1,
+	RUNNING = 0
+};
+
 class Application 
 {
 public:
@@ -34,6 +41,8 @@ public:
   virtual GameState getGameState() = 0;
   static inline Application* Get() { return s_Instance; }
   std::shared_ptr<Window> GetWindow() { return m_Window; }
+  
+  std::shared_ptr<CameraController> GetCameraController() const { return m_Controller; }
 
   ~Application();
 protected:
@@ -44,8 +53,7 @@ private:
   std::shared_ptr<Window> m_Window;
   LayerStack m_Layers;
 
-  // TEMP
-  std::shared_ptr<CameraController> t_Controller;
+  std::shared_ptr<CameraController> m_Controller;
 
   UserInterface userInterface;
 };

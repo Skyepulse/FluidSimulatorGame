@@ -1,7 +1,7 @@
 #include "Game.h"
 #include <algorithm>
 
-Game::Game() : Layer("Game Layer")
+Game::Game() : LevelLayer("Game Layer")
 {
 }
 
@@ -14,6 +14,7 @@ void Game::OnAttach()
 	circleWalls = std::make_shared<Circle>();
 	circleLiquid = std::make_shared<Circle>();
 	circleGlass = std::make_shared<Circle>();
+
 
 	float circleRadius = 0.5f;
 	circleWalls->Transform->Scale2D(circleRadius);
@@ -45,6 +46,24 @@ void Game::OnAttach()
 
 	winningGlassParticles = solver.getWinningGlass();
 	particleSpawnPosition = solver.getSpawnPosition();
+
+	rectangle = std::make_shared<Rectangle>();
+	rectangle->Transform->Scale2D(50.0f);
+	Bound bound(glm::vec2(-50.0), glm::vec2(50.0));
+	Application::Get()->GetCameraController()->LimitCameraMovementInBound(true);
+	Application::Get()->GetCameraController()->SetCameraMovementBound(bound);
+
+/*	Bound a(glm::vec2(0.1), glm::vec2(1.0));
+	Bound b(glm::vec2(0.1), glm::vec2(2.0));
+	Bound c(glm::vec2(0.0), glm::vec2(3.0));
+
+	DEBUG("0,0 is in a : {}", a.InBound(glm::vec2(0)));
+	DEBUG("1,1 is in a : {}", a.InBound(glm::vec2(1)));
+	DEBUG("1,1 is in b : {}", b.InBound(glm::vec2(1)));
+
+	DEBUG("a is included in b : {}", b.Includes(a)); // false
+	DEBUG("a is included in c : {}", c.Includes(a)); // true
+	DEBUG("b is included in c : {}", c.Includes(b)); // true*/
 }
 
 void Game::OnDetach()
@@ -53,6 +72,7 @@ void Game::OnDetach()
 
 void Game::Update()
 {
+	Renderer::DrawShape(rectangle);
 	Real _dt = 0.0f;
 	if(state != GameState::PAUSED) _dt = solver.update();
 	if(state == GameState::RUNNING) maxTime -= _dt;
@@ -88,7 +108,6 @@ void Game::Update()
 		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 		state = GameState::WIN;
 	}
-
 }
 
 bool Game::OnEvent(Event& e)

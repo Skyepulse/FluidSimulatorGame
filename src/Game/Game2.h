@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../Simulator/Solver.h"
-#include "../Core/Engine.h"
+#include "GameLayer.h"
 
-// TEMP : TODO : REPLACE BY LAYERS
-class Game2 : public Layer
+class Game2 : public LevelLayer
 {
 public:
 	Game2();

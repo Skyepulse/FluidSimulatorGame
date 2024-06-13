@@ -214,7 +214,7 @@ void Solver::adaptDt() {
 		maxVel2 = max(maxVel2, particleVel2);
 	}
 	Real maxVel = sqrt(maxVel2);
-	CORE_DEBUG("Max velocity: {}", maxVel);
+	//CORE_DEBUG("Max velocity: {}", maxVel);
 	if(maxVel == 0e0) _dt = DEFAULT_DT;
 	else _dt = 0.6*_h/maxVel;
 	_dt = min(_dt, DEFAULT_DT);

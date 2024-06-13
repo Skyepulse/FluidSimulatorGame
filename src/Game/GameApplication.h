@@ -66,7 +66,7 @@ public:
 	}
 
 private:
-	Layer* m_game = nullptr;
+	LevelLayer* m_game = nullptr;
 	int game_index = 0;
 };
 
