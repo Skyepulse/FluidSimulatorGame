@@ -20,6 +20,19 @@ struct Particle {
 	Real alpha; // alpha
 	int type; // type of particle
 	bool isInGlass; // is particle in glass
+	bool needUpdate=true;
+};
+
+
+struct ParticleGroup {
+	tIndex startIdx;
+	tIndex endIdx;
+	vector<Vec2f> initPos;
+
+	ParticleGroup() : startIdx(0), endIdx(0) {}
+
+    ParticleGroup(tIndex start, tIndex end, const std::vector<Vec2f>& positions)
+        : startIdx(start), endIdx(end), initPos(positions) {}
 };
 
 enum KernelType
@@ -85,9 +98,9 @@ public:
 	void spawnParticle(Vec2f position);
 
 	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
-	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1, bool save=true);
+	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1, bool save=true);
 
 	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
 	void setSpawnPosition(Vec2f position);
@@ -102,10 +115,11 @@ public:
 	void setMaxParticles(int maxParticles) { _maxParticles = maxParticles; }
 	void setViscosityType(ViscosityType viscosityType) { _viscosityType = viscosityType; }
 
-
-
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
 
+	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
+	bool isIdxValid(int x, int y);
+	void extendGridUpdate(vector<bool> &grid);
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
@@ -152,6 +166,9 @@ private:
 	vector<int> _neighborOffsets;
 
 	vector<vector<tIndex>> _particlesInGrid;
+
+	vector<ParticleGroup> _glassGroups;
+	vector<ParticleGroup> _wallGroups;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
 	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
