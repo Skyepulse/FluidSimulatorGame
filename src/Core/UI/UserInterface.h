@@ -15,6 +15,8 @@ public:
     void newFrame();
     void show();
 
+    void onEvent(Event &e);
+
 private:
     void buildMenu();
     void buildInGame();
