@@ -47,6 +47,7 @@ void UserInterface::newFrame(){
 }
 
 void UserInterface::show(){
+    ImGui::SetNextWindowPos(ImVec2(3, 3), ImGuiCond_Always);
     ImGui::Begin("Overlay", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
     
     switch (state)

@@ -8,3 +8,4 @@ CMakeCache.txt
 CMakeFiles/
 CMakeDoxygenDefaults.cmake
 CMakeDoxyfile.in
+imgui.ini
