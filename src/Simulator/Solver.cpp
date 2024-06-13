@@ -18,6 +18,9 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	_particleData.clear();
 
+	_wallGroups.clear();
+	_glassGroups.clear();
+
 	_neighbors.clear();
 
 	_particlesInGrid.clear();
@@ -179,8 +182,9 @@ void Solver::computeNPforces() {
 }
 
 void Solver::predictVel(const Real dt){
-	for (int i = 0; i < _particleCount; i++) {
-		if (_particleData[i].type == 2) {
+
+	for (auto &glass: _glassGroups){
+		for (int i=glass.startIdx; i<glass.endIdx; i++){
 			if (this->_moveGlassRight) {
 				_particleData[i].vel = _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
 			}
@@ -196,8 +200,10 @@ void Solver::predictVel(const Real dt){
 			else {
 				_particleData[i].vel = Vec2f(0.0f, 0.0f);
 			}
-			continue;
 		}
+	}
+
+	for (int i = 0; i < _particleCount; i++) {
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
 	}
@@ -372,7 +378,9 @@ void Solver::drawWalls(int resX, int resY) {
 	}
 }
 
-void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type) {
+void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type, bool save) {
+	tIndex start = _particleCount;
+
 	Real sr = _kernel->getSupportRad(); 
 	for (int i = 0; i < particleLength; i++) {
 		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
@@ -380,14 +388,23 @@ void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type)
 		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		addParticle(sr * pos2, type);
 	}
+
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
-void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type) {
+void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type, bool save) {
 	Real sr = _kernel->getSupportRad();
 	Real radAngle = angle * M_PI / 180.0;
 	Real cosAngle = cos(radAngle);
 	Real sinAngle = sin(radAngle);
 
+	tIndex start = _particleCount;
 
 	//Turn the line by angle
 	for (int i = 0; i < particleLength; i++) {
@@ -399,13 +416,22 @@ void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, 
 		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
 		addParticle(sr * newPos2, type);	
 	}
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
-void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type) {
+void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type, bool save) {
 	Real sr = _kernel->getSupportRad();
 	Real radAngle = angle * M_PI / 180.0;
 	Real cosAngle = cos(radAngle);
 	Real sinAngle = sin(radAngle);
+
+	tIndex start = _particleCount;
 
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
@@ -414,15 +440,30 @@ void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real
 			addParticle(sr * newPos, type);
 		}
 	}
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
 void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
-	drawAngleLineWall(cornerPosition, width, 0, 2);
-	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2);
-	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2);
+	tIndex start = _particleCount;
+	drawAngleLineWall(cornerPosition, width, 0, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2, false);
 	this->_glasscorner = cornerPosition;
 	this->_glassSize = Vec2f(width/2, height/2);
 	this->_winningGlass = (width - 2) * (height - 1) / 2;
+
+
+	ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+	for (int i=start; i<_particleCount; i++){
+		pGroup.initPos[i - start] = _particleData[i].pos;
+	}
+	_glassGroups.push_back(pGroup);
 }
 
 void Solver::spawnParticle(Vec2f position) {
