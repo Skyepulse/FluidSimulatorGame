@@ -53,22 +53,26 @@ void Window::Init()
 
   CORE_TRACE("Initializing GLFW");
 
-  glfwInit();
+	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwSetErrorCallback([](int err, const char* msg)
 	{
-		CORE_ERROR("GLFW [{}] {}", err, msg)
+			CORE_ERROR("GLFW [{}] {}", err, msg);
 	});
 
 	m_Window = glfwCreateWindow(m_Data->Width, m_Data->Height, "GlassOverFlow", NULL, NULL);
+
 	if (m_Window == NULL) {
 		glfwTerminate();
 		CORE_ASSERT(false, "Failed to create Window");
 	}
-  isGLFWInit = true;
+	isGLFWInit = true;
+
+	glfwSetWindowSizeLimits(m_Window, 480, 640, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
 
 	m_Context = std::make_shared<OpenGLContext>(m_Window);
 	m_Context->Init();
@@ -176,7 +180,6 @@ void Window::Init()
 
 		// TEMP ??
 		RendererCommand::SetViewportSize(glm::ivec2(width, height));
-
 		WindowResizedEvent e(width, height);
 		windowData->eventCallback(e);
 	});

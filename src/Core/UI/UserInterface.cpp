@@ -2,6 +2,7 @@
 #include <cstdio>
 #include "../Application.h"
 #include <cmath>
+#include <algorithm>
 
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
@@ -21,8 +22,22 @@ void UserInterface::init(Window *window){
     windowWidth = window->GetWidth();
     windowHeight = window->GetHeight();
 
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", 30);
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", 70);
+    reloadFonts();
+}
+
+void UserInterface::reloadFonts() {
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    float fontSize = std::min(windowHeight, windowWidth) / 6.0f;
+
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.3f);
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.5f);
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize);
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.4f);
+
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
 void UserInterface::newFrame(){
@@ -32,6 +47,7 @@ void UserInterface::newFrame(){
 }
 
 void UserInterface::show(){
+    ImGui::SetNextWindowPos(ImVec2(3, 3), ImGuiCond_Always);
     ImGui::Begin("Overlay", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
     
     switch (state)
@@ -59,26 +75,58 @@ void UserInterface::show(){
 void UserInterface::buildMenu(){
 
     // Dimensions de la grille
-    int rows = 4;
-    int cols = 3;
+    int rows = 3;
+    int cols = 4;
     int buttonIndex = 1;
 
     // Dimensions des boutons
-    ImVec2 buttonSize(100, 100);
+    ImVec2 buttonSize(std::min(windowWidth, windowHeight)/5.0f, std::min(windowWidth, windowHeight)/5.0f);
 
     // Espacement entre les boutons
-    ImVec2 buttonSpacing(20, 20);
+    ImVec2 buttonSpacing(buttonSize.x * 0.25, buttonSize.y * 0.2);
+
+    // Title
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* titleFont = io.Fonts->Fonts[2];
+    ImGui::PushFont(titleFont);
+
+    const char* title = "GlassOverflow";
+    ImVec2 titleSize = ImGui::CalcTextSize(title);
+    ImVec2 titlePos((windowWidth - titleSize.x) / 2, 50);
+    ImGui::SetCursorPos(titlePos);
+
+    ImVec4 defaultColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+    ImVec4 highlightColor = ImVec4(80.0f/255.0f, 188.0f / 255.0f, 216.0f / 255.0f, 255.0f / 255.0f); //Bleu
+
+    ImGui::BeginGroup(); 
+    for (int i = 0; title[i] != '\0'; ++i) {
+        if (title[i] == 'O' || title[i] == 'G') {
+            ImGui::PushStyleColor(ImGuiCol_Text, highlightColor);
+        }
+        else {
+            ImGui::PushStyleColor(ImGuiCol_Text, defaultColor);
+        }
+
+        ImGui::TextUnformatted(&title[i], &title[i] + 1);
+        ImGui::SameLine(0.0f, 0.0f);
+
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndGroup();
+
+    ImGui::PopFont();
 
     // Calculer la taille totale de la grille
     float gridWidth = cols * buttonSize.x + (cols - 1) * buttonSpacing.x;
     float gridHeight = rows * buttonSize.y + (rows - 1) * buttonSpacing.y;
+    float gridOffset = -150.0f;
 
     // Calculer la position de départ pour centrer la grille
-    ImVec2 startPos((windowWidth - gridWidth) / 2, (windowHeight - gridHeight) / 2);
+    ImVec2 startPos((windowWidth - gridWidth) / 2.0f, (windowHeight - gridHeight - gridOffset) / 2.0f);
 
     // Configurer le style pour les boutons ronds
     ImGuiStyle& style = ImGui::GetStyle();
-    style.FrameRounding = 50.0f; // Arrondir les coins des boutons
+    style.FrameRounding = 100.0f; // Arrondir les coins des boutons
 
     for (int row = 0; row < rows; ++row)
     {
@@ -99,10 +147,8 @@ void UserInterface::buildMenu(){
             if (ImGui::Button(buttonLabel, buttonSize))
             {
                 state = 1;
-                CORE_DEBUG("Loading game {0} {1}", buttonIndex, buttonLabel);
                 Application* app = Application::Get();
                 if(app != nullptr) app->loadGame(buttonIndex);
-                CORE_DEBUG("Game loaded");
             }
 
             ++buttonIndex;
@@ -174,7 +220,11 @@ void UserInterface::buildInGame(){
     snprintf(numberText, sizeof(numberText), "%d", timer);
     ImVec2 textSize = ImGui::CalcTextSize(numberText);
     ImGui::SetCursorPos(ImVec2((windowWidth - textSize.x) / 2, 10));
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* font = io.Fonts->Fonts[3];
+    ImGui::PushFont(font);
     ImGui::Text("%s", numberText);
+    ImGui::PopFont();
 
     if (app->getGameState() == GameState::WIN){
         buildPopUp("YOU WON!", "Next level", ImVec4(0.2f, 0.6f, 0.2f, 1.0f), ImVec4(0.3f, 0.7f, 0.3f, 1.0f), []() {Application::Get()->loadNextGame();});
@@ -185,7 +235,7 @@ void UserInterface::buildInGame(){
 
 void UserInterface::buildPause(){
     // Dimensions des boutons
-    ImVec2 buttonSize(200, 50);
+    ImVec2 buttonSize(std::min(windowHeight, windowWidth) / 3.0f, std::min(windowHeight, windowWidth) / 12.0f);
 
     // Espacement entre les boutons
     float buttonSpacing = 20.0f;
@@ -228,5 +278,7 @@ void UserInterface::onEvent(Event &e){
 
         windowWidth = size.x;
         windowHeight = size.y;
+
+        reloadFonts();
     }
 }
