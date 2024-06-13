@@ -11,7 +11,7 @@ CameraController::CameraController(float aspectRatio, float zoomLevel, float cam
 }
 
 CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed)
-    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_LimitBound({ glm::vec2(0.0), glm::vec2(0.0) }), m_CameraPosition(glm::vec2(0))
+    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_LimitBound(glm::vec2(0.0), glm::vec2(0.0)), m_CameraPosition(glm::vec2(0))
 {
     m_Camera = std::make_shared<Camera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 }
