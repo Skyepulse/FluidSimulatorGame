@@ -157,7 +157,7 @@ void UserInterface::buildMenu(){
 }
 
 void UserInterface::buildPopUp(const char* message, const char* subMessage, ImVec4 color, ImVec4 hoverColor, void (*onClick)()){
-    ImVec2 rectSize(300, 150);
+    ImVec2 rectSize(std::min(windowHeight, windowWidth)/2.5f, std::min(windowHeight, windowWidth) / 5.0f);
 
     ImVec2 rectPos((windowWidth - rectSize.x) / 2, (windowHeight - rectSize.y) / 2);
 

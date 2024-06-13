@@ -1,7 +1,7 @@
 
 #include "Game/GameApplication.h"
 
-int main() 
+int main()
 {
 	Application* application = Application::Create();
 	application->Start();
