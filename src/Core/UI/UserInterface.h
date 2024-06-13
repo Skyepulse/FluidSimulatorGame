@@ -19,6 +19,7 @@ public:
 
 private:
     void buildMenu();
+    void reloadFonts();
     void buildInGame();
     void buildPause();
     void buildPopUp(const char* message, const char* subMessage, ImVec4 color, ImVec4 hoverColor, void (*onClick)());

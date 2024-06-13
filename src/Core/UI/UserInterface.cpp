@@ -2,6 +2,7 @@
 #include <cstdio>
 #include "../Application.h"
 #include <cmath>
+#include <algorithm>
 
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
@@ -21,8 +22,21 @@ void UserInterface::init(Window *window){
     windowWidth = window->GetWidth();
     windowHeight = window->GetHeight();
 
+    reloadFonts();
+}
+
+void UserInterface::reloadFonts() {
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    float fontSize = std::min(windowHeight, windowWidth) / 6.0f;
+
     io.Fonts->AddFontFromFileTTF("src/font.ttf", 30);
     io.Fonts->AddFontFromFileTTF("src/font.ttf", 70);
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize);
+
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
 void UserInterface::newFrame(){
@@ -59,26 +73,36 @@ void UserInterface::show(){
 void UserInterface::buildMenu(){
 
     // Dimensions de la grille
-    int rows = 4;
-    int cols = 3;
+    int rows = 3;
+    int cols = 4;
     int buttonIndex = 1;
 
     // Dimensions des boutons
-    ImVec2 buttonSize(100, 100);
+    ImVec2 buttonSize(std::min(windowWidth, windowHeight)/5, std::min(windowWidth, windowHeight)/5);
 
     // Espacement entre les boutons
-    ImVec2 buttonSpacing(20, 20);
+    ImVec2 buttonSpacing(buttonSize.x * 0.25, buttonSize.y * 0.2);
+
+    //Title
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* titleFont = io.Fonts->Fonts[2];
+    ImGui::PushFont(titleFont);
+    ImVec2 titleSize = ImGui::CalcTextSize("GlassOverflow");
+    ImGui::SetCursorPos(ImVec2((windowWidth - titleSize.x)/2, 50));
+    ImGui::Text("GlassOverflow");
+    ImGui::PopFont();
 
     // Calculer la taille totale de la grille
     float gridWidth = cols * buttonSize.x + (cols - 1) * buttonSpacing.x;
     float gridHeight = rows * buttonSize.y + (rows - 1) * buttonSpacing.y;
+    float gridOffset = -150.0f;
 
     // Calculer la position de départ pour centrer la grille
-    ImVec2 startPos((windowWidth - gridWidth) / 2, (windowHeight - gridHeight) / 2);
+    ImVec2 startPos((windowWidth - gridWidth) / 2, (windowHeight - gridHeight - gridOffset) / 2);
 
     // Configurer le style pour les boutons ronds
     ImGuiStyle& style = ImGui::GetStyle();
-    style.FrameRounding = 50.0f; // Arrondir les coins des boutons
+    style.FrameRounding = 100.0f; // Arrondir les coins des boutons
 
     for (int row = 0; row < rows; ++row)
     {
@@ -99,10 +123,8 @@ void UserInterface::buildMenu(){
             if (ImGui::Button(buttonLabel, buttonSize))
             {
                 state = 1;
-                CORE_DEBUG("Loading game {0} {1}", buttonIndex, buttonLabel);
                 Application* app = Application::Get();
                 if(app != nullptr) app->loadGame(buttonIndex);
-                CORE_DEBUG("Game loaded");
             }
 
             ++buttonIndex;
@@ -228,5 +250,7 @@ void UserInterface::onEvent(Event &e){
 
         windowWidth = size.x;
         windowHeight = size.y;
+
+        reloadFonts();
     }
 }
