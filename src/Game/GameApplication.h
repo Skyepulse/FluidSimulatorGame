@@ -57,12 +57,16 @@ public:
 		m_game->setRunning();
 	}
 
+	void loadNextGame() override {
+		loadGame(++game_index);
+	}
+
 	GameState getGameState() override {
 		return m_game->getState();
 	}
 
 private:
-	Layer* m_game = nullptr;
+	LevelLayer* m_game = nullptr;
 	int game_index = 0;
 };
 

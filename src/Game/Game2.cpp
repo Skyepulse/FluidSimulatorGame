@@ -1,7 +1,7 @@
 #include "Game2.h"
 #include <algorithm>
 
-Game2::Game2() : Layer("Game Layer")
+Game2::Game2() : LevelLayer("Game Layer")
 {
 }
 

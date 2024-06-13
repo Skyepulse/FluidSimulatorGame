@@ -47,12 +47,11 @@ void Application::Start()
 	CORE_TRACE("Applications started")
 
 	// TEMP ?
-	t_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 100.0f, 2.0f);
+	m_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 100.0f, 2.0f);
 
 	while (!m_Window->ShouldClose()) 
 	{
-		// TEMP : TODO PASS CAMERA SHARED PTR
-		Renderer::BeginScene(t_Controller->GetCamera());
+		Renderer::BeginScene(m_Controller->GetCamera());
 
 		userInterface.newFrame();
 
@@ -74,7 +73,9 @@ void Application::OnEvent(Event &e)
 	for(auto it = m_Layers.begin(); it != m_Layers.end(); it++)
 		(*it)->OnEvent(e);
 
+	userInterface.onEvent(e);
+
 	// TEMP ?
-	if(t_Controller->OnEvent(e))
+	if(m_Controller->OnEvent(e))
 		return;
 }

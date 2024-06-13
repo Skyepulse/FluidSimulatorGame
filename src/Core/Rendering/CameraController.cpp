@@ -4,9 +4,15 @@
 #include "../Event/ApplicationEvent.h"
 #include "../Event/KeyCode.h"
 
-CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed) : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed)
+CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed, Bound bound)
+    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_UseLimitBound(true), m_LimitBound(bound)
 {
+    m_Camera = std::make_shared<Camera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+}
 
+CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed)
+    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_UseLimitBound(false), m_LimitBound({ glm::vec2(0.0), glm::vec2(0.0) })
+{
     m_Camera = std::make_shared<Camera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 }
 
@@ -23,6 +29,16 @@ bool CameraController::OnEvent(Event & e)
   dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnKeyPressed));
 
   return true;
+}
+
+void CameraController::LimitCameraMovementInBound(bool enabled)
+{
+    m_UseLimitBound = enabled;
+}
+
+void CameraController::SetCameraMovementBound(const Bound bound)
+{
+    m_LimitBound = bound;
 }
 
 bool CameraController::OnKeyPressed(KeyPressedEvent &e)
@@ -45,6 +61,13 @@ bool CameraController::OnKeyPressed(KeyPressedEvent &e)
   default:
     return false;
   }
+
+  Bound newCameraBound = m_Camera->GetBound();
+  newCameraBound.MaxCorner += translation;
+  newCameraBound.MinCorner += translation;
+
+  if (m_UseLimitBound && !m_LimitBound.Includes(newCameraBound))
+      return false;
 
   m_Camera->Translate(translation);
   return true;

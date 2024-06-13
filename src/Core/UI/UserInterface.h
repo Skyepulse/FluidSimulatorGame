@@ -15,10 +15,13 @@ public:
     void newFrame();
     void show();
 
+    void onEvent(Event &e);
+
 private:
     void buildMenu();
     void buildInGame();
     void buildPause();
+    void buildPopUp(const char* message, const char* subMessage, ImVec4 color, ImVec4 hoverColor, void (*onClick)());
 
     // 0: Menu, 1: Game, 2: Pause
     int state=0;

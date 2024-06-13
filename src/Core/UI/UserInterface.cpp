@@ -22,6 +22,7 @@ void UserInterface::init(Window *window){
     windowHeight = window->GetHeight();
 
     io.Fonts->AddFontFromFileTTF("src/font.ttf", 30);
+    io.Fonts->AddFontFromFileTTF("src/font.ttf", 70);
 }
 
 void UserInterface::newFrame(){
@@ -109,6 +110,52 @@ void UserInterface::buildMenu(){
     }
 }
 
+void UserInterface::buildPopUp(const char* message, const char* subMessage, ImVec4 color, ImVec4 hoverColor, void (*onClick)()){
+    ImVec2 rectSize(300, 150);
+
+    ImVec2 rectPos((windowWidth - rectSize.x) / 2, (windowHeight - rectSize.y) / 2);
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* smallFont = io.Fonts->Fonts[0];
+    ImFont* bigFont = io.Fonts->Fonts[1];
+
+    ImVec2 textSize = ImGui::CalcTextSize(message);
+    ImVec2 nextLevelTextSize;
+
+    ImGui::PushFont(bigFont);
+    textSize = ImGui::CalcTextSize(message);
+    ImGui::PopFont();
+
+    ImGui::PushFont(smallFont);
+    nextLevelTextSize = ImGui::CalcTextSize(subMessage);
+    ImGui::PopFont();
+
+    ImVec2 textPos(rectPos.x + (rectSize.x - textSize.x) / 2, rectPos.y + (rectSize.y - textSize.y) / 2);
+    ImVec2 nextLevelTextPos(rectPos.x + (rectSize.x - nextLevelTextSize.x) / 2, rectPos.y + (rectSize.y + textSize.y) / 2);
+
+    ImGui::SetCursorPos(rectPos);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+    ImGui::PushStyleColor(ImGuiCol_Button, color);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverColor);
+
+    if (ImGui::Button("##", rectSize)){
+        onClick();
+    }
+
+    ImGui::PopStyleColor(2);
+    ImGui::PopStyleVar();
+
+    ImGui::SetCursorPos(textPos);
+    ImGui::PushFont(bigFont);
+    ImGui::Text("%s", message);
+    ImGui::PopFont();
+
+    ImGui::SetCursorPos(nextLevelTextPos);
+    ImGui::PushFont(smallFont);
+    ImGui::Text("%s", subMessage);
+    ImGui::PopFont();
+}
+
 
 void UserInterface::buildInGame(){
     ImGui::SetCursorPos(ImVec2(windowWidth - 67, 0));
@@ -119,13 +166,21 @@ void UserInterface::buildInGame(){
         state = 2;
     }
 
-    int timer = ceil(Application::Get()->getGameTime());
+    Application* app = Application::Get();
+
+    int timer = ceil(app->getGameTime());
 
     char numberText[8];
     snprintf(numberText, sizeof(numberText), "%d", timer);
     ImVec2 textSize = ImGui::CalcTextSize(numberText);
     ImGui::SetCursorPos(ImVec2((windowWidth - textSize.x) / 2, 10));
     ImGui::Text("%s", numberText);
+
+    if (app->getGameState() == GameState::WIN){
+        buildPopUp("YOU WON!", "Next level", ImVec4(0.2f, 0.6f, 0.2f, 1.0f), ImVec4(0.3f, 0.7f, 0.3f, 1.0f), []() {Application::Get()->loadNextGame();});
+    } else if (app->getGameState() == GameState::LOSE){
+        buildPopUp("YOU LOSE!", "Restart level", ImVec4(0.6f, 0.2f, 0.2f, 1.0f), ImVec4(0.7f, 0.3f, 0.3f, 1.0f), []() {Application::Get()->restartGame();});
+    }
 }
 
 void UserInterface::buildPause(){
@@ -163,5 +218,15 @@ void UserInterface::buildPause(){
     {
         Application::Get()->unloadGame();
         state = 0;
+    }
+}
+
+void UserInterface::onEvent(Event &e){
+    if (e.GetEventType() == EventType::WindowResized) {
+		WindowResizedEvent& e_win = dynamic_cast<WindowResizedEvent&>(e);
+        glm::vec2 size = e_win.GetSize();
+
+        windowWidth = size.x;
+        windowHeight = size.y;
     }
 }
