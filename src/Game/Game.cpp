@@ -48,22 +48,22 @@ void Game::OnAttach()
 	particleSpawnPosition = solver.getSpawnPosition();
 
 	rectangle = std::make_shared<Rectangle>();
-	rectangle->Transform->Scale2D(50.0f);
+	rectangle->Transform->SetSize(glm::vec2(100.0f));
 	Bound bound(glm::vec2(-50.0), glm::vec2(50.0));
-	Application::Get()->GetCameraController()->LimitCameraMovementInBound(true);
+
 	Application::Get()->GetCameraController()->SetCameraMovementBound(bound);
 
-/*	Bound a(glm::vec2(0.1), glm::vec2(1.0));
+	Bound a(glm::vec2(0.1), glm::vec2(1.0));
 	Bound b(glm::vec2(0.1), glm::vec2(2.0));
 	Bound c(glm::vec2(0.0), glm::vec2(3.0));
 
-	DEBUG("0,0 is in a : {}", a.InBound(glm::vec2(0)));
-	DEBUG("1,1 is in a : {}", a.InBound(glm::vec2(1)));
-	DEBUG("1,1 is in b : {}", b.InBound(glm::vec2(1)));
+	Bound a_inter_b = Bound::Intersection(a, b);
+	Bound a_inter_c = Bound::Intersection(a, c);
+	Bound b_inter_c = Bound::Intersection(c, b);
 
-	DEBUG("a is included in b : {}", b.Includes(a)); // false
-	DEBUG("a is included in c : {}", c.Includes(a)); // true
-	DEBUG("b is included in c : {}", c.Includes(b)); // true*/
+	DEBUG("a inter b : {}, {}; {}, {}", a_inter_b.MinCorner.x, a_inter_b.MinCorner.y, a_inter_b.MaxCorner.x, a_inter_b.MaxCorner.y);
+	DEBUG("a inter c : {}, {}; {}, {}", a_inter_c.MinCorner.x, a_inter_c.MinCorner.y, a_inter_c.MaxCorner.x, a_inter_c.MaxCorner.y);
+	DEBUG("b inter c : {}, {}; {}, {}", b_inter_c.MinCorner.x, b_inter_c.MinCorner.y, b_inter_c.MaxCorner.x, b_inter_c.MaxCorner.y);
 }
 
 void Game::OnDetach()

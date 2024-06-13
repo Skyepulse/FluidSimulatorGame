@@ -43,6 +43,8 @@ public:
   Transform2D GetScaled(const glm::vec2& scale) const {Transform2D transform(*this); transform.Scale2D(scale); return transform; }
   Transform2D GetScaled(float scale) const {Transform2D transform(*this); transform.Scale2D(scale); return transform; }
 
+  void SetSize(const glm::vec2 size);
+
   void Rotate2D(float angle) { Rotate(angle, glm::vec3(0.0f, 0.0f, 1.0f)); }
   Transform2D GetRotated(float angle, const glm::vec3& axis) const {Transform2D transform(*this); transform.Rotate2D(angle); return transform; }
 

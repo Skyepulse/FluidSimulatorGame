@@ -5,13 +5,13 @@
 #include "../Event/KeyCode.h"
 
 CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed, Bound bound)
-    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_UseLimitBound(true), m_LimitBound(bound)
+    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed),m_LimitBound(bound), m_CameraPosition(glm::vec2(0))
 {
     m_Camera = std::make_shared<Camera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 }
 
 CameraController::CameraController(float aspectRatio, float zoomLevel, float cameraSpeed)
-    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_UseLimitBound(false), m_LimitBound({ glm::vec2(0.0), glm::vec2(0.0) })
+    : m_AspectRatio(aspectRatio), m_ZoomLevel(zoomLevel), m_CameraSpeed(cameraSpeed), m_LimitBound({ glm::vec2(0.0), glm::vec2(0.0) }), m_CameraPosition(glm::vec2(0))
 {
     m_Camera = std::make_shared<Camera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 }
@@ -29,11 +29,6 @@ bool CameraController::OnEvent(Event & e)
   dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnKeyPressed));
 
   return true;
-}
-
-void CameraController::LimitCameraMovementInBound(bool enabled)
-{
-    m_UseLimitBound = enabled;
 }
 
 void CameraController::SetCameraMovementBound(const Bound bound)
@@ -62,13 +57,12 @@ bool CameraController::OnKeyPressed(KeyPressedEvent &e)
     return false;
   }
 
-  Bound newCameraBound = m_Camera->GetBound();
-  newCameraBound.MaxCorner += translation;
-  newCameraBound.MinCorner += translation;
+  glm::vec2 newCameraPosition = m_CameraPosition + translation;
 
-  if (m_UseLimitBound && !m_LimitBound.Includes(newCameraBound))
+  if (!m_LimitBound.InBound(newCameraPosition))
       return false;
 
+  m_CameraPosition = newCameraPosition;
   m_Camera->Translate(translation);
   return true;
 }
@@ -76,8 +70,8 @@ bool CameraController::OnKeyPressed(KeyPressedEvent &e)
 bool CameraController::OnMouseScrolled(MouseScrolledEvent& e)
 {
     m_ZoomLevel -= (float)e.GetYOffset();
+    
     m_Camera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-    CORE_DEBUG("Received event")
     return true;
 }
 
@@ -87,6 +81,6 @@ bool CameraController::OnWindowResized(WindowResizedEvent& e)
     m_AspectRatio = size.x / size.y;
 
     m_Camera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-
+   
     return true;
 }
