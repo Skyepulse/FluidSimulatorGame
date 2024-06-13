@@ -29,8 +29,6 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_particleCount = 0;
 	_immovableParticleCount = 0;
 	_immovableGlassParticleCount = 0;
-
-	Real sr = _kernel->getSupportRad();
 }
 
 void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
