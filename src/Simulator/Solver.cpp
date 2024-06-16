@@ -20,6 +20,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	_wallGroups.clear();
 	_glassGroups.clear();
+	_rigidBodies.clear();
 
 	_neighbors.clear();
 
@@ -86,6 +87,7 @@ Real Solver::update() {
 	correctDensityError(_dt);
 	//CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
+	updateRigidBodies(_dt);
 	//CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
 	//CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
@@ -136,7 +138,7 @@ void Solver::buildNeighbors() {
 		tIndex idx = idx1d(x, y);
 		if (isIdxValid(x, y)) {
 			_particleData[i].needUpdate = true;
-			if (_particleData[i].type == 0){
+			if (_particleData[i].type == 0 || _particleData[i].type == 3){
 				gridNeedUpdate[idx] = true;
 			} else {
 				if (!checkingWalls){
@@ -207,7 +209,7 @@ void Solver::computeNPforces() {
 	}
 	for (int i = 0; i < _particleCount; i++) {
 		if (!_particleData[i].needUpdate) continue;
-		if(_particleData[i].type == 1 || _particleData[i].type == 2) continue;
+		if(_particleData[i].type == 1 || _particleData[i].type == 2 || _particleData[i].type == 3) continue;
 		// gravity
 		_particleData[i].acc = _g;
 
@@ -249,6 +251,8 @@ void Solver::predictVel(const Real dt){
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
 	}
+
+	for (auto &rBody: _rigidBodies) rBody.vel += dt * _g;
 }
 
 void Solver::adaptDt() {
@@ -272,7 +276,7 @@ void Solver::adaptDt() {
 void Solver::updatePos(const Real dt) {
 	Vec2f glassVel = Vec2f(0.0f, 0.0f);
 	for (int i = _particleCount - 1; i >= 0; i--) {
-		if(_particleData[i].type == 1) continue;
+		if(_particleData[i].type == 1 || _particleData[i].type == 3) continue;
 		if (_particleData[i].type == 2) {
 			_particleData[i].pos += dt * _particleData[i].vel;
 			glassVel = _particleData[i].vel;
@@ -298,6 +302,20 @@ void Solver::updatePos(const Real dt) {
 		}	
 	}
 	_glasscorner += dt * glassVel;
+}
+
+void Solver::updateRigidBodies(const Real dt){
+	for (auto &rBody: _rigidBodies){
+		Vec2f buffer(0);
+		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
+			buffer += _particleData[i].vel;
+		}
+		rBody.vel += buffer * rBody.relInvMass;
+		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
+			_particleData[i].vel = Vec2f(0);
+			_particleData[i].pos += rBody.vel * dt;
+		}
+	}
 }
 
 void Solver::correctDivergenceError(const Real dt){
@@ -327,7 +345,7 @@ void Solver::correctDivergenceError(const Real dt){
 		dpAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
-			if (_particleData[i].type != 0) continue;
+			if (_particleData[i].type == 1 || _particleData[i].type == 2) continue;
 			Real ki = dp[i] * _particleData[i].alpha;
 			Vec2f sum(0);
 			for (int p=0; p<_neighbors[i].size(); p++) {
@@ -552,6 +570,22 @@ void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int typ
 			addParticle(sr * Vec2f(i + 0.75, j + 0.75));
 		}
 	}
+}
+
+void Solver::addRigidBody(Vec2f pos, int width, int height, Real relMass) {
+	tIndex start = _particleCount;
+	drawAngleLineWall(pos, width, 0, 3, false);
+	drawAngleLineWall(pos + Vec2f(1.0f), height, 90, 3, false);
+	drawAngleLineWall(pos + Vec2f(width/2, 1.0f), height, 90, 3, false);
+	drawAngleLineWall(pos + Vec2f(1.0f, height/2), width-4, 0, 3, false);
+
+	if (relMass == 0) relMass = _particleCount - start;
+
+	RigidBody rBody(start, _particleCount, vector<Vec2f>(_particleCount - start), pos, relMass);
+	for (int i=start; i<_particleCount; i++){
+		rBody.initPos[i - start] = _particleData[i].pos;
+	}
+	_rigidBodies.push_back(rBody);
 }
 
 void Solver::rotateWall(int wallIdx, float angle, Vec2f orig){

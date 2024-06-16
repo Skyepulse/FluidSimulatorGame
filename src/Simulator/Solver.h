@@ -35,6 +35,17 @@ struct ParticleGroup {
         : startIdx(start), endIdx(end), initPos(positions) {}
 };
 
+struct RigidBody: ParticleGroup {
+	Vec2f pos;
+	Vec2f vel;
+	Real relInvMass;
+
+	RigidBody() : ParticleGroup(), pos(0), vel(0), relInvMass(0) {}
+
+    RigidBody(tIndex start, tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass)
+        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass) {}
+};
+
 enum KernelType
 {
 	CUBIC_SPLINE = 0
@@ -121,6 +132,8 @@ public:
 	bool isIdxValid(int x, int y);
 	void extendGridUpdate(vector<bool> &grid);
 
+	void addRigidBody(Vec2f pos, int width, int height, Real relMass);
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
@@ -135,6 +148,8 @@ private:
 	void correctDensityError(const Real dt);
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
+
+	void updateRigidBodies(const Real dt);
 
 	void resizeSSBO();
 
@@ -169,6 +184,8 @@ private:
 
 	vector<ParticleGroup> _glassGroups;
 	vector<ParticleGroup> _wallGroups;
+
+	vector<RigidBody> _rigidBodies;
 
 	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
 	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
