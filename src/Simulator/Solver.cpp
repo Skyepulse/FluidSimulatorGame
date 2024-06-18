@@ -306,14 +306,23 @@ void Solver::updatePos(const Real dt) {
 
 void Solver::updateRigidBodies(const Real dt){
 	for (auto &rBody: _rigidBodies){
-		Vec2f buffer(0);
+		Vec2f bufferMov(0);
+		Real bufferRot = 0;
+
 		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
-			buffer += _particleData[i].vel;
+			bufferMov += _particleData[i].vel;
+			bufferRot += (_particleData[i].pos - rBody.pos).crossProduct(_particleData[i].vel);
 		}
-		rBody.vel += buffer * rBody.relInvMass;
+		bufferRot *= rBody.invI;
+
+		rBody.omega += bufferRot;
+		rBody.theta += rBody.omega * dt;
+
+		rBody.vel += bufferMov * rBody.relInvMass;
+		rBody.pos += rBody.vel * dt;
 		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
 			_particleData[i].vel = Vec2f(0);
-			_particleData[i].pos += rBody.vel * dt;
+			_particleData[i].pos = rBody.pos + rBody.initPos[i-rBody.startIdx].rotated(rBody.theta);
 		}
 	}
 }
@@ -581,10 +590,13 @@ void Solver::addRigidBody(Vec2f pos, int width, int height, Real relMass) {
 
 	if (relMass == 0) relMass = _particleCount - start;
 
+	pos += Vec2f(width/4, height/4);
+
 	RigidBody rBody(start, _particleCount, vector<Vec2f>(_particleCount - start), pos, relMass);
 	for (int i=start; i<_particleCount; i++){
-		rBody.initPos[i - start] = _particleData[i].pos;
+		rBody.initPos[i - start] = _particleData[i].pos - pos;
 	}
+	rBody.invI = 12.0/(relMass * (width*width/4 + height*height/4));
 	_rigidBodies.push_back(rBody);
 }
 

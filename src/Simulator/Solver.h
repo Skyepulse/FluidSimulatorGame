@@ -40,10 +40,17 @@ struct RigidBody: ParticleGroup {
 	Vec2f vel;
 	Real relInvMass;
 
-	RigidBody() : ParticleGroup(), pos(0), vel(0), relInvMass(0) {}
+	Real omega; // angular velocity
+	Real theta; // angle
+	Real invI;
 
-    RigidBody(tIndex start, tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass)
-        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass) {}
+	RigidBody() : ParticleGroup(), pos(0), vel(0), relInvMass(0), omega(0), theta(0), invI(0) {}
+
+    RigidBody(const tIndex start, const tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass)
+        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass), omega(0), theta(0), invI(0) {}
+
+	RigidBody(const tIndex start, const tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass, const Real theta_)
+        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass), omega(0), theta(theta_),  invI(0)  {}
 };
 
 enum KernelType

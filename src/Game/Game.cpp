@@ -37,7 +37,7 @@ void Game::OnAttach()
 	int height = 10;
 	solver.drawWinningGlass(width, height, Vec2f(1, 1));
 
-	solver.addRigidBody(Vec2f(2*width, 5), width, height, 10);
+	// solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
 
 	solver.setSpawnPosition(Vec2f(4, resY - 4));
 
