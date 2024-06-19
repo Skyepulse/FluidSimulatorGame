@@ -117,11 +117,12 @@ public:
 	void spawnParticle(Vec2f position, ViscosityType viscosityType);
 
 	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1, bool save=true);
-	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1, bool save=true);
+	int drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
+	int drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1, bool save=true);
+	int drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1, bool save=true);
 
-	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
+	int drawWinningGlass(int width, int height, Vec2f cornerPosition);
+	int drawRegularGlass(int width, int height, Vec2f cornerPosition);
 	void setSpawnPosition(Vec2f position);
 
 	void moveGlassLeft(bool move) { _moveGlassLeft = move; }
@@ -138,6 +139,8 @@ public:
 	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
 	bool isIdxValid(int x, int y);
 	void extendGridUpdate(vector<bool> &grid);
+
+	void rotateGlass(int glassIdx, float angle, Vec2f orig = Vec2f(0));
 
 	void addRigidBody(Vec2f pos, int width, int height, Real relMass);
 
