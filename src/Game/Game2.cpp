@@ -125,7 +125,7 @@ bool Game2::OnEvent(Event& e)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) {
-			solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
+			solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		}
 
 		return true;

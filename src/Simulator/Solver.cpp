@@ -32,7 +32,7 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_immovableGlassParticleCount = 0;
 }
 
-void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
+void Solver::addParticle(const Vec2f& pos, const int type, ViscosityType viscosityType ,const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
 {
 	Particle p;
 	p.pos = pos;
@@ -42,6 +42,8 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	p.type = type;
 	p.alpha = alpha;
 	p.isInGlass = false;
+	p.viscosityType = viscosityType;
+
 
 	_particleData.push_back(p);
 	_neighbors.push_back(vector<tIndex>());
@@ -199,14 +201,6 @@ void Solver::computeDensityAlpha() {
 
 void Solver::computeNPforces() {
 	Real visc = 2.0f;
-	switch (_viscosityType) {
-		case ViscosityType::VISCOUS:
-			visc = 60.0f;
-			break;
-		case ViscosityType::FLUID:
-			visc = 2.0f;
-			break;
-	}
 	for (int i = 0; i < _particleCount; i++) {
 		if (!_particleData[i].needUpdate) continue;
 		if(_particleData[i].type == 1 || _particleData[i].type == 2 || _particleData[i].type == 3) continue;
@@ -220,6 +214,7 @@ void Solver::computeNPforces() {
 			// viscosity force
 			Vec2f x = (_particleData[i].pos - _particleData[p].pos);
             Vec2f u = (_particleData[i].vel - _particleData[p].vel);
+			visc = _particleData[i].viscosityType == ViscosityType::VISCOUS ? 50.0f : 2.0f;
             _particleData[i].acc += visc * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
 		}
 	}
@@ -542,7 +537,7 @@ void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
 	_glassGroups.push_back(pGroup);
 }
 
-void Solver::spawnParticle(Vec2f position) {
+void Solver::spawnParticle(Vec2f position, ViscosityType viscosityType) {
 	if(_maxParticles == 0) return;
 	//We check the potential neighbors for this particle. If we find a neighbor too close, we don't spawn the particle
 	int x = position.x;
@@ -561,7 +556,7 @@ void Solver::spawnParticle(Vec2f position) {
 			}
 		}
 	}
-	addParticle(position, 0);
+	addParticle(position, 0, viscosityType);
 	_maxParticles--;
 }
 
@@ -569,14 +564,14 @@ void Solver::setSpawnPosition(Vec2f position) {
 	_spawnPosition = this->_kernel->getSupportRad()*position;
 }
 
-void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int type) {
+void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int type, ViscosityType viscosityType) {
 	Real sr = _kernel->getSupportRad();
 	for (int i = position.x; i < position.x + width; i++) {
 		for (int j = position.y; j < position.y + height; j++) {
-			addParticle(sr * Vec2f(i + 0.25, j + 0.25));
-			addParticle(sr * Vec2f(i + 0.75, j + 0.25));
-			addParticle(sr * Vec2f(i + 0.25, j + 0.75));
-			addParticle(sr * Vec2f(i + 0.75, j + 0.75));
+			addParticle(sr * Vec2f(i + 0.25, j + 0.25), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.75, j + 0.25), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.25, j + 0.75), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.75, j + 0.75), 0, viscosityType);
 		}
 	}
 }

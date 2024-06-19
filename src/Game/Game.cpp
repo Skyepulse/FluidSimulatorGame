@@ -32,7 +32,7 @@ void Game::OnAttach()
 	//Draw level
 	solver.drawWalls(resX, resY);
 	solver.drawAngleLineWall(Vec2f(0, 7 * resY/10), 45, -30, 1);
-	solver.drawAngleLineWall(Vec2f(20, 3 * resY / 10), 45, 30, 1);
+	solver.drawAngleLineWall(Vec2f(20, 3 * resY / 10), 36, 30, 1);
 	int width = 10;
 	int height = 10;
 	solver.drawWinningGlass(width, height, Vec2f(1, 1));
@@ -41,7 +41,7 @@ void Game::OnAttach()
 
 	solver.setSpawnPosition(Vec2f(4, resY - 4));
 
-	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
+	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10, 0, ViscosityType::FLUID);
 
 	solver.setGlassSpeed(4.0f, 0.0f);
 
@@ -121,7 +121,7 @@ bool Game::OnEvent(Event& e)
 		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
+		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(true);
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(true);
 

@@ -12,6 +12,12 @@
 
 using namespace std;
 
+enum ViscosityType
+{
+	FLUID = 0,
+	VISCOUS = 1
+};
+
 struct Particle {
 	Vec2f pos; // position
 	Vec2f vel; // velocity
@@ -21,6 +27,7 @@ struct Particle {
 	int type; // type of particle
 	bool isInGlass; // is particle in glass
 	bool needUpdate=true;
+	ViscosityType viscosityType;
 };
 
 
@@ -56,12 +63,6 @@ struct RigidBody: ParticleGroup {
 enum KernelType
 {
 	CUBIC_SPLINE = 0
-};
-
-enum ViscosityType
-{
-	FLUID = 0,
-	VISCOUS = 1
 };
 
 
@@ -113,7 +114,7 @@ public:
 	int getImmovableParticleCount() { return _immovableParticleCount; }
 	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
 	Vec2f getSpawnPosition() { return _spawnPosition; }
-	void spawnParticle(Vec2f position);
+	void spawnParticle(Vec2f position, ViscosityType viscosityType);
 
 	void drawWalls(int resX, int resY);
 	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
@@ -131,9 +132,8 @@ public:
 	Vec2f getGlassPosition();
 	void setGlassSpeed(Real speedX, Real speedY);
 	void setMaxParticles(int maxParticles) { _maxParticles = maxParticles; }
-	void setViscosityType(ViscosityType viscosityType) { _viscosityType = viscosityType; }
 
-	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
+	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0, ViscosityType viscosityType = ViscosityType::FLUID);
 
 	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
 	bool isIdxValid(int x, int y);
@@ -143,7 +143,7 @@ public:
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
-	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
+	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
@@ -201,8 +201,6 @@ private:
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
 	bool _moveGlassDown = false;
-
-	ViscosityType _viscosityType = ViscosityType::FLUID;
 	
 	int _maxParticles = 10000;
 	//OpenGL compute shader variables
