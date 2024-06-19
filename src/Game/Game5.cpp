@@ -33,15 +33,16 @@ void Game5::OnAttach()
 	solver.initSimulation(resX, resY);
 
 	//Draw level
+	solver.drawAngleLineWall(Vec2f(15.0f, 6.0f * resY / 10.0f), 45, 20, 1, true);
+	rotatingWallIndex = 0;
 	solver.drawAngleLineWall(Vec2f(0, resY - 1), resX * 2, 0, 1);
 	solver.drawAngleLineWall(Vec2f(1, 1), resY * 2 - 4, 90, 1);
 	solver.drawAngleLineWall(Vec2f(resX, 1), resY * 2 - 4, 90, 1);
-	rotatingGlassIndex = solver.drawRegularGlass(10, 10, Vec2f(2, 10));
-	rotatingWallIndex = solver.drawAngleLineWall(Vec2f(15.0f, 6.0f * resY / 10.0f), 45, 20, 1, true);
-
+	solver.drawRegularGlass(10, 15, Vec2f(2, 10));
+	rotatingGlassIndex = 0;
 	int width = 20;
 	int height = 7;
-	solver.drawWinningGlass(width, height, Vec2f(25, 1));
+	solver.drawWinningGlass(width, height, Vec2f(15, 1));
 
 	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 	solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 5), 10, 5, 0, ViscosityType::FLUID);
@@ -82,6 +83,12 @@ void Game5::Update()
 		maxTime = 0.0;
 		state = GameState::LOSE;
 	}
+
+	timer += _dt;
+
+	if(isRotatingGlass) timerGlass += _dt * rotationDirection;
+	solver.rotateGlass(rotatingGlassIndex, 360.0f * timerGlass / (rotateSpeed * 1000), Vec2f(4.5, 10));
+
 	vector<Particle> particleManager = solver.getParticleManager();
 
 	vector<Vec2f> wallsPositions;
@@ -123,8 +130,14 @@ bool Game5::OnEvent(Event& e)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
-		if (keypressed.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(true);
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(true);
+		if (keypressed.GetKey() == CORE_KEY_LEFT) {
+			isRotatingGlass = true;
+			rotationDirection = 1;
+		}
+		if (keypressed.GetKey() == CORE_KEY_RIGHT) {
+			isRotatingGlass = true;
+			rotationDirection = -1;
+		}
 
 
 		return true;
@@ -135,8 +148,8 @@ bool Game5::OnEvent(Event& e)
 		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
 			return false;
 
-		if (keyreleased.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(false);
-		if (keyreleased.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(false);
+		if (keyreleased.GetKey() == CORE_KEY_LEFT) isRotatingGlass = false;
+		if (keyreleased.GetKey() == CORE_KEY_RIGHT) isRotatingGlass = false;
 
 		return true;
 	}

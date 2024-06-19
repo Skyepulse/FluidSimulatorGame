@@ -26,7 +26,10 @@ private:
 	float timer = 0.0f;
 
 	int rotatingGlassIndex = 0;
-	float rotateSpeedGlass = 1.0f; // time to rotate 360 degrees in seconds
+	float rotateSpeedGlass = 8.0f; // time to rotate 360 degrees in seconds
+	float timerGlass = 0.0f;
+	bool isRotatingGlass = false;
+	int rotationDirection = 1;
 
 	std::shared_ptr<Circle> circleWalls;
 	std::shared_ptr<Circle> circleLiquid;
