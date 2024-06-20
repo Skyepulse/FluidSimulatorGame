@@ -21,13 +21,18 @@
 #include "Rendering/CameraController.h"
 #include "Rendering/Transform.h"
 #include "Rendering/Renderer.h"
+#include "Rendering/RendererCommand.h"
 
 // ----------------------------------------
 //            OPENGL ABSTRACTION
 // ----------------------------------------
 
+#include "OpenGL/Buffer.h"
+#include "OpenGL/VertexArray.h"
 #include "OpenGL/Shader.h"
 #include "OpenGL/Texture.h"
+#include "OpenGL/ComputeShader.h"
+#include "OpenGL/RenderTexture.h"
 
 // ----------------------------------------
 //              SCENE OBJECTS
@@ -42,3 +47,4 @@
 // ----------------------------------------
 
 #include "Utils/Bounds.h"
+

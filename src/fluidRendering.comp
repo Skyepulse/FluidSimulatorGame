@@ -1,0 +1,96 @@
+#version 430
+
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+layout(std430, binding = 1) buffer Particles {
+	vec2 particles[500];
+};
+
+layout(std430, binding = 2) buffer ParticlesInd {
+	uvec4 particleindex[]; // Acceed with key
+};
+
+layout(std430, binding = 3) buffer LevelInfos {
+	ivec2 size;
+	uint particleCount;
+	uint zoomFactor;
+};
+
+// From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
+const ivec2 offsets2D[9] =
+{
+	ivec2(-1, 1),
+	ivec2(0, 1),
+	ivec2(1, 1),
+	ivec2(-1, 0),
+	ivec2(0, 0),
+	ivec2(1, 0),
+	ivec2(-1, -1),
+	ivec2(0, -1),
+	ivec2(1, -1),
+};
+
+// Constants used for hashing
+const uint hashK1 = 15823;
+const uint hashK2 = 9737333;
+
+// Hash cell coordinate to a single unsigned integer
+uint HashCell2D(ivec2 _cell)
+{
+	uvec2 cell = uvec2(_cell);
+	uint a = cell.x * hashK1;
+	uint b = cell.y * hashK2;
+	return (a + b);
+}
+
+uint KeyFromHash(uint hash, uint tableSize)
+{
+	return hash % tableSize;
+}
+
+void main() {
+	vec2 cell_pos = gl_GlobalInvocationID.xy;
+	ivec2 cell = ivec2(cell_pos);
+
+	uint partcount = 0;
+
+	// neighbour search
+	for(int i = 0; i < 9; i++)
+	{
+		ivec2 n_cell = cell + offsets2D[i];
+		uint hash = HashCell2D(n_cell);
+		uint key = KeyFromHash(hash, particleCount);
+
+		// Retrieve particle indexes
+		uvec4 partind = particleindex[key];
+		uint count = partind.x; // particle count 
+		uvec3 ind = partind.yzw; // particle ind, valid if count > 0 for x, 1 for y, 2 for z
+
+		vec2 candidate_pos = particles[ind.x] * float(zoomFactor);
+		if(length(cell_pos - candidate_pos) < 1.0)
+			partcount += 1;
+		candidate_pos = particles[ind.y] * float(zoomFactor);
+		if(length(cell_pos - candidate_pos) < 1.0)
+			partcount += 1;
+		candidate_pos = particles[ind.z] * float(zoomFactor);
+		if(length(cell_pos - candidate_pos) < 1.0)
+			partcount += 1;
+
+	}
+
+	imageStore(imgOutput, cell, vec4(0.0, 0.0, float(partcount) / 5.0, 1.0));
+
+	/*ivec2 x = ivec2(gl_GlobalInvocationID.xy);
+
+	uint index = x.x;
+	if(index >= particleCount)
+		return;
+
+	vec2 texPos = particles[index] * float(zoomFactor);
+
+	vec2 uv = texPos / vec2(size);
+	ivec2 pos = ivec2(texPos);
+
+    imageStore(imgOutput, pos, vec4(0.0, 0.0, 1.0, 1.0));*/
+}

@@ -52,17 +52,17 @@ void Game3::OnDetach()
 {
 }
 
-void Game3::Update()
+void Game3::UpdateGame()
 {
+	vector<Particle> particleManager = solver.getParticleManager();
+
 	Real _dt = 0.0f;
-	if (state != GameState::PAUSED) _dt = solver.update();
-	if (state == GameState::RUNNING) maxTime -= _dt;
+	if (m_State != GameState::PAUSED) _dt = m_Solver.update();
+	if (m_State == GameState::RUNNING) maxTime -= _dt;
 	if (maxTime < 0.0) {
 		maxTime = 0.0;
-		state = GameState::LOSE;
+		m_State = GameState::LOSE;
 	}
-
-	vector<Particle> particleManager = solver.getParticleManager();
 
 	vector<Vec2f> wallsPositions;
 	vector<Vec2f> liquidPositions;
@@ -87,7 +87,7 @@ void Game3::Update()
 	if (particlesInGlass >= winningGlassParticles)
 	{
 		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		state = GameState::WIN;
+		m_State = GameState::WIN;
 	}
 
 }

@@ -1,0 +1,77 @@
+#version 430
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+layout(std430, binding = 1) buffer Particles {
+	vec2 particles[];
+};
+
+layout(std430, binding = 2) buffer ParticlesInd {
+	uvec4 particleindex[]; // Acceed with key
+};
+
+layout(std430, binding = 3) buffer LevelInfos {
+	ivec2 size;
+	uint particleCount;
+	uint zoomFactor;
+};
+
+// From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
+const ivec2 offsets2D[9] =
+{
+	ivec2(-1, 1),
+	ivec2(0, 1),
+	ivec2(1, 1),
+	ivec2(-1, 0),
+	ivec2(0, 0),
+	ivec2(1, 0),
+	ivec2(-1, -1),
+	ivec2(0, -1),
+	ivec2(1, -1),
+};
+
+// Constants used for hashing
+const uint hashK1 = 15823;
+const uint hashK2 = 9737333;
+
+// Hash cell coordinate to a single unsigned integer
+uint HashCell2D(ivec2 _cell)
+{
+	uvec2 cell = uvec2(_cell);
+	uint a = cell.x * hashK1;
+	uint b = cell.y * hashK2;
+	return (a + b);
+}
+
+uint KeyFromHash(uint hash, uint tableSize)
+{
+	return hash % tableSize;
+}
+
+void main() {
+	ivec2 x = ivec2(gl_GlobalInvocationID.xy);
+
+	uint index = uint(x.x);
+	if(index >= particleCount)
+		return;
+
+	vec2 pos = particles[index] * float(zoomFactor);
+
+	ivec2 cell = ivec2(pos);
+
+	uint hash = HashCell2D(cell);
+	uint key = KeyFromHash(hash, particleCount);
+
+	// No var for particle index because can change
+	uint count = atomicAdd(particleindex[key].x, 1);
+
+	if(count == 0)
+		atomicExchange(particleindex[key].y, index);
+	else if(count == 1)
+		atomicExchange(particleindex[key].z, index);
+	else if(count == 2)
+		atomicExchange(particleindex[key].w, index);
+
+    //imageStore(imgOutput, cell, vec4(particleindex[key] / 400.0) + vec4(0,0,0,1.0));
+}

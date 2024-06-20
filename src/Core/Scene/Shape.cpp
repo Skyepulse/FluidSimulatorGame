@@ -1,6 +1,13 @@
 #include "Shape.h"
 
-Shape::Shape()
+void Shape::SetTexture(const Texture* texture)
+{
+	std::shared_ptr<RenderProperty> textureProperty;
+	textureProperty = std::make_shared<TextureRenderProperty>(texture);
+	m_RendererData.renderProperties.push_back(textureProperty);
+}
+
+Shape::Shape() : m_Color(glm::vec3(1.0))
 {  
   // TRANSFORM
   Transform = std::make_shared<Transform2D>();

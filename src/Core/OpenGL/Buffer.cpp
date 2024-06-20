@@ -2,9 +2,6 @@
 
 #include <glad/glad.h>
 
-// temp
-#include <iostream>
-
 // VertexBuffer Class
 
 VertexBuffer::VertexBuffer(float* vertices, uint32_t size)
@@ -56,7 +53,7 @@ void IndexBuffer::Unbind() const
 
 // SSBO Class
 
-DataBufferObject::DataBufferObject(const std::shared_ptr<void>& data, size_t size) : m_Size(size)
+DataBufferObject::DataBufferObject(const void* data, size_t size) : m_Size(size)
 {
 	glGenBuffers(1, &m_RendererID);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_RendererID);
@@ -74,7 +71,11 @@ void DataBufferObject::Unbind() const
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void DataBufferObject::UpdateData(const std::shared_ptr<void>& data) const
+void DataBufferObject::UpdateData(const void* data, uint32_t size) const
 {
-	glBufferData(GL_SHADER_STORAGE_BUFFER, m_Size, data.get(), GL_DYNAMIC_READ);
+	if(size == 0)
+		glBufferData(GL_SHADER_STORAGE_BUFFER, m_Size, data, GL_DYNAMIC_READ);
+	else
+		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_DYNAMIC_READ);
+
 }

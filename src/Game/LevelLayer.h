@@ -13,7 +13,7 @@ class LevelLayer : public Layer
 	};
 public:
 	LevelLayer(const std::string& name, const Bound& levelBound);
-	LevelLayer(const std::string& name) : Layer(name), m_BackgroundCompute(ComputeShader("")), m_BackgroundResetCompute(ComputeShader("")) {}
+	LevelLayer(const std::string& name) : Layer(name), m_BackgroundCompute(ComputeShader("")), m_BackgroundResetCompute(ComputeShader("")), m_SpatialHashCompute(ComputeShader("")) {}
 	~LevelLayer() {}
 
 	virtual void OnAttach() = 0;
@@ -44,8 +44,12 @@ private:
 	std::shared_ptr<Rectangle> m_Background;
 	ComputeShader m_BackgroundResetCompute;
 	ComputeShader m_BackgroundCompute;
+	ComputeShader m_SpatialHashCompute;
+	std::vector<glm::uvec4> m_HashTable;
+
 	std::shared_ptr<RenderTexture2D> m_BackgroundTexture;
 	DataBufferObject m_BackgroundData;
+	DataBufferObject m_BackgroundHashTable;
 
 	LevelInfo m_LevelInfo;
 	DataBufferObject m_LevelInfoBuffer;

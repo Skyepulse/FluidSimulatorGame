@@ -9,6 +9,7 @@
 class CameraController
 {
 public:
+	CameraController() {}
 	CameraController(float aspectRatio, float zoomLevel, float cameraSpeed, Bound bound);
 	CameraController(float aspectRatio, float zoomLevel, float cameraSpeed);
 	~CameraController();

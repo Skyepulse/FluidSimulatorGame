@@ -11,6 +11,7 @@ public:
 
     bool InBound(glm::vec2 p) const;
     bool Includes(const Bound& bound) const;
+    glm::vec2 GetSize() const { return MaxCorner - MinCorner; }
 
     void Translate(const glm::vec2 translation);
 
