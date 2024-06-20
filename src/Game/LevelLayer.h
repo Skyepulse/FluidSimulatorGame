@@ -1,0 +1,53 @@
+#pragma once
+
+#include "../Core/Engine.h"
+#include "../Simulator/Solver.h"
+
+class LevelLayer : public Layer
+{
+	struct LevelInfo
+	{
+		glm::ivec2 BackgroundTextureSize;
+		uint32_t ParticleCount;
+		uint32_t ZoomFactor;
+	};
+public:
+	LevelLayer(const std::string& name, const Bound& levelBound);
+	LevelLayer(const std::string& name) : Layer(name), m_BackgroundCompute(ComputeShader("")), m_BackgroundResetCompute(ComputeShader("")) {}
+	~LevelLayer() {}
+
+	virtual void OnAttach() = 0;
+	virtual void OnDetach() = 0;
+
+	virtual void Update() override;
+	virtual void UpdateGame() = 0;
+	virtual bool OnEvent(Event& e) = 0;
+
+	virtual float getTime() const = 0;
+
+	GameState getState() const { return m_State; }
+
+	void setPaused() { m_State = GameState::PAUSED; }
+	void setRunning() { m_State = GameState::RUNNING; }
+
+protected:
+	GameState m_State = GameState::RUNNING;
+
+	Bound m_Bound;
+	glm::ivec2 m_Size;
+	Solver m_Solver;
+	std::vector<Particle> m_Particles;
+
+	std::shared_ptr<Circle> m_WallParticle;
+	uint32_t m_MaxParticle = 1000;
+private:
+	std::shared_ptr<Rectangle> m_Background;
+	ComputeShader m_BackgroundResetCompute;
+	ComputeShader m_BackgroundCompute;
+	std::shared_ptr<RenderTexture2D> m_BackgroundTexture;
+	DataBufferObject m_BackgroundData;
+
+	LevelInfo m_LevelInfo;
+	DataBufferObject m_LevelInfoBuffer;
+
+};
