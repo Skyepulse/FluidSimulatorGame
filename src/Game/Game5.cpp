@@ -92,6 +92,7 @@ void Game5::Update()
 			_dt += step;
         } else {
 			accumulator = 0.0;
+			break;
 		}
 	}
 	if(state == GameState::RUNNING) maxTime -= _dt;
