@@ -158,8 +158,6 @@ bool Game4::OnEvent(Event& e)
 		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
-		if (keypressed.GetKey() == CORE_KEY_UP) moveGlassUp = true;
-		if (keypressed.GetKey() == CORE_KEY_DOWN) moveGlassDown = true;
 		return true;
 	}
 	else if (e.GetEventType() == EventType::KeyReleased) {
@@ -171,8 +169,6 @@ bool Game4::OnEvent(Event& e)
 
 		if (keyreleased.GetKey() == CORE_KEY_LEFT) moveGlassLeft = false;
 		if (keyreleased.GetKey() == CORE_KEY_RIGHT) moveGlassRight = false;
-		if (keyreleased.GetKey() == CORE_KEY_UP) moveGlassUp = false;
-		if (keyreleased.GetKey() == CORE_KEY_DOWN) moveGlassDown = false;
 
 		return true;
 	}

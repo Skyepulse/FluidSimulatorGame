@@ -32,11 +32,11 @@ private:
 	Real glassHeight = 0.0f;
 	Real glassWidth = 0.0f;
 
-	int glassIndex = 0;
+	int winningGlassIndex = 0;
 	Real _glassSpeedY = 2.0f;
-	Real _glassSpeedX = 4.0f;
-	bool _glassMoveDown = false;
-	bool _glassMoveUp = false;
+	Real _glassSpeedX = 6.0f;
+	bool _moveGlassLeft = false;
+	bool _moveGlassRight = false;
 
 	int _maxParticles;
 
