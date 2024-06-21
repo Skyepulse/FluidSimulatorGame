@@ -39,6 +39,7 @@ void Game5::OnAttach()
 	solver.drawAngleLineWall(Vec2f(1, 1), resY * 2 - 4, 90, 1);
 	solver.drawAngleLineWall(Vec2f(resX, 1), resY * 2 - 4, 90, 1);
 	solver.drawRegularGlass(10, 15, Vec2f(2, 10));
+	rotatecenter = Vec2f(4.5, 10);
 	rotatingGlassIndex = 0;
 	int width = 20;
 	int height = 7;
@@ -46,8 +47,6 @@ void Game5::OnAttach()
 
 	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 	solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 5), 10, 5, 0, ViscosityType::FLUID);
-
-	solver.setGlassSpeed(0.0f, 0.0f);
 
 	solver.init();
 
@@ -86,8 +85,21 @@ void Game5::Update()
 
 	timer += _dt;
 
-	if(isRotatingGlass) timerGlass += _dt * rotationDirection;
-	solver.rotateGlass(rotatingGlassIndex, 360.0f * timerGlass / (rotateSpeed * 1000), Vec2f(4.5, 10));
+	rotatecenter += _dt * velVec;
+
+	if (isRotatingGlass) {
+		timerGlass += _dt * rotationDirection;
+		solver.rotateGlass(rotatingGlassIndex, 360.0f * timerGlass / (rotateSpeed * 1000), rotatecenter);
+	}
+
+	velVec = Vec2f(0.0f, 0.0f);
+	if (moveIntermGlassLeft) velVec.x -= moveSpeedGlass;
+	if (moveIntermGlassRight) velVec.x += moveSpeedGlass;
+	if (moveIntermGlassUp) velVec.y += moveSpeedGlass;
+	if (moveIntermGlassDown) velVec.y -= moveSpeedGlass;
+	solver.moveGlass(rotatingGlassIndex, velVec);
+		
+
 
 	vector<Particle> particleManager = solver.getParticleManager();
 
@@ -126,15 +138,21 @@ bool Game5::OnEvent(Event& e)
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT)
+		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT 
+			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN
+			&& keypressed.GetKey() != CORE_KEY_A && keypressed.GetKey() != CORE_KEY_B)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
-		if (keypressed.GetKey() == CORE_KEY_LEFT) {
+		if (keypressed.GetKey() == CORE_KEY_LEFT) moveIntermGlassLeft = true;
+		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveIntermGlassRight = true;
+		if (keypressed.GetKey() == CORE_KEY_UP) moveIntermGlassUp = true;
+		if (keypressed.GetKey() == CORE_KEY_DOWN) moveIntermGlassDown = true;
+		if (keypressed.GetKey() == CORE_KEY_A) {
 			isRotatingGlass = true;
 			rotationDirection = 1;
 		}
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) {
+		if (keypressed.GetKey() == CORE_KEY_B) {
 			isRotatingGlass = true;
 			rotationDirection = -1;
 		}
@@ -145,11 +163,18 @@ bool Game5::OnEvent(Event& e)
 	else if (e.GetEventType() == EventType::KeyReleased) {
 		KeyReleasedEvent& keyreleased = dynamic_cast<KeyReleasedEvent&>(e);
 
-		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
+		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT 
+			&& keyreleased.GetKey() != CORE_KEY_UP && keyreleased.GetKey() != CORE_KEY_DOWN
+			&& keyreleased.GetKey() != CORE_KEY_A && keyreleased.GetKey() != CORE_KEY_B)
 			return false;
 
-		if (keyreleased.GetKey() == CORE_KEY_LEFT) isRotatingGlass = false;
-		if (keyreleased.GetKey() == CORE_KEY_RIGHT) isRotatingGlass = false;
+		if (keyreleased.GetKey() == CORE_KEY_LEFT) moveIntermGlassLeft = false;
+		if (keyreleased.GetKey() == CORE_KEY_RIGHT) moveIntermGlassRight = false;
+		if (keyreleased.GetKey() == CORE_KEY_UP) moveIntermGlassUp = false;
+		if (keyreleased.GetKey() == CORE_KEY_DOWN) moveIntermGlassDown = false;
+		if (keyreleased.GetKey() == CORE_KEY_A || keyreleased.GetKey() == CORE_KEY_B) {
+			isRotatingGlass = false;
+		}
 
 		return true;
 	}

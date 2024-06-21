@@ -222,26 +222,6 @@ void Solver::computeNPforces() {
 
 void Solver::predictVel(const Real dt){
 
-	for (auto &glass: _glassGroups){
-		for (int i=glass.startIdx; i<glass.endIdx; i++){
-			if (this->_moveGlassRight) {
-				_particleData[i].vel = _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
-			}
-			else if (this->_moveGlassLeft) {
-				_particleData[i].vel = _moveGlassSpeedX * Vec2f(-1.0f, 0.0f);
-			}
-			else if (this->_moveGlassUp) {
-				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, 1.0f);
-			}
-			else if (this->_moveGlassDown) {
-				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, -1.0f);
-			}
-			else {
-				_particleData[i].vel = Vec2f(0.0f, 0.0f);
-			}
-		}
-	}
-
 	for (int i = 0; i < _particleCount; i++) {
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
@@ -269,12 +249,9 @@ void Solver::adaptDt() {
 }
 
 void Solver::updatePos(const Real dt) {
-	Vec2f glassVel = Vec2f(0.0f, 0.0f);
 	for (int i = _particleCount - 1; i >= 0; i--) {
-		if(_particleData[i].type == 1 || _particleData[i].type == 3) continue;
-		if (_particleData[i].type == 2) {
+		if (_particleData[i].type == 1 || _particleData[i].type == 3 || _particleData[i].type == 2) {
 			_particleData[i].pos += dt * _particleData[i].vel;
-			glassVel = _particleData[i].vel;
 			continue;
 		}
 		_particleData[i].pos += dt * _particleData[i].vel;
@@ -296,7 +273,11 @@ void Solver::updatePos(const Real dt) {
 			_particleData[i].isInGlass = false;
 		}	
 	}
-	_glasscorner += dt * glassVel;
+	if (_moveGlassCorner) {
+		_glasscorner += _winningGlassVel * dt;
+		CORE_DEBUG("Move glass corner {} {}", _glasscorner.x, _glasscorner.y);
+		_moveGlassCorner = false;
+	}
 }
 
 void Solver::updateRigidBodies(const Real dt){
@@ -616,6 +597,14 @@ void Solver::rotateWall(int wallIdx, float angle, Vec2f orig){
 	}
 }
 
+void Solver::moveWall(int wallIdx, Vec2f moveVector){
+	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].vel = moveVector;
+	}
+}
+
 void Solver::rotateGlass(int glassIdx, float angle, Vec2f orig) {
 	ParticleGroup &pGroup = _glassGroups[glassIdx];
 	for (int i = pGroup.startIdx; i < pGroup.endIdx; i++) {
@@ -624,13 +613,20 @@ void Solver::rotateGlass(int glassIdx, float angle, Vec2f orig) {
 	}
 }
 
-Vec2f Solver::getGlassPosition() {
-	return _glasscorner;
+void Solver::moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass) {
+	ParticleGroup &pGroup = _glassGroups[glassIdx];
+	for(int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].vel = moveVector;
+	}
+	if (isWinningGlass) {
+		_moveGlassCorner = true;
+		_winningGlassVel = moveVector;
+	}
 }
 
-void Solver::setGlassSpeed(Real speedX, Real speedY) {
-	_moveGlassSpeedX = speedX;
-	_moveGlassSpeedY = speedY;
+Vec2f Solver::getGlassPosition() {
+	return _glasscorner;
 }
 
 //OPENGL

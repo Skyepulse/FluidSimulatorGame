@@ -50,14 +50,13 @@ void Game2::OnAttach()
 	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 
 	//solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
-	solver.setGlassSpeed(0.0f, 4.0f);
 
 	solver.init();
 
 	winningGlassParticles = solver.getWinningGlass();
 	particleSpawnPosition = solver.getSpawnPosition();
 
-	solver.moveGlassUp(true);
+	_glassMoveUp = true;
 }
 
 void Game2::OnDetach()
@@ -68,16 +67,23 @@ void Game2::Update()
 {
 
 	Vec2f glassPosition = solver.getGlassPosition();
+	Vec2f velocityVector = Vec2f(0, 0);
 	if (glassPosition.y >= _resY - glassHeight)
 	{
-		solver.moveGlassUp(false);
-		solver.moveGlassDown(true);
+		_glassMoveUp = false;
+		_glassMoveDown = true;
 	}
 	else if (glassPosition.y <= 1)
 	{
-		solver.moveGlassDown(false);
-		solver.moveGlassUp(true);
+		_glassMoveDown = false;
+		_glassMoveUp = true;
 	}
+	if(_glassMoveUp)
+		velocityVector = Vec2f(0, _glassSpeedY);
+	else if(_glassMoveDown)
+		velocityVector = Vec2f(0, -_glassSpeedY);
+	solver.moveGlass(glassIndex, velocityVector, true);
+
 
 	Real _dt = 0.0f;
 	if (state != GameState::PAUSED) _dt = solver.update();

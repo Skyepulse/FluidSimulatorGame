@@ -125,22 +125,18 @@ public:
 	void drawRegularGlass(int width, int height, Vec2f cornerPosition);
 	void setSpawnPosition(Vec2f position);
 
-	void moveGlassLeft(bool move) { _moveGlassLeft = move; }
-	void moveGlassRight(bool move) { _moveGlassRight = move; }
-	void moveGlassUp(bool move) { _moveGlassUp = move; }
-	void moveGlassDown(bool move) { _moveGlassDown = move; }
-
 	Vec2f getGlassPosition();
-	void setGlassSpeed(Real speedX, Real speedY);
 	void setMaxParticles(int maxParticles) { _maxParticles = maxParticles; }
 
 	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0, ViscosityType viscosityType = ViscosityType::FLUID);
 
 	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
+	void moveWall(int wallIdx, Vec2f moveVector);
 	bool isIdxValid(int x, int y);
 	void extendGridUpdate(vector<bool> &grid);
 
 	void rotateGlass(int glassIdx, float angle, Vec2f orig = Vec2f(0));
+	void moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass = false);
 	void addRigidBody(Vec2f pos, int width, int height, Real relMass);
 
 private:
@@ -172,6 +168,8 @@ private:
 	const Real MAX_PARTICLE_VEL = 25.0f;
 
 	Vec2f _glasscorner;
+	bool _moveGlassCorner = false;
+	Vec2f _winningGlassVel = Vec2f(0);
 	Vec2f _glassSize;
 	int _particlesInGlass = 0;
 	int _winningGlass = 0;
@@ -195,9 +193,6 @@ private:
 	vector<ParticleGroup> _wallGroups;
 
 	vector<RigidBody> _rigidBodies;
-
-	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
-	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
 
 	bool _moveGlassLeft = false;
 	bool _moveGlassRight = false;

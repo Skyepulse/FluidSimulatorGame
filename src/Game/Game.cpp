@@ -43,8 +43,6 @@ void Game::OnAttach()
 
 	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10, 0, ViscosityType::FLUID);
 
-	solver.setGlassSpeed(4.0f, 0.0f);
-
 	solver.init();
 
 	winningGlassParticles = solver.getWinningGlass();
@@ -90,6 +88,13 @@ void Game::Update()
 	vector<Vec2f> liquidPositions;
 	vector<Vec2f> glassPositions;
 
+	Vec2f velVec = Vec2f(0, 0);
+	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
+	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
+	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
+	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
+	solver.moveGlass(winningGlassIndex, velVec, true);
+
 	for (size_t i = 0; i < particleManager.size(); i++)
 	{
 		if (particleManager[i].type == 1)
@@ -118,23 +123,28 @@ bool Game::OnEvent(Event& e)
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT)
+		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT
+			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
-		if (keypressed.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(true);
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(true);
-
+		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
+		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
+		if (keypressed.GetKey() == CORE_KEY_UP) moveGlassUp = true;
+		if (keypressed.GetKey() == CORE_KEY_DOWN) moveGlassDown = true;
 
 		return true;
 	} else if(e.GetEventType() == EventType::KeyReleased) {
 		KeyReleasedEvent& keyreleased = dynamic_cast<KeyReleasedEvent&>(e);
 
-		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
+		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT
+			&& keyreleased.GetKey() != CORE_KEY_UP && keyreleased.GetKey() != CORE_KEY_DOWN)
 			return false;
 
-		if (keyreleased.GetKey() == CORE_KEY_LEFT) solver.moveGlassLeft(false);
-		if (keyreleased.GetKey() == CORE_KEY_RIGHT) solver.moveGlassRight(false);
+		if (keyreleased.GetKey() == CORE_KEY_LEFT) moveGlassLeft = false;
+		if (keyreleased.GetKey() == CORE_KEY_RIGHT) moveGlassRight = false;
+		if (keyreleased.GetKey() == CORE_KEY_UP) moveGlassUp = false;
+		if (keyreleased.GetKey() == CORE_KEY_DOWN) moveGlassDown = false;
 
 		return true;
 	}

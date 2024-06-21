@@ -32,6 +32,14 @@ private:
 	Real glassHeight = 0.0f;
 	Real glassWidth = 0.0f;
 
+	bool moveGlassUp = false;
+	bool moveGlassDown = false;
+	bool moveGlassLeft = false;
+	bool moveGlassRight = false;
+	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
+	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
+	int winningGlassIndex = 0;
+
 	int _maxParticles;
 	float maxTime = 100.0f;
 };

@@ -27,9 +27,16 @@ private:
 
 	int rotatingGlassIndex = 0;
 	float rotateSpeedGlass = 8.0f; // time to rotate 360 degrees in seconds
+	float moveSpeedGlass = 8.0f; // time to move 1 unit in seconds
 	float timerGlass = 0.0f;
+	Vec2f velVec = Vec2f(0.0f, 0.0f);
 	bool isRotatingGlass = false;
 	int rotationDirection = 1;
+	bool moveIntermGlassUp = false;
+	bool moveIntermGlassDown = false;
+	bool moveIntermGlassLeft = false;
+	bool moveIntermGlassRight = false;
+	Vec2f rotatecenter = Vec2f(0.0f, 0.0f);
 
 	std::shared_ptr<Circle> circleWalls;
 	std::shared_ptr<Circle> circleLiquid;
