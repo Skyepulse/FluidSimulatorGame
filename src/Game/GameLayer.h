@@ -27,8 +27,9 @@ protected:
 	GameState state = GameState::RUNNING;
 	double previousTime;
 
-	const double MIN_FRAME_TIME = 1.0 / 30.0;
+	const double MIN_FRAME_TIME = 0.0f;
 	double accumulator;
+	const bool SHOULD_FPSCAP = false;
 
 private:
 	Bound m_Bound;

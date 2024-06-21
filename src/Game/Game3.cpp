@@ -59,6 +59,9 @@ void Game3::Update()
 	previousTime = currentTime;
 	accumulator += frameTime;
 
+	if (!SHOULD_FPSCAP) accumulator = 0.0;
+
+
 	while (accumulator >= MIN_FRAME_TIME) {
 		if(state != GameState::PAUSED){
             double step = solver.update();

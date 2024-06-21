@@ -275,7 +275,6 @@ void Solver::updatePos(const Real dt) {
 	}
 	if (_moveGlassCorner) {
 		_glasscorner += _winningGlassVel * dt;
-		CORE_DEBUG("Move glass corner {} {}", _glasscorner.x, _glasscorner.y);
 		_moveGlassCorner = false;
 	}
 
