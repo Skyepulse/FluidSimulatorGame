@@ -141,6 +141,9 @@ public:
 	void moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass = false);
 	void addRigidBody(Vec2f pos, int width, int height, Real relMass);
 
+	void activateInfiniteWalls() { _infiniteWalls = true; }
+	void deactivateInfiniteWalls() { _infiniteWalls = false; }
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
@@ -212,6 +215,8 @@ private:
 	void setupComputeShaderPredictVel();
 	void setupComputeShaderDensityAlpha();
 	void setupBuffers();
+
+	bool _infiniteWalls = false;
 };
 
 #endif // !_SOLVER_H_

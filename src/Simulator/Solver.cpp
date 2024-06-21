@@ -259,6 +259,19 @@ void Solver::updatePos(const Real dt) {
 		//We check if the particle is out of bounds
 		Vec2f pos = _particleData[i].pos;
 		if (pos.x < 0 || pos.x >= _resX * _kernel->getSupportRad() || pos.y < 0 || pos.y >= _resY * _kernel->getSupportRad()) {
+			if (_infiniteWalls) {
+				Vec2f newPos = Vec2f(0.0f);
+				if(pos.x < 0) newPos.x = _resX * _kernel->getSupportRad() + pos.x;
+				else if(pos.x >= _resX * _kernel->getSupportRad()) newPos.x = pos.x - _resX * _kernel->getSupportRad();
+				else newPos.x = pos.x;
+
+				if(pos.y < 0) newPos.y = _resY * _kernel->getSupportRad() + pos.y;
+				else if(pos.y >= _resY * _kernel->getSupportRad()) newPos.y = pos.y - _resY * _kernel->getSupportRad();
+				else newPos.y = pos.y;
+
+				_particleData[i].pos = newPos;
+				continue;
+			}
 			removeParticle(i);
 			continue;
 		}
