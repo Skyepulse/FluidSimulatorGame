@@ -278,6 +278,16 @@ void Solver::updatePos(const Real dt) {
 		CORE_DEBUG("Move glass corner {} {}", _glasscorner.x, _glasscorner.y);
 		_moveGlassCorner = false;
 	}
+
+	for (auto &pGroup: _wallGroups){
+		pGroup.displacement += pGroup.vel * dt;
+	}
+
+	for (auto &pGroup: _glassGroups){
+		pGroup.displacement += pGroup.vel * dt;
+	}
+
+	cout << _glassGroups[0].displacement << " | " << _glassGroups[0].initPos[0] << " | " << _particleData[_glassGroups[0].startIdx].pos << endl;
 }
 
 void Solver::updateRigidBodies(const Real dt){
@@ -591,14 +601,16 @@ void Solver::addRigidBody(Vec2f pos, int width, int height, Real relMass) {
 
 void Solver::rotateWall(int wallIdx, float angle, Vec2f orig){
 	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	Vec2f displacement = orig + pGroup.displacement;
 	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
 		tIndex iGroup = i - pGroup.startIdx;
-		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + orig;
+		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + displacement;
 	}
 }
 
 void Solver::moveWall(int wallIdx, Vec2f moveVector){
 	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	pGroup.vel = moveVector;
 	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
 		tIndex iGroup = i - pGroup.startIdx;
 		_particleData[i].vel = moveVector;
@@ -607,14 +619,16 @@ void Solver::moveWall(int wallIdx, Vec2f moveVector){
 
 void Solver::rotateGlass(int glassIdx, float angle, Vec2f orig) {
 	ParticleGroup &pGroup = _glassGroups[glassIdx];
+	Vec2f displacement = orig + pGroup.displacement;
 	for (int i = pGroup.startIdx; i < pGroup.endIdx; i++) {
 		tIndex iGroup = i - pGroup.startIdx;
-		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + orig;
+		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + displacement;
 	}
 }
 
 void Solver::moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass) {
 	ParticleGroup &pGroup = _glassGroups[glassIdx];
+	pGroup.vel = moveVector;
 	for(int i=pGroup.startIdx; i<pGroup.endIdx; i++){
 		tIndex iGroup = i - pGroup.startIdx;
 		_particleData[i].vel = moveVector;

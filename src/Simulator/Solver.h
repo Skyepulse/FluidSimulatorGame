@@ -35,11 +35,13 @@ struct ParticleGroup {
 	tIndex startIdx;
 	tIndex endIdx;
 	vector<Vec2f> initPos;
+	Vec2f displacement;
+	Vec2f vel;
 
-	ParticleGroup() : startIdx(0), endIdx(0) {}
+	ParticleGroup() : startIdx(0), endIdx(0), displacement(0), vel(0) {}
 
     ParticleGroup(tIndex start, tIndex end, const std::vector<Vec2f>& positions)
-        : startIdx(start), endIdx(end), initPos(positions) {}
+        : startIdx(start), endIdx(end), initPos(positions), displacement(0), vel(0) {}
 };
 
 struct RigidBody: ParticleGroup {
