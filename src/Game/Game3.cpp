@@ -52,13 +52,31 @@ void Game3::OnDetach()
 
 void Game3::Update()
 {
+	// ----------- HANDLE FRAMERATE ----------
 	Real _dt = 0.0f;
-	if (state != GameState::PAUSED) _dt = solver.update();
-	if (state == GameState::RUNNING) maxTime -= _dt;
+	double currentTime = Time::GetSeconds();
+	double frameTime = currentTime - previousTime;
+	previousTime = currentTime;
+	accumulator += frameTime;
+
+	while (accumulator >= MIN_FRAME_TIME) {
+		if(state != GameState::PAUSED){
+            double step = solver.update();
+            accumulator -= step;
+			_dt += step;
+        } else {
+			accumulator = 0.0;
+		}
+	}
+	if(state == GameState::RUNNING) maxTime -= _dt;
 	if (maxTime < 0.0) {
 		maxTime = 0.0;
 		state = GameState::LOSE;
 	}
+
+	if (accumulator > MIN_FRAME_TIME) return;
+
+	// ----------- END HANDLE FRAMERATE ----------
 
 	vector<Particle> particleManager = solver.getParticleManager();
 

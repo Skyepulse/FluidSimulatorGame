@@ -286,8 +286,6 @@ void Solver::updatePos(const Real dt) {
 	for (auto &pGroup: _glassGroups){
 		pGroup.displacement += pGroup.vel * dt;
 	}
-
-	cout << _glassGroups[0].displacement << " | " << _glassGroups[0].initPos[0] << " | " << _particleData[_glassGroups[0].startIdx].pos << endl;
 }
 
 void Solver::updateRigidBodies(const Real dt){

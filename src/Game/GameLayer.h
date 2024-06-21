@@ -2,12 +2,13 @@
 
 #include "../Core/Engine.h"
 #include "../Simulator/Solver.h"
+#include "../Core/Time.h"
 
 class LevelLayer : public Layer
 {
 public:
 	//LevelLayer(const Bound& levelBound, const Solver* solver) : m_Bound(levelBound), m_Solver(solver) {}
-	LevelLayer(const std::string& name) : Layer(name) {}
+	LevelLayer(const std::string& name) : Layer(name), previousTime(Time::GetSeconds()), accumulator(0) {}
 	~LevelLayer() {}
 
 	virtual void OnAttach() = 0;
@@ -24,6 +25,11 @@ public:
 	void setRunning() { state = GameState::RUNNING; }
 protected:
 	GameState state = GameState::RUNNING;
+	double previousTime;
+
+	const double MIN_FRAME_TIME = 1.0 / 30.0;
+	double accumulator;
+
 private:
 	Bound m_Bound;
 	Solver* m_Solver;
