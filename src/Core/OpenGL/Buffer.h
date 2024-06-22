@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <glad/glad.h>
 
 enum class ShaderDataType
 {
