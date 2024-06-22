@@ -78,8 +78,8 @@ void Game::UpdateGame()
 
 	}
 
-	Renderer::DrawShapeDuplicate(m_WallParticle, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
+	//Renderer::DrawShapeDuplicate(m_WallParticle, wallsPositions);
+	//Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
 	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
 
 	int particlesInGlass = m_Solver.getParticlesInGlass();

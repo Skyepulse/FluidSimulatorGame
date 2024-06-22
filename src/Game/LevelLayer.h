@@ -7,14 +7,17 @@ class LevelLayer : public Layer
 {
 	struct LevelInfo
 	{
+		glm::vec4 LowDensityColor;
+		glm::vec4 HighDensityColor;
 		glm::ivec2 DensityTextureSize;
 		uint32_t ParticleCount;
 		uint32_t DensityZoomFactor;
 		uint32_t BackgroundZoomFactor;
+		float LowDensityThreshold;
 	};
 public:
 	LevelLayer(const std::string& name, const Bound& levelBound);
-	LevelLayer(const std::string& name) : Layer(name), m_DensityCompute(ComputeShader("")), m_ResetCompute(ComputeShader("")), m_SpatialHashCompute(ComputeShader("")), m_FluidRenderingCompute(ComputeShader("")) {}
+	LevelLayer(const std::string& name) : Layer(name), m_DensityCompute(ComputeShader("")), m_ResetCompute(ComputeShader("")), m_SpatialHashCompute(ComputeShader("")) {}
 	~LevelLayer() {}
 
 	virtual void OnAttach() = 0;
@@ -42,20 +45,20 @@ protected:
 	std::shared_ptr<Circle> m_WallParticle;
 	uint32_t m_MaxParticle = 1000;
 private:
-	std::shared_ptr<Rectangle> m_Background;
+	std::shared_ptr<Rectangle> m_MovingParticleRect;
+	std::shared_ptr<Rectangle> m_StaticParticleRect;
+
 	ComputeShader m_ResetCompute;
 	ComputeShader m_DensityCompute;
 	ComputeShader m_SpatialHashCompute;
-	ComputeShader m_FluidRenderingCompute;
-	std::vector<glm::uvec4> m_HashTable;
 
-	std::shared_ptr<RenderTexture2D> m_DensityTexture;
-	std::shared_ptr<RenderTexture2D> m_BackgroundTexture;
+	std::shared_ptr<RenderTexture2D> m_MovingParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_StaticParticleTexture;
+
+	std::vector<glm::uvec4> m_HashTable;
+	LevelInfo m_LevelInfo;
 
 	DataBufferObject m_BackgroundData;
 	DataBufferObject m_BackgroundHashTable;
-
-	LevelInfo m_LevelInfo;
 	DataBufferObject m_LevelInfoBuffer;
-
 };

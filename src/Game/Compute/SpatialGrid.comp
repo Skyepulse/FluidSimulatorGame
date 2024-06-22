@@ -12,10 +12,13 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
+	vec4 lowDensityColor;
+	vec4 highDensityColor;
 	vec2 densTexSize;
 	uint particleCount;
 	uint densityZoomFactor;
 	uint backgroundZoomFactor;
+	float lowDensityThreshold;
 };
 
 // From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl

@@ -12,10 +12,13 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
+	vec4 lowDensityColor;
+	vec4 highDensityColor;
 	vec2 densTexSize;
 	uint particleCount;
 	uint densityZoomFactor;
 	uint backgroundZoomFactor;
+	float lowDensityThreshold;
 };
 
 // From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
@@ -101,14 +104,11 @@ void main() {
 
 	float t = 1.0 / (3.0 * density); // arbitraire
 
-	vec3 lightBlue = vec3(0.0, 0.902, 1.0);
-	vec3 darkBlue = vec3(0, 0.447, 0.839);
-
-	vec3 col;
-	if(density > 0.05)
-		col = mix(darkBlue, lightBlue, t);
+	vec4 col;
+	if(density > lowDensityThreshold)
+		col = mix(highDensityColor, lowDensityColor, t);
 	else
-		col = vec3(0);
+		col = vec4(0);
 
-	imageStore(imgOutput, cell, vec4(col, 0.5));
+	imageStore(imgOutput, cell, col);
 }

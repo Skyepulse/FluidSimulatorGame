@@ -22,7 +22,7 @@ RenderTexture2D::~RenderTexture2D()
 	glDeleteTextures(1, &m_RendererID);
 }
 
-void RenderTexture2D::BindImage(uint32_t slot)
+void RenderTexture2D::Bind(uint32_t slot) const
 {
 	m_ImageSlot = slot;
 	glActiveTexture(GL_TEXTURE0 + m_ImageSlot);
@@ -30,7 +30,7 @@ void RenderTexture2D::BindImage(uint32_t slot)
 	glBindImageTexture(m_ImageSlot, m_RendererID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 }
 
-void RenderTexture2D::UnbindImage() const
+void RenderTexture2D::Unbind() const
 {
 	glActiveTexture(GL_TEXTURE0 + m_ImageSlot);
 	glBindTexture(GL_TEXTURE_2D, 0);

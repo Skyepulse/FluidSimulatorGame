@@ -11,8 +11,8 @@ public:
 	RenderTexture2D(uint32_t width, uint32_t height);
 	~RenderTexture2D();
 
-	void BindImage(uint32_t slot);
-	void UnbindImage() const;
+	virtual void Bind(uint32_t slot) const override;
+	virtual void Unbind() const override;
  
 private:
 	mutable uint32_t m_ImageSlot;
