@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameLayer.h"
+#include "LevelLayer.h"
 
 class Game2 : public LevelLayer
 {
@@ -11,15 +11,10 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void Update() override;
+	virtual void UpdateGame() override;
 	virtual bool OnEvent(Event& e) override;
-
-	float getTime() const override { return maxTime; }
-
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
-	Solver solver;
-	int winningGlassParticles;
 
 	std::shared_ptr<Circle> circleWalls;
 	std::shared_ptr<Circle> circleLiquid;
@@ -39,6 +34,4 @@ private:
 	bool _glassMoveUp = false;
 
 	int _maxParticles;
-
-	float maxTime = 100.0f;
 };

@@ -194,11 +194,6 @@ private:
 
 	vector<vector<tIndex>> _particlesInGrid;
 
-	vector<ParticleGroup> _glassGroups;
-	vector<ParticleGroup> _wallGroups;
-
-	vector<RigidBody> _rigidBodies;
-
 	bool _moveGlassLeft = false;
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
@@ -217,6 +212,11 @@ private:
 	void setupBuffers();
 
 	bool _infiniteWalls = false;
+public:
+	vector<ParticleGroup> _glassGroups;
+	vector<ParticleGroup> _wallGroups;
+
+	vector<RigidBody> _rigidBodies;
 };
 
 #endif // !_SOLVER_H_

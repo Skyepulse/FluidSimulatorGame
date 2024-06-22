@@ -1,7 +1,7 @@
 #include "Game4.h"
 #include <algorithm>
 
-Game4::Game4() : LevelLayer("Game4 Layer")
+Game4::Game4() : LevelLayer("Game4 Layer", Bound(glm::vec2(36.0, 50.0)))
 {
 }
 
@@ -30,30 +30,28 @@ void Game4::OnAttach()
 
 	Real resX = 36.0f;
 	Real resY = 50.0f;
-	solver.initSimulation(resX, resY);
 
 	//Draw level
-	solver.drawWalls(resX, resY);
-	solver.drawAngleLineWall(Vec2f(0.0f, 7.0f * resY / 10.0f), 30, -30, 1);
-	solver.drawAngleLineWall(Vec2f(23.0f, 5.5f * resY / 10.0f), 30, 30, 1);
-	solver.drawAngleLineWall(Vec2f(7, 3.0f * resY / 10.0f), 43, 0, 1);
+	m_Solver.drawAngleLineWall(Vec2f(0.0f, 7.0f * resY / 10.0f), 30, -30, 1);
+	m_Solver.drawAngleLineWall(Vec2f(23.0f, 5.5f * resY / 10.0f), 30, 30, 1);
+	m_Solver.drawAngleLineWall(Vec2f(7, 3.0f * resY / 10.0f), 43, 0, 1);
 	int width = 10;
 	int height = 10;
 
 	winningGlassIndex = 0;
-	solver.drawWinningGlass(width, height, Vec2f(16, 1));
+	m_Solver.drawWinningGlass(width, height, Vec2f(16, 1));
 
-	// solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
+	// m_Solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
 
-	solver.setSpawnPosition(Vec2f(4, resY - 4));
+	m_Solver.setSpawnPosition(Vec2f(4, resY - 4));
 
-	solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 5, 0, ViscosityType::FLUID);
-	solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 15), 10, 5, 0, ViscosityType::VISCOUS);
+	m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 5, 0, ViscosityType::FLUID);
+	m_Solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 15), 10, 5, 0, ViscosityType::VISCOUS);
 
-	solver.init();
+	m_Solver.init();
 
-	winningGlassParticles = solver.getWinningGlass();
-	particleSpawnPosition = solver.getSpawnPosition();
+	winningGlassParticles = m_Solver.getWinningGlass();
+	particleSpawnPosition = m_Solver.getSpawnPosition();
 
 	rectangle = std::make_shared<Rectangle>();
 	rectangle->Transform->SetSize(glm::vec2(100.0f));
@@ -74,41 +72,8 @@ void Game4::OnDetach()
 {
 }
 
-void Game4::Update()
+void Game4::UpdateGame()
 {
-	Renderer::DrawShape(rectangle);
-	
-	// ----------- HANDLE FRAMERATE ----------
-	Real _dt = 0.0f;
-	double currentTime = Time::GetSeconds();
-	double frameTime = currentTime - previousTime;
-	previousTime = currentTime;
-	accumulator += frameTime;
-
-	if (!SHOULD_FPSCAP) accumulator = 0.0;
-
-	while (accumulator >= MIN_FRAME_TIME) {
-		if(state != GameState::PAUSED){
-            double step = solver.update();
-            accumulator -= step;
-			_dt += step;
-        } else {
-			accumulator = 0.0;
-			break;
-		}
-	}
-	if(state == GameState::RUNNING) maxTime -= _dt;
-	if (maxTime < 0.0) {
-		maxTime = 0.0;
-		state = GameState::LOSE;
-	}
-
-	if (accumulator > MIN_FRAME_TIME) return;
-
-	// ----------- END HANDLE FRAMERATE ----------
-
-	vector<Particle> particleManager = solver.getParticleManager();
-
 	vector<Vec2f> wallsPositions;
 	vector<Vec2f> liquidPositions;
 	vector<Vec2f> glassPositions;
@@ -119,17 +84,17 @@ void Game4::Update()
 	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
-	solver.moveGlass(winningGlassIndex, velVec, true);
+	m_Solver.moveGlass(winningGlassIndex, velVec, true);
 
-	for (size_t i = 0; i < particleManager.size(); i++)
+	for (size_t i = 0; i < m_Particles.size(); i++)
 	{
-		if (particleManager[i].type == 1)
-			wallsPositions.push_back(particleManager[i].pos);
-		else if (particleManager[i].type == 0)
-			if(particleManager[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(particleManager[i].pos);
-			else viscousLiquidPositions.push_back(particleManager[i].pos);
+		if (m_Particles[i].type == 1)
+			wallsPositions.push_back(m_Particles[i].pos);
+		else if (m_Particles[i].type == 0)
+			if(m_Particles[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(m_Particles[i].pos);
+			else viscousLiquidPositions.push_back(m_Particles[i].pos);
 		else
-			glassPositions.push_back(particleManager[i].pos);
+			glassPositions.push_back(m_Particles[i].pos);
 
 	}
 
@@ -137,13 +102,6 @@ void Game4::Update()
 	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
 	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
 	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
-
-	int particlesInGlass = solver.getParticlesInGlass();
-	if (particlesInGlass >= winningGlassParticles)
-	{
-		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		state = GameState::WIN;
-	}
 }
 
 bool Game4::OnEvent(Event& e)
@@ -155,7 +113,7 @@ bool Game4::OnEvent(Event& e)
 			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
+		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
 		return true;

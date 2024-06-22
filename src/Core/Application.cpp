@@ -34,7 +34,7 @@ Application::Application()
 	userInterface = std::make_shared<UserInterface>();
 	userInterface->init(m_Window.get());
 
-  // TEMP A CHANGER
+	// TEMP A CHANGER
 	// Enable Blending
 	RendererCommand::EnableBlending(true);
 }

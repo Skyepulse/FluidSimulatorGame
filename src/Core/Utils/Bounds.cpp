@@ -6,9 +6,15 @@ Bound::Bound(const glm::vec2& minCorner, const glm::vec2& maxCorner)
 
 }
 
+Bound::Bound(const glm::vec2& maxCorner)
+    : MinCorner(glm::vec2(0)), MaxCorner(maxCorner)
+{
+
+}
+
 bool Bound::InBound(glm::vec2 p) const
 {
-    return p.x < MaxCorner.x && p.x > MinCorner.x && p.y < MaxCorner.y && p.y > MinCorner.y;
+    return p.x <= MaxCorner.x && p.x >= MinCorner.x && p.y <= MaxCorner.y && p.y >= MinCorner.y;
 }
 
 bool Bound::Includes(const Bound& bound) const
