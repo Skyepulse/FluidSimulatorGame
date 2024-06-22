@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
+
 UserInterface::~UserInterface(){
     ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -23,6 +24,11 @@ void UserInterface::init(Window *window){
     windowHeight = window->GetHeight();
 
     reloadFonts();
+}
+
+void UserInterface::reset(){
+    hintStartTime = -1;
+    setHintMessage("");
 }
 
 void UserInterface::reloadFonts() {
@@ -70,6 +76,10 @@ void UserInterface::show(){
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void UserInterface::setHintMessage(const char *hint){
+    strcpy(hintString, hint);
 }
 
 void UserInterface::buildMenu(){
@@ -156,6 +166,27 @@ void UserInterface::buildMenu(){
     }
 }
 
+void UserInterface::buildHint(const char* message){
+
+    float time = ImGui::GetTime();
+
+    if (hintStartTime == -1) hintStartTime = time;
+    if (time - hintStartTime > HINT_DURATION) return;
+
+    ImVec2 textSize = ImGui::CalcTextSize(message);
+    ImVec2 textPos((windowWidth - textSize.x) / 2, (windowHeight - textSize.y) / 2);
+    ImGui::SetCursorPos(textPos);
+
+    float alpha = (std::sin(time * 2.0f * M_PI * 0.5f) * 0.5f) + 0.5f;
+
+    ImVec4 textColor(1.0f, 1.0f, 1.0f, alpha);
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+
+    ImGui::Text("%s", message);
+
+    ImGui::PopStyleColor();
+}
+
 void UserInterface::buildPopUp(const char* message, const char* subMessage, ImVec4 color, ImVec4 hoverColor, void (*onClick)()){
     ImVec2 rectSize(std::min(windowHeight, windowWidth)/2.5f, std::min(windowHeight, windowWidth) / 5.0f);
 
@@ -212,6 +243,11 @@ void UserInterface::buildInGame(){
         state = 2;
     }
 
+    ImGui::SetCursorPos(ImVec2(windowWidth - 130, 0));
+    if (ImGui::Button("?", ImVec2(60, 60))) {
+        hintStartTime = -1;
+    }
+
     Application* app = Application::Get();
 
     int timer = ceil(app->getGameTime());
@@ -231,6 +267,8 @@ void UserInterface::buildInGame(){
     } else if (app->getGameState() == GameState::LOSE){
         buildPopUp("YOU LOSE!", "Restart level", ImVec4(0.6f, 0.2f, 0.2f, 1.0f), ImVec4(0.7f, 0.3f, 0.3f, 1.0f), []() {Application::Get()->restartGame();});
     }
+
+    buildHint(hintString);
 }
 
 void UserInterface::buildPause(){

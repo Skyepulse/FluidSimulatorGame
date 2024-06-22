@@ -66,6 +66,8 @@ void Game5::OnAttach()
 	Bound a_inter_b = Bound::Intersection(a, b);
 	Bound a_inter_c = Bound::Intersection(a, c);
 	Bound b_inter_c = Bound::Intersection(c, b);
+
+	Application::Get()->GetUI()->setHintMessage("Press C or B to rotate the glass !");
 }
 
 void Game5::OnDetach()

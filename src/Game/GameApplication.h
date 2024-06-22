@@ -18,6 +18,8 @@ public:
 
     void loadGame(int index) override {
 		unloadGame();
+		userInterface->reset();
+
 		switch (index)
 		{
 		case 1:

@@ -65,6 +65,8 @@ void Game::OnAttach()
 	DEBUG("a inter b : {}, {}; {}, {}", a_inter_b.MinCorner.x, a_inter_b.MinCorner.y, a_inter_b.MaxCorner.x, a_inter_b.MaxCorner.y);
 	DEBUG("a inter c : {}, {}; {}, {}", a_inter_c.MinCorner.x, a_inter_c.MinCorner.y, a_inter_c.MaxCorner.x, a_inter_c.MaxCorner.y);
 	DEBUG("b inter c : {}, {}; {}, {}", b_inter_c.MinCorner.x, b_inter_c.MinCorner.y, b_inter_c.MaxCorner.x, b_inter_c.MaxCorner.y);
+	
+	Application::Get()->GetUI()->setHintMessage("Press <- and -> to move the glass !");
 }
 
 void Game::OnDetach()

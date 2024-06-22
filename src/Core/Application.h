@@ -44,9 +44,12 @@ public:
   
   std::shared_ptr<CameraController> GetCameraController() const { return m_Controller; }
 
+  std::shared_ptr<UserInterface> GetUI() const { return userInterface; }
+
   ~Application();
 protected:
   Application();
+  std::shared_ptr<UserInterface> userInterface;
 
 private:
   static Application* s_Instance; 
@@ -55,5 +58,4 @@ private:
 
   std::shared_ptr<CameraController> m_Controller;
 
-  UserInterface userInterface;
 };

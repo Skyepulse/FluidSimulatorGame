@@ -57,6 +57,8 @@ void Game2::OnAttach()
 	particleSpawnPosition = solver.getSpawnPosition();
 
 	_glassMoveUp = true;
+
+	Application::Get()->GetUI()->setHintMessage("Press P to release water !");
 }
 
 void Game2::OnDetach()
