@@ -102,11 +102,11 @@ void main() {
 		}
 	}
 
-	float t = 1.0 / (3.0 * density); // arbitraire
+	float t = 3.0 * density; // arbitraire
 
 	vec4 col;
 	if(density > lowDensityThreshold)
-		col = mix(highDensityColor, lowDensityColor, t);
+		col = mix(lowDensityColor, highDensityColor, t);
 	else
 		col = vec4(0);
 

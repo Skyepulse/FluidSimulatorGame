@@ -4,7 +4,7 @@ layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 layout(std430, binding = 1) buffer Particles {
-	vec2 particles[];
+	vec2 particles[500];
 };
 
 layout(std430, binding = 2) buffer ParticlesInd {
@@ -24,11 +24,12 @@ layout(std430, binding = 3) buffer LevelInfos {
 void main() {
 	ivec2 x = ivec2(gl_GlobalInvocationID.xy);
 
-	imageStore(imgOutput, x, vec4(0.0, 0.0, 0.0, 0.0));
-
-	uint index = uint(x.y * densTexSize.x + x.x);
+	uint index = uint(x.x);
 	if(index >= particleCount)
 		return;
 
-	particleindex[index] = uvec4(0, 0, 0, 0);
+	vec2 pos = particles[index] * float(densityZoomFactor);
+	ivec2 cell = ivec2(pos);
+
+	imageStore(imgOutput, cell, lowDensityColor);
 }

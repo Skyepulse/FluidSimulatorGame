@@ -35,13 +35,11 @@ void Game::OnAttach()
 	int height = 10;
 	m_Solver.drawWinningGlass(width, height, Vec2f(1, 1));
 
-	m_Solver.addRigidBody(Vec2f(2*width, 5), width, height, 10);
+	m_Solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
 
 	m_Solver.setSpawnPosition(Vec2f(4, resY - 4));
 
-	m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
-
-	m_Solver.setGlassSpeed(4.0f, 0.0f);
+	m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10, 0, ViscosityType::FLUID);
 
 	m_Solver.init();
 
@@ -55,39 +53,12 @@ void Game::OnDetach()
 
 void Game::UpdateGame()
 {
-	Real _dt = 0.0f;
-	if (m_State != GameState::PAUSED) _dt = m_Solver.update();
-	if (m_State == GameState::RUNNING) maxTime -= _dt;
-	if (maxTime < 0.0) {
-		maxTime = 0.0;
-		m_State = GameState::LOSE;
-	}
-
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-
-	for (size_t i = 0; i < m_Particles.size(); i++)
-	{
-		if (m_Particles[i].type == 1)
-			wallsPositions.push_back(m_Particles[i].pos);
-		else if(m_Particles[i].type == 0)
-			liquidPositions.push_back(m_Particles[i].pos);
-		else
-			glassPositions.push_back(m_Particles[i].pos);
-
-	}
-
-	//Renderer::DrawShapeDuplicate(m_WallParticle, wallsPositions);
-	//Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-
-	int particlesInGlass = m_Solver.getParticlesInGlass();
-	if (particlesInGlass >= winningGlassParticles)
-	{
-		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		m_State = GameState::WIN;
-	}
+	Vec2f velVec = Vec2f(0, 0);
+	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
+	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
+	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
+	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
+	m_Solver.moveGlass(winningGlassIndex, velVec, true);
 }
 
 bool Game::OnEvent(Event& e)
@@ -95,23 +66,24 @@ bool Game::OnEvent(Event& e)
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT)
+		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT
+			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
-		if (keypressed.GetKey() == CORE_KEY_LEFT) m_Solver.moveGlassLeft(true);
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) m_Solver.moveGlassRight(true);
-
+		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
+		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
+		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
 
 		return true;
 	} else if(e.GetEventType() == EventType::KeyReleased) {
 		KeyReleasedEvent& keyreleased = dynamic_cast<KeyReleasedEvent&>(e);
 
-		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT)
+		if (keyreleased.GetKey() != CORE_KEY_LEFT && keyreleased.GetKey() != CORE_KEY_RIGHT
+			&& keyreleased.GetKey() != CORE_KEY_UP && keyreleased.GetKey() != CORE_KEY_DOWN)
 			return false;
 
-		if (keyreleased.GetKey() == CORE_KEY_LEFT) m_Solver.moveGlassLeft(false);
-		if (keyreleased.GetKey() == CORE_KEY_RIGHT) m_Solver.moveGlassRight(false);
+		if (keyreleased.GetKey() == CORE_KEY_LEFT) moveGlassLeft = false;
+		if (keyreleased.GetKey() == CORE_KEY_RIGHT) moveGlassRight = false;
 
 		return true;
 	}

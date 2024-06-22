@@ -14,11 +14,8 @@ public:
   virtual void UpdateGame() override;
   virtual bool OnEvent(Event& e) override;
 
-  float getTime() const override { return maxTime; }
-
 private:
   Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
-  int winningGlassParticles;
 
   //std::shared_ptr<Circle> circleWalls;
   std::shared_ptr<Circle> circleLiquid;
@@ -27,5 +24,11 @@ private:
   Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
   Real particleSpawnRadius = 4.0f;
 
-  float maxTime = 100.0f;
+  bool moveGlassUp = false;	
+  bool moveGlassDown = false;
+  bool moveGlassLeft = false;
+  bool moveGlassRight = false;
+  Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
+  Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
+  int winningGlassIndex = 0;
 };

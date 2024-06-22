@@ -17,7 +17,6 @@ class LevelLayer : public Layer
 	};
 public:
 	LevelLayer(const std::string& name, const Bound& levelBound);
-	LevelLayer(const std::string& name) : Layer(name), m_DensityCompute(ComputeShader("")), m_ResetCompute(ComputeShader("")), m_SpatialHashCompute(ComputeShader("")) {}
 	~LevelLayer() {}
 
 	virtual void OnAttach() = 0;
@@ -27,13 +26,23 @@ public:
 	virtual void UpdateGame() = 0;
 	virtual bool OnEvent(Event& e) = 0;
 
-	virtual float getTime() const = 0;
+	float getTime() const { return maxTime; };
 
 	GameState getState() const { return m_State; }
 
 	void setPaused() { m_State = GameState::PAUSED; }
 	void setRunning() { m_State = GameState::RUNNING; }
+private:
+	void HandleFramerate();
+	void CheckPlayerWin();
 
+	void InitComputeRect(std::shared_ptr<Rectangle>& rect, std::shared_ptr<RenderTexture2D>& renderTexture, const Bound& bound);
+	void ComputeStaticWallParticleTexture();
+	void ComputeMovingWallParticleTexture();
+	void ComputeGlassParticleTexture();
+	void ComputeRigidBodyParticleTexture();
+	void ComputeFluidParticleTexture();
+	void DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions, bool useDensity = true);
 protected:
 	GameState m_State = GameState::RUNNING;
 
@@ -42,18 +51,36 @@ protected:
 	Solver m_Solver;
 	std::vector<Particle> m_Particles;
 
-	std::shared_ptr<Circle> m_WallParticle;
 	uint32_t m_MaxParticle = 1000;
+
+	int winningGlassParticles;
 private:
-	std::shared_ptr<Rectangle> m_MovingParticleRect;
-	std::shared_ptr<Rectangle> m_StaticParticleRect;
+	glm::vec4 m_GlassColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
+	glm::vec4 m_WinningGlassColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
+
+	double previousTime;
+	float maxTime = 100.0f;
+
+	const double MIN_FRAME_TIME = 0.0f;
+	double accumulator;
+	const bool SHOULD_FPSCAP = false;
+
+	std::shared_ptr<Rectangle> m_MovingWallParticleRect;
+	std::shared_ptr<Rectangle> m_StaticWallParticleRect;
+	std::shared_ptr<Rectangle> m_GlassParticleRect;
+	std::shared_ptr<Rectangle> m_RigidbodyParticleRect;
+	std::shared_ptr<Rectangle> m_FluidParticleRect;
 
 	ComputeShader m_ResetCompute;
 	ComputeShader m_DensityCompute;
+	ComputeShader m_PartCountCompute;
 	ComputeShader m_SpatialHashCompute;
 
-	std::shared_ptr<RenderTexture2D> m_MovingParticleTexture;
-	std::shared_ptr<RenderTexture2D> m_StaticParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_MovingWallParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_StaticWallParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_GlassParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_RigidbodyParticleTexture;
+	std::shared_ptr<RenderTexture2D> m_FluidParticleTexture;
 
 	std::vector<glm::uvec4> m_HashTable;
 	LevelInfo m_LevelInfo;

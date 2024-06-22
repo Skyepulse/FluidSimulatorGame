@@ -7,7 +7,8 @@
 class Bound
 {
 public:
-    Bound(const glm::vec2& minCorner = glm::vec2(0), const glm::vec2& maxCorner = glm::vec2(0));
+    Bound(const glm::vec2& minCorner, const glm::vec2& maxCorner);
+    Bound(const glm::vec2& maxCorner = glm::vec2(0));
 
     bool InBound(glm::vec2 p) const;
     bool Includes(const Bound& bound) const;

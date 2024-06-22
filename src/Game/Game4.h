@@ -2,11 +2,11 @@
 
 #include "LevelLayer.h"
 
-class Game2 : public LevelLayer
+class Game4 : public LevelLayer
 {
 public:
-	Game2();
-	~Game2();
+	Game4();
+	~Game4();
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -19,19 +19,18 @@ private:
 	std::shared_ptr<Circle> circleWalls;
 	std::shared_ptr<Circle> circleLiquid;
 	std::shared_ptr<Circle> circleGlass;
+	std::shared_ptr<Circle> circleViscousLiquid;
+
+	std::shared_ptr<Rectangle> rectangle;
 
 	Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
 	Real particleSpawnRadius = 4.0f;
-	Real _resX;
-	Real _resY;
-	Real glassHeight = 0.0f;
-	Real glassWidth = 0.0f;
 
-	int glassIndex = 0;
-	Real _glassSpeedY = 2.0f;
-	Real _glassSpeedX = 4.0f;
-	bool _glassMoveDown = false;
-	bool _glassMoveUp = false;
-
-	int _maxParticles;
+	bool moveGlassUp = false;
+	bool moveGlassDown = false;
+	bool moveGlassLeft = false;
+	bool moveGlassRight = false;
+	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
+	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
+	int winningGlassIndex = 0;
 };
