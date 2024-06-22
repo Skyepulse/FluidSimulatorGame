@@ -16,6 +16,7 @@ public:
 
 	bool OnEvent(Event& e);
 	void SetCameraMovementBound(const Bound bound);
+	void SetCameraPosition(const glm::vec2& position);
 
 	std::shared_ptr<Camera> GetCamera() const { return m_Camera; }
 private:

@@ -12,20 +12,18 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
-	ivec2 size;
+	vec2 densTexSize;
 	uint particleCount;
-	uint zoomFactor;
+	uint densityZoomFactor;
+	uint backgroundZoomFactor;
 };
 
 void main() {
 	ivec2 x = ivec2(gl_GlobalInvocationID.xy);
 
-	if(x.x >= size.x || x.y >= size.y)
-		return;
-
 	imageStore(imgOutput, x, vec4(0.0, 0.0, 0.0, 1.0));
 
-	uint index = uint(x.y * size.x + x.x);
+	uint index = uint(x.y * densTexSize.x + x.x);
 	if(index >= particleCount)
 		return;
 

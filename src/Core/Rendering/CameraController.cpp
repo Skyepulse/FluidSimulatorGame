@@ -36,6 +36,22 @@ void CameraController::SetCameraMovementBound(const Bound bound)
     m_LimitBound = bound;
 }
 
+/// <summary>
+/// Set the camera position.
+/// Have to be called after setting the camera bound !
+/// </summary>
+/// <param name="position"></param>
+void CameraController::SetCameraPosition(const glm::vec2& position)
+{
+    CORE_DEBUG("Camera pos : {}, {}", position.x, position.y);
+
+    if (!m_LimitBound.InBound(position))
+        return;
+
+    m_CameraPosition = position;
+    m_Camera->SetPosition(position);
+}
+
 bool CameraController::OnKeyPressed(KeyPressedEvent &e)
 {
   glm::vec2 translation(0.0f);

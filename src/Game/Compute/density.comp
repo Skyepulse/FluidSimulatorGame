@@ -12,9 +12,10 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
-	ivec2 size;
+	vec2 densTexSize;
 	uint particleCount;
-	uint zoomFactor;
+	uint densityZoomFactor;
+	uint backgroundZoomFactor;
 };
 
 // From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
@@ -49,11 +50,19 @@ uint KeyFromHash(uint hash, uint tableSize)
 	return hash % tableSize;
 }
 
+// Density kernel
+const float h = 2.0;
+float densityKernel(float length_r)
+{
+	return 315.0 * pow((2.0 - length_r) * (2.0 + length_r), 3.0) / (64.0 * 3.141592 * pow(2.0, 9.0));
+}
+
 void main() {
 	vec2 cell_pos = gl_GlobalInvocationID.xy;
 	ivec2 cell = ivec2(cell_pos);
 
 	uint partcount = 0;
+	float density = 0.0;
 
 	// neighbour search
 	for(int i = 0; i < 9; i++)
@@ -67,30 +76,39 @@ void main() {
 		uint count = partind.x; // particle count 
 		uvec3 ind = partind.yzw; // particle ind, valid if count > 0 for x, 1 for y, 2 for z
 
-		vec2 candidate_pos = particles[ind.x] * float(zoomFactor);
-		if(length(cell_pos - candidate_pos) < 1.0)
+		vec2 candidate_pos = particles[ind.x] * float(densityZoomFactor);
+		float length_r = length(cell_pos - candidate_pos);
+		if(count > 0 && length_r < 2.0)
+		{
 			partcount += 1;
-		candidate_pos = particles[ind.y] * float(zoomFactor);
-		if(length(cell_pos - candidate_pos) < 1.0)
+			density += densityKernel(length_r);
+		}
+		candidate_pos = particles[ind.y] * float(densityZoomFactor);
+		length_r = length(cell_pos - candidate_pos);
+		if(count > 1 && length_r < 2.0)
+		{
 			partcount += 1;
-		candidate_pos = particles[ind.z] * float(zoomFactor);
-		if(length(cell_pos - candidate_pos) < 1.0)
+			density += densityKernel(length_r);
+		}
+		candidate_pos = particles[ind.z] * float(densityZoomFactor);
+		length_r = length(cell_pos - candidate_pos);
+		if(count > 2 && length_r < 2.0)
+		{
 			partcount += 1;
-
+			density += densityKernel(length_r);
+		}
 	}
 
-	imageStore(imgOutput, cell, vec4(0.0, 0.0, float(partcount) / 5.0, 1.0));
+	float t = 1.0 / (3.0 * density); // arbitraire
 
-	/*ivec2 x = ivec2(gl_GlobalInvocationID.xy);
+	vec3 lightBlue = vec3(0.0, 0.902, 1.0);
+	vec3 darkBlue = vec3(0, 0.447, 0.839);
 
-	uint index = x.x;
-	if(index >= particleCount)
-		return;
+	vec3 col;
+	if(density > 0.05)
+		col = mix(darkBlue, lightBlue, t);
+	else
+		col = vec3(0);
 
-	vec2 texPos = particles[index] * float(zoomFactor);
-
-	vec2 uv = texPos / vec2(size);
-	ivec2 pos = ivec2(texPos);
-
-    imageStore(imgOutput, pos, vec4(0.0, 0.0, 1.0, 1.0));*/
+	imageStore(imgOutput, cell, vec4(col, 0.5));
 }
