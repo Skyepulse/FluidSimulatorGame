@@ -16,8 +16,6 @@ public:
 
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
-	Solver solver;
-	int winningGlassParticles;
 
 	std::shared_ptr<Circle> circleWalls;
 	std::shared_ptr<Circle> circleLiquid;
@@ -37,5 +35,6 @@ private:
 	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
 	int winningGlassIndex = 0;
 
-	float maxTime = 100.0f;
+	int barrier1Index = 0;
+	int barrier2Index = 1;
 };

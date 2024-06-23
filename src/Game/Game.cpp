@@ -41,6 +41,9 @@ void Game::OnAttach()
 
 	m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10, 0, ViscosityType::FLUID);
 
+	m_Solver.setViscosityForWin(ViscosityType::VISCOUS);
+	m_Solver.setViscosityForWin(ViscosityType::FLUID);
+
 	m_Solver.init();
 
 	winningGlassParticles = m_Solver.getWinningGlass();

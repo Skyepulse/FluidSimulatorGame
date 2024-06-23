@@ -144,6 +144,8 @@ public:
 	void activateInfiniteWalls() { _infiniteWalls = true; }
 	void deactivateInfiniteWalls() { _infiniteWalls = false; }
 
+	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.push_back(viscosityType); }
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
@@ -212,6 +214,9 @@ private:
 	void setupBuffers();
 
 	bool _infiniteWalls = false;
+
+	bool _specificParticlesWin = false;
+	vector<ViscosityType> _specificParticlesViscosity;
 public:
 	vector<ParticleGroup> _glassGroups;
 	vector<ParticleGroup> _wallGroups;
