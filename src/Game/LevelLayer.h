@@ -56,6 +56,14 @@ protected:
 	int winningGlassParticles;
 
 	Real _dt = 0.0f;
+
+	Real GlassMinX = -1.0f;
+	Real GlassMaxX = 1.0f;
+	Real GlassMinY = -1.0f;
+	Real GlassMaxY = 1.0f;
+
+	Real resX;
+	Real resY;
 private:
 	glm::vec4 m_GlassColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 	glm::vec4 m_WinningGlassColor = glm::vec4(0.0, 1.0, 0.0, 1.0);

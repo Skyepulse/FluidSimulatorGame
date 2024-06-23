@@ -74,7 +74,13 @@ void Game7::OnAttach()
 	winningGlassParticles = 10;
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
+	GlassMinX = 8;
+	GlassMaxX = -width / 2.0f - 1;
+
+
 	Application::Get()->GetUI()->setHintMessage("Pour just a little blue fluid in the glass!");
+
+
 }
 
 void Game7::OnDetach()
@@ -84,8 +90,9 @@ void Game7::OnDetach()
 void Game7::UpdateGame()
 {
 	Vec2f velVec = Vec2f(0, 0);
-	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
-	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
+	Vec2f pos = m_Solver.getGlassPosition();
+	if (moveGlassLeft && pos.x > GlassMinX) velVec.x -= _moveGlassSpeedX;
+	if (moveGlassRight && pos.x < resX + GlassMaxX) velVec.x += _moveGlassSpeedX;
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	m_Solver.moveGlass(winningGlassIndex, velVec, true);

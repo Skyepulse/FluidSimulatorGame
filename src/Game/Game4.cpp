@@ -53,19 +53,10 @@ void Game4::OnAttach()
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
-	rectangle = std::make_shared<Rectangle>();
-	rectangle->Transform->SetSize(glm::vec2(100.0f));
-	Bound bound(glm::vec2(-50.0), glm::vec2(50.0));
+	GlassMinX = 1;
+	GlassMaxX = -width / 2.0f - 1;
 
-	Application::Get()->GetCameraController()->SetCameraMovementBound(bound);
-
-	Bound a(glm::vec2(0.1), glm::vec2(1.0));
-	Bound b(glm::vec2(0.1), glm::vec2(2.0));
-	Bound c(glm::vec2(0.0), glm::vec2(3.0));
-
-	Bound a_inter_b = Bound::Intersection(a, b);
-	Bound a_inter_c = Bound::Intersection(a, c);
-	Bound b_inter_c = Bound::Intersection(c, b);
+	Application::Get()->GetUI()->setHintMessage("What about two viscosities at once?");
 }
 
 void Game4::OnDetach()
@@ -80,8 +71,9 @@ void Game4::UpdateGame()
 	vector<Vec2f> viscousLiquidPositions;
 
 	Vec2f velVec = Vec2f(0, 0);
-	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
-	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
+	Vec2f pos = m_Solver.getGlassPosition();
+	if (moveGlassLeft && pos.x > GlassMinX) velVec.x -= _moveGlassSpeedX;
+	if (moveGlassRight && pos.x < resX + GlassMaxX) velVec.x += _moveGlassSpeedX;
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	m_Solver.moveGlass(winningGlassIndex, velVec, true);

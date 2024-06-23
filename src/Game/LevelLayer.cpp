@@ -29,6 +29,9 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 	m_Solver.initSimulation(BoundSize.x, BoundSize.y);
 	if (drawWalls) m_Solver.drawWalls(BoundSize.x, BoundSize.y);
 
+	resX = BoundSize.x;
+	resY = BoundSize.y;
+
 	Application::Get()->GetCameraController()->SetCameraMovementBound(m_Bound);
 	Application::Get()->GetCameraController()->SetCameraPosition(levelBound.MaxCorner / 2.0f + levelBound.MinCorner);
 	Application::Get()->GetCameraController()->AdaptZoomLevel(m_Bound);

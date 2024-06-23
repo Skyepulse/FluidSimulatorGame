@@ -38,6 +38,7 @@ private:
 	std::shared_ptr<Circle> circleLiquid;
 	std::shared_ptr<Circle> circleGlass;
 	std::shared_ptr<Circle> circleViscousLiquid;
+	std::shared_ptr<Circle> circleDebug;
 
 	std::shared_ptr<Rectangle> rectangle;
 

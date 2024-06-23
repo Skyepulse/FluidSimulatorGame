@@ -15,6 +15,7 @@ void Game5::OnAttach()
 	circleLiquid = std::make_shared<Circle>();
 	circleGlass = std::make_shared<Circle>();
 	circleViscousLiquid = std::make_shared<Circle>();
+	circleDebug = std::make_shared<Circle>();
 
 
 	float circleRadius = 0.5f;
@@ -22,11 +23,13 @@ void Game5::OnAttach()
 	circleLiquid->Transform->Scale2D(circleRadius);
 	circleGlass->Transform->Scale2D(circleRadius);
 	circleViscousLiquid->Transform->Scale2D(circleRadius);
+	circleDebug->Transform->Scale2D(circleRadius);
 
 	circleWalls->SetColor(glm::vec3(0.6f));
 	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
 	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
 	circleViscousLiquid->SetColor(glm::vec3(0.2f, 0.7f, 0.3f));
+	circleDebug->SetColor(glm::vec3(0.7f, 0.7f, 0.0f));
 
 	Real resX = 36.0f;
 	Real resY = 50.0f;
@@ -76,6 +79,9 @@ void Game5::OnDetach()
 void Game5::UpdateGame()
 {	
 	rotatecenter += _dt * velVec;
+
+	circleDebug->Transform->SetPosition2D(glm::vec2(rotatecenter.x, rotatecenter.y));
+	Renderer::DrawShape(circleDebug);
 
 	if (isRotatingGlass) {
 		timerGlass += _dt * rotationDirection;
