@@ -144,6 +144,8 @@ public:
 	void activateInfiniteWalls() { _infiniteWalls = true; }
 	void deactivateInfiniteWalls() { _infiniteWalls = false; }
 
+	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.push_back(viscosityType); }
+
 	Vec2f getGravity() { return _g; }
 	void setGravity( Vec2f &g ) { _g = g; }
 
@@ -215,6 +217,9 @@ private:
 	void setupBuffers();
 
 	bool _infiniteWalls = false;
+
+	bool _specificParticlesWin = false;
+	vector<ViscosityType> _specificParticlesViscosity;
 public:
 	vector<ParticleGroup> _glassGroups;
 	vector<ParticleGroup> _wallGroups;

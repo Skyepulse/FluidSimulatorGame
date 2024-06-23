@@ -241,6 +241,9 @@ void Solver::adaptDt() {
 		}
 		maxVel2 = max(maxVel2, particleVel2);
 	}
+	for (auto& rBody : _rigidBodies) {
+		maxVel2 = max(maxVel2, rBody.vel.lengthSquare());
+	}
 	Real maxVel = sqrt(maxVel2);
 	//CORE_DEBUG("Max velocity: {}", maxVel);
 	if(maxVel == 0e0) _dt = DEFAULT_DT;
@@ -278,8 +281,14 @@ void Solver::updatePos(const Real dt) {
 
 		//We check if the particle is inside the glass
 		if (_particleData[i].pos.x >= _glasscorner.x && _particleData[i].pos.x <= _glasscorner.x + _glassSize.x && _particleData[i].pos.y >= _glasscorner.y && _particleData[i].pos.y <= _glasscorner.y + _glassSize.y) {
-			if (!_particleData[i].isInGlass) _particlesInGlass++;
-			_particleData[i].isInGlass = true;
+			if (_specificParticlesWin && find(_specificParticlesViscosity.begin(), _specificParticlesViscosity.end(), _particleData[i].viscosityType) != _specificParticlesViscosity.end()) {
+				if (!_particleData[i].isInGlass) _particlesInGlass++;
+				_particleData[i].isInGlass = true;
+			}
+			else if(!_specificParticlesWin) {
+				if (!_particleData[i].isInGlass) _particlesInGlass++;
+				_particleData[i].isInGlass = true;
+			}
 		}
 		else {
 			if (_particleData[i].isInGlass) _particlesInGlass--;
