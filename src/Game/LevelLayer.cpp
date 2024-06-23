@@ -11,10 +11,18 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 	InitComputeRect(m_RigidbodyParticleRect, m_RigidbodyParticleTexture, levelBound);
 	InitComputeRect(m_FluidParticleRect, m_FluidParticleTexture, levelBound);
 
-	m_BackgroundData = DataBufferObject(m_Solver.getParticleManager().data(), m_MaxParticle * sizeof(Particle));
+	m_ParticlePositionBuffer = DataBufferObject(m_Solver.getParticleManager().data(), m_MaxParticle * sizeof(Vec2f));
+	m_ParticleViscosityBuffer = DataBufferObject(m_Solver.getParticleManager().data(), m_MaxParticle * sizeof(int));
+	m_ColorPerViscosity = {
+		glm::vec4(0.0, 0.902, 1.0, 0.8),
+		glm::vec4(0.0, 0.447, 0.839, 0.8),
+		glm::vec4(1.0, 0.0, 1.0, 0.8),
+		glm::vec4(1.0, 0.0, 0.0, 0.8),
+	};
+	m_ParticleViscosityColorBuffer = DataBufferObject(m_ColorPerViscosity.data(), m_ColorPerViscosity.size() * sizeof(glm::vec4));
 
 	m_HashTable = std::vector<glm::uvec4>(m_MaxParticle);
-	m_BackgroundHashTable = DataBufferObject(m_HashTable.data(), m_MaxParticle * sizeof(glm::uvec4));
+	m_BackgroundHashBuffer = DataBufferObject(m_HashTable.data(), m_MaxParticle * sizeof(glm::uvec4));
 
 	m_LevelInfo = LevelInfo();
 	m_LevelInfo.LowDensityColor = glm::vec4(0.0, 0.902, 1.0, 1.0);
@@ -50,10 +58,10 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 
 void LevelLayer::Update()
 {
-	m_Particles = m_Solver.getParticleManager();
-
 	HandleFramerate();
 	CheckPlayerWin();
+
+	m_Particles = m_Solver.getParticleManager();
 
 	ComputeMovingWallParticleTexture();
 	ComputeGlassParticleTexture();
@@ -136,7 +144,7 @@ void LevelLayer::ComputeStaticWallParticleTexture()
 	// Update color and threshold for walls
 	m_LevelInfo.LowDensityColor = glm::vec4(1.0);
 
-	DispatchComputes(m_StaticWallParticleTexture, pos, false);
+	DispatchComputes(m_StaticWallParticleTexture, pos);
 }
 
 void LevelLayer::ComputeMovingWallParticleTexture()
@@ -152,7 +160,7 @@ void LevelLayer::ComputeMovingWallParticleTexture()
 	// Update color and threshold for dynamic walls
 	m_LevelInfo.LowDensityColor = glm::vec4(1.0);
 
-	DispatchComputes(m_MovingWallParticleTexture, pos, false);
+	DispatchComputes(m_MovingWallParticleTexture, pos);
 }
 
 void LevelLayer::ComputeGlassParticleTexture()
@@ -168,7 +176,7 @@ void LevelLayer::ComputeGlassParticleTexture()
 	// Update color and threshold for glass particle
 	m_LevelInfo.LowDensityColor = m_GlassColor;
 
-	DispatchComputes(m_GlassParticleTexture, pos, false);
+	DispatchComputes(m_GlassParticleTexture, pos);
 }
 
 void LevelLayer::ComputeRigidBodyParticleTexture()
@@ -184,51 +192,79 @@ void LevelLayer::ComputeRigidBodyParticleTexture()
 	// Update color and threshold for rigidbody particle
 	m_LevelInfo.LowDensityColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
 
-	DispatchComputes(m_RigidbodyParticleTexture, pos, false);
+	DispatchComputes(m_RigidbodyParticleTexture, pos);
 }
 
 void LevelLayer::ComputeFluidParticleTexture()
 {
 	std::vector<Vec2f> pos;
+	std::vector<int> viscosityType;
 
 	for (const Particle& p : m_Particles)
-		if(p.type == 0)
+		if (p.type == 0)
+		{
 			pos.push_back(p.pos);
+			viscosityType.push_back(p.viscosityType);
+		}
 
 	// Update color and threshold for fluid particle
 	m_LevelInfo.LowDensityColor = glm::vec4(0.0, 0.902, 1.0, 1.0);
 	m_LevelInfo.HighDensityColor = glm::vec4(0, 0.447, 0.839, 1.0);
 	m_LevelInfo.LowDensityThreshold = 0.05;
 
-	DispatchComputes(m_FluidParticleTexture, pos);
+	DispatchComputes(m_FluidParticleTexture, pos, viscosityType);
 }
 
-void LevelLayer::DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions, bool useDensity)
+void LevelLayer::DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions, const std::vector<int>& particleViscType)
 {
 	renderTexture->Bind(0);
 
-	m_BackgroundData.Bind(1);
-	m_BackgroundData.UpdateData(particlePositions.data(), particlePositions.size() * sizeof(Vec2f));
+	m_ParticlePositionBuffer.Bind(1);
+	m_ParticlePositionBuffer.UpdateData(particlePositions.data(), particlePositions.size() * sizeof(Vec2f));
 
-	m_BackgroundHashTable.Bind(2);
-	m_BackgroundData.UpdateData(m_HashTable.data(), m_MaxParticle * sizeof(glm::uvec4));
+	m_BackgroundHashBuffer.Bind(2);
+	m_ParticlePositionBuffer.UpdateData(m_HashTable.data(), m_MaxParticle * sizeof(glm::uvec4));
+
+	m_LevelInfoBuffer.Bind(3);
+	m_LevelInfo.ParticleCount = particlePositions.size();
+	m_LevelInfoBuffer.UpdateData(&m_LevelInfo);
+
+	// Add particle viscosityy
+	m_ParticleViscosityBuffer.Bind(4);
+	m_ParticleViscosityBuffer.UpdateData(particleViscType.data(), particleViscType.size() * sizeof(int));
+
+	m_ParticleViscosityColorBuffer.Bind(5);
+
+	m_ResetCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
+	m_SpatialHashCompute.Dispatch((particlePositions.size() + 31) / 32, 1);
+	m_DensityCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
+
+	renderTexture->Unbind();
+	m_ParticlePositionBuffer.Unbind();
+	m_BackgroundHashBuffer.Unbind();
+	m_LevelInfoBuffer.Unbind();
+}
+
+
+void LevelLayer::DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions)
+{
+	renderTexture->Bind(0);
+
+	m_ParticlePositionBuffer.Bind(1);
+	m_ParticlePositionBuffer.UpdateData(particlePositions.data(), particlePositions.size() * sizeof(Vec2f));
+
+	m_BackgroundHashBuffer.Bind(2);
+	m_ParticlePositionBuffer.UpdateData(m_HashTable.data(), m_MaxParticle * sizeof(glm::uvec4));
 
 	m_LevelInfoBuffer.Bind(3);
 	m_LevelInfo.ParticleCount = particlePositions.size();
 	m_LevelInfoBuffer.UpdateData(&m_LevelInfo);
 
 	m_ResetCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
-	
-	if (useDensity)
-	{
-		m_SpatialHashCompute.Dispatch((particlePositions.size() + 31) / 32, 1);
-		m_DensityCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
-	}
-	else
-		m_PartCountCompute.Dispatch((particlePositions.size() + 31) / 32, 1);
+	m_PartCountCompute.Dispatch((particlePositions.size() + 31) / 32, 1);
 
 	renderTexture->Unbind();
-	m_BackgroundData.Unbind();
-	m_BackgroundHashTable.Unbind();
+	m_ParticlePositionBuffer.Unbind();
+	m_BackgroundHashBuffer.Unbind();
 	m_LevelInfoBuffer.Unbind();
 }

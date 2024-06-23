@@ -34,13 +34,7 @@ private:
 	bool moveIntermGlassRight = false;
 	Vec2f rotatecenter = Vec2f(0.0f, 0.0f);
 
-	std::shared_ptr<Circle> circleWalls;
-	std::shared_ptr<Circle> circleLiquid;
-	std::shared_ptr<Circle> circleGlass;
-	std::shared_ptr<Circle> circleViscousLiquid;
 	std::shared_ptr<Circle> circleDebug;
-
-	std::shared_ptr<Rectangle> rectangle;
 
 	Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
 	Real particleSpawnRadius = 4.0f;

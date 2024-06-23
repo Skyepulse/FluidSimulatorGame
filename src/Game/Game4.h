@@ -16,13 +16,6 @@ public:
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
 
-	std::shared_ptr<Circle> circleWalls;
-	std::shared_ptr<Circle> circleLiquid;
-	std::shared_ptr<Circle> circleGlass;
-	std::shared_ptr<Circle> circleViscousLiquid;
-
-	std::shared_ptr<Rectangle> rectangle;
-
 	Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
 	Real particleSpawnRadius = 4.0f;
 

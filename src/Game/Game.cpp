@@ -11,24 +11,10 @@ Game::~Game()
 
 void Game::OnAttach()
 {
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-
-
-	float circleRadius = 0.1f;
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-
-	//circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-
 	Real resX = 36.0f;
 	Real resY = 50.0f;
-	//solver.initSimulation(resX, resY);
 
 	//Draw level
-	//solver.drawWalls(resX, resY);
 	m_Solver.drawAngleLineWall(Vec2f(0, 7 * resY/10), 45, -30, 1);
 	m_Solver.drawAngleLineWall(Vec2f(20, 3 * resY / 10), 45, 30, 1);
 	int width = 10;

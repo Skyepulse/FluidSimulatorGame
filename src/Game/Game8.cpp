@@ -11,26 +11,12 @@ Game8::~Game8()
 
 void Game8::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-
-	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-
 	Real resX = 50.0f;
 	Real resY = 50.0f;
 	_resX = resX;
 	_resY = resY;
 
 	//Draw level
-
 	m_Solver.drawAngleLineWall(Vec2f(0, resY - 17), 40, 0);
 	m_Solver.drawAngleLineWall(Vec2f(20, resY - 17), 20, 90);
 
@@ -52,7 +38,6 @@ void Game8::OnAttach()
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
-
 	arrowTex = std::make_shared<Texture2D>("src/data/arrow.png");
 	arrow = std::make_shared<Rectangle>();
 	arrow->SetTexture(arrowTex.get());
@@ -61,7 +46,6 @@ void Game8::OnAttach()
 
 	arrowPos.emplace_back(-10, resY/2);
 	arrowPos.emplace_back(resX - 4, resY/2);
-
 
 	Application::Get()->GetUI()->setHintMessage("Press G to change gravity !");
 }

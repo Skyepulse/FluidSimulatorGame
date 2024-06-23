@@ -42,7 +42,10 @@ private:
 	void ComputeGlassParticleTexture();
 	void ComputeRigidBodyParticleTexture();
 	void ComputeFluidParticleTexture();
-	void DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions, bool useDensity = true);
+
+	void DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions);
+	void DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture, const std::vector<Vec2f>& particlePositions, const std::vector<int>& particleViscType);
+
 protected:
 	GameState m_State = GameState::RUNNING;
 
@@ -98,9 +101,12 @@ private:
 
 	std::vector<glm::uvec4> m_HashTable;
 	LevelInfo m_LevelInfo;
+	std::vector<glm::vec4> m_ColorPerViscosity;
 
-	DataBufferObject m_BackgroundData;
-	DataBufferObject m_BackgroundHashTable;
+	DataBufferObject m_ParticlePositionBuffer;
+	DataBufferObject m_ParticleViscosityBuffer;
+	DataBufferObject m_ParticleViscosityColorBuffer;
+	DataBufferObject m_BackgroundHashBuffer;
 	DataBufferObject m_LevelInfoBuffer;
 
 };

@@ -11,24 +11,9 @@ Game5::~Game5()
 
 void Game5::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-	circleViscousLiquid = std::make_shared<Circle>();
 	circleDebug = std::make_shared<Circle>();
-
-
 	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-	circleViscousLiquid->Transform->Scale2D(circleRadius);
 	circleDebug->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-	circleViscousLiquid->SetColor(glm::vec3(0.2f, 0.7f, 0.3f));
 	circleDebug->SetColor(glm::vec3(0.7f, 0.7f, 0.0f));
 
 	Real resX = 36.0f;
@@ -54,20 +39,6 @@ void Game5::OnAttach()
 
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
-
-	rectangle = std::make_shared<Rectangle>();
-	rectangle->Transform->SetSize(glm::vec2(100.0f));
-	Bound bound(glm::vec2(-50.0), glm::vec2(50.0));
-
-	Application::Get()->GetCameraController()->SetCameraMovementBound(bound);
-
-	Bound a(glm::vec2(0.1), glm::vec2(1.0));
-	Bound b(glm::vec2(0.1), glm::vec2(2.0));
-	Bound c(glm::vec2(0.0), glm::vec2(3.0));
-
-	Bound a_inter_b = Bound::Intersection(a, b);
-	Bound a_inter_c = Bound::Intersection(a, c);
-	Bound b_inter_c = Bound::Intersection(c, b);
 
 	Application::Get()->GetUI()->setHintMessage("Press C or B to rotate the glass !");
 }

@@ -11,19 +11,6 @@ Game2::~Game2()
 
 void Game2::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-
-	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-
 	Real resX = 36.0f;
 	Real resY = 50.0f;
 	_resX = resX;
@@ -34,8 +21,6 @@ void Game2::OnAttach()
 	m_Solver.setMaxParticles(_maxParticles);
 
 	//Draw level
-	//m_Solver.drawWalls(resX, resY);
-	//m_Solver.drawAngleLineWall(Vec2f(0, 0), resX*2, 0, 1);
 	m_Solver.drawAngleLineWall(Vec2f(0, resY-1), resX*2, 0, 1);
 
 	m_Solver.drawAngleLineWall(Vec2f(1, 1), resY*2 - 4, 90, 1);

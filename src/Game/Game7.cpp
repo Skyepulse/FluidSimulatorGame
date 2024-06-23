@@ -11,23 +11,6 @@ Game7::~Game7()
 
 void Game7::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-	circleViscousLiquid = std::make_shared<Circle>();
-
-
-	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-	circleViscousLiquid->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-	circleViscousLiquid->SetColor(glm::vec3(0.2f, 0.7f, 0.3f));
-
 	Real resX = 50.0f;
 	Real resY = 50.0f;
 
@@ -35,8 +18,6 @@ void Game7::OnAttach()
 	m_Solver.drawAngleLineWall(Vec2f(13.0f, 5.7f * resY / 10.0f), 35, 135, 1);
 	m_Solver.drawAngleLineWall(Vec2f(resX-13.0f, 5.5f * resY / 10.0f), 37, 45, 1);
 	m_Solver.drawAngleLineWall(Vec2f(7, 4.2f * resY / 10.0f), resX*2 - 28, 0, 1);
-	//m_Solver.drawAngleLineWall(Vec2f(7, 5.0f * resY / 10.0f - 1), resX * 2 - 28, 0, 1);
-
 
 	//Barriers
 	barrier1Index = 3;
@@ -58,7 +39,6 @@ void Game7::OnAttach()
 	winningGlassIndex = 0;
 	m_Solver.drawWinningGlass(width, height, Vec2f(16, 1));
 
-	// m_Solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
 	m_Solver.addRigidBody(Vec2f(24.0f,4.4f*resY / 10.0f), 8, 8, 50);
 	m_Solver.setDefaultDt(0.01f);
 
@@ -77,10 +57,7 @@ void Game7::OnAttach()
 	GlassMinX = 8;
 	GlassMaxX = -width / 2.0f - 1;
 
-
 	Application::Get()->GetUI()->setHintMessage("Pour just a little blue fluid in the glass!");
-
-
 }
 
 void Game7::OnDetach()
@@ -101,7 +78,6 @@ void Game7::UpdateGame()
 	{
 		_barrier1Timer += _dt;
 		_barrier1CurrentAngle = 360.0f * _barrier1Timer / (_moveBarrierSpeed * 1000);
-		CORE_DEBUG("Barrier1 angle: {0}", _barrier1CurrentAngle);
 		m_Solver.rotateWall(barrier1Index, _barrier1CurrentAngle, _barrier1Center);
 	}
 	if (moveBarrier2 && _barrier2CurrentAngle > _barrier2MinAngle)
@@ -110,30 +86,6 @@ void Game7::UpdateGame()
 		_barrier2CurrentAngle = 360.0f * _barrier2Timer / (_moveBarrierSpeed * 1000);
 		m_Solver.rotateWall(barrier2Index, _barrier2CurrentAngle, _barrier2Center);
 	}
-
-	vector<Particle> particleManager = m_Solver.getParticleManager();
-
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-	vector<Vec2f> viscousLiquidPositions;
-
-	for (size_t i = 0; i < particleManager.size(); i++)
-	{
-		if (particleManager[i].type == 1)
-			wallsPositions.push_back(particleManager[i].pos);
-		else if (particleManager[i].type == 0)
-			if (particleManager[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(particleManager[i].pos);
-			else viscousLiquidPositions.push_back(particleManager[i].pos);
-		else
-			glassPositions.push_back(particleManager[i].pos);
-
-	}
-
-	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
 }
 
 bool Game7::OnEvent(Event& e)

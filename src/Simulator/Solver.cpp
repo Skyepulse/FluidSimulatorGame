@@ -648,6 +648,7 @@ void Solver::moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass) {
 	if (isWinningGlass) {
 		_moveGlassCorner = true;
 		_winningGlassVel = moveVector;
+
 	}
 }
 

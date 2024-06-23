@@ -76,4 +76,6 @@ void main() {
 		atomicExchange(particleindex[key].z, index);
 	else if(count == 2)
 		atomicExchange(particleindex[key].w, index);
+
+	//imageStore(imgOutput, cell, float(count) * vec4(vec3(1.0), 1.0));
 }

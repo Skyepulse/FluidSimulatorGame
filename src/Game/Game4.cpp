@@ -11,23 +11,6 @@ Game4::~Game4()
 
 void Game4::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-	circleViscousLiquid = std::make_shared<Circle>();
-
-
-	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-	circleViscousLiquid->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-	circleViscousLiquid->SetColor(glm::vec3(0.2f, 0.7f, 0.3f));
-
 	Real resX = 36.0f;
 	Real resY = 50.0f;
 
@@ -40,8 +23,6 @@ void Game4::OnAttach()
 
 	winningGlassIndex = 0;
 	m_Solver.drawWinningGlass(width, height, Vec2f(16, 1));
-
-	// m_Solver.addRigidBody(Vec2f(2*width, 5), width, height, 100);
 
 	m_Solver.setSpawnPosition(Vec2f(4, resY - 4));
 
@@ -65,11 +46,6 @@ void Game4::OnDetach()
 
 void Game4::UpdateGame()
 {
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-	vector<Vec2f> viscousLiquidPositions;
-
 	Vec2f velVec = Vec2f(0, 0);
 	Vec2f pos = m_Solver.getGlassPosition();
 	if (moveGlassLeft && pos.x > GlassMinX) velVec.x -= _moveGlassSpeedX;
@@ -77,23 +53,6 @@ void Game4::UpdateGame()
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	m_Solver.moveGlass(winningGlassIndex, velVec, true);
-
-	for (size_t i = 0; i < m_Particles.size(); i++)
-	{
-		if (m_Particles[i].type == 1)
-			wallsPositions.push_back(m_Particles[i].pos);
-		else if (m_Particles[i].type == 0)
-			if(m_Particles[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(m_Particles[i].pos);
-			else viscousLiquidPositions.push_back(m_Particles[i].pos);
-		else
-			glassPositions.push_back(m_Particles[i].pos);
-
-	}
-
-	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
 }
 
 bool Game4::OnEvent(Event& e)
