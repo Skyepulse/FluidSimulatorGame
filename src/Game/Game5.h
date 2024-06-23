@@ -22,8 +22,8 @@ private:
 	float timer = 0.0f;
 
 	int rotatingGlassIndex = 0;
-	float rotateSpeedGlass = 8.0f; // time to rotate 360 degrees in seconds
-	float moveSpeedGlass = 8.0f; // time to move 1 unit in seconds
+	float rotateSpeedGlass = 8.1f; // time to rotate 360 degrees in seconds
+	float moveSpeedGlass = 8.1f; // time to move 1 unit in seconds
 	float timerGlass = 0.0f;
 	Vec2f velVec = Vec2f(0.0f, 0.0f);
 	bool isRotatingGlass = false;

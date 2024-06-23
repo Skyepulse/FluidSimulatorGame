@@ -25,8 +25,8 @@ private:
 	Real glassWidth = 0.0f;
 
 	int winningGlassIndex = 0;
-	Real _glassSpeedY = 2.0f;
-	Real _glassSpeedX = 6.0f;
+	Real _glassSpeedY = 2.1f;
+	Real _glassSpeedX = 6.1f;
 	bool _moveGlassLeft = false;
 	bool _moveGlassRight = false;
 

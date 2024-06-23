@@ -28,7 +28,7 @@ private:
   bool moveGlassDown = false;
   bool moveGlassLeft = false;
   bool moveGlassRight = false;
-  Real _moveGlassSpeedX = 8.0f; // per second so dt 1000
-  Real _moveGlassSpeedY = 8.0f; // per second so dt 1000
+  Real _moveGlassSpeedX = 8.1f; // per second so dt 1000
+  Real _moveGlassSpeedY = 8.1f; // per second so dt 1000
   int winningGlassIndex = 0;
 };
