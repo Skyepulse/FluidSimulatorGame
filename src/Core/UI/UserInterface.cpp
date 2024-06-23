@@ -38,10 +38,10 @@ void UserInterface::reloadFonts() {
 
     float fontSize = std::min(windowHeight, windowWidth) / 6.0f;
 
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.3f);
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.5f);
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize);
-    io.Fonts->AddFontFromFileTTF("src/font.ttf", fontSize*0.4f);
+    io.Fonts->AddFontFromFileTTF("src/data/font.ttf", fontSize*0.3f);
+    io.Fonts->AddFontFromFileTTF("src/data/font.ttf", fontSize*0.5f);
+    io.Fonts->AddFontFromFileTTF("src/data/font.ttf", fontSize);
+    io.Fonts->AddFontFromFileTTF("src/data/font.ttf", fontSize*0.4f);
 
     ImGui_ImplOpenGL3_DestroyFontsTexture();
     ImGui_ImplOpenGL3_CreateFontsTexture();
