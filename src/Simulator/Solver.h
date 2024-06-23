@@ -146,6 +146,9 @@ public:
 
 	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.push_back(viscosityType); }
 
+	Vec2f getGravity() { return _g; }
+	void setGravity( Vec2f &g ) { _g = g; }
+
 	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
 
 private:
