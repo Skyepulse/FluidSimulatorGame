@@ -146,6 +146,8 @@ public:
 
 	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.push_back(viscosityType); }
 
+	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
@@ -171,7 +173,7 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
-	const Real DEFAULT_DT = 0.05f;
+	Real DEFAULT_DT = 0.05f;
 	const Real MAX_PARTICLE_VEL = 25.0f;
 
 	Vec2f _glasscorner;

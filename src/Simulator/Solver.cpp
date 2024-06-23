@@ -83,7 +83,7 @@ Real Solver::update() {
 	computeNPforces();
 	//CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
-	//CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Adapt dt: {}", _dt);
 	predictVel(_dt);
 	//CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
 	correctDensityError(_dt);

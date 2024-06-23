@@ -31,10 +31,27 @@ private:
 	bool moveGlassDown = false;
 	bool moveGlassLeft = false;
 	bool moveGlassRight = false;
-	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
-	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
+	Real _moveGlassSpeedX = 8.0f; // per second so dt 1000
+	Real _moveGlassSpeedY = 8.0f; // per second so dt 1000
 	int winningGlassIndex = 0;
 
 	int barrier1Index = 0;
 	int barrier2Index = 1;
+
+	bool moveBarrier1 = false;
+	bool moveBarrier2 = false;
+
+	Real _moveBarrierSpeed = 1/5.0f; // per second so dt 1000
+
+	Real _barrier1Timer = 0.0f;
+	Real _barrier2Timer = 0.0f;
+
+	Real _barrier1MaxAngle = 90.0f * M_PI / 360.0f;
+	Real _barrier2MinAngle = -90.0f * M_PI / 360.0f;
+
+	Real _barrier1CurrentAngle = 0.0f;
+	Real _barrier2CurrentAngle = 0.0f;
+
+	Vec2f _barrier1Center = Vec2f(0.0f, 0.0f);
+	Vec2f _barrier2Center = Vec2f(0.0f, 0.0f);
 };

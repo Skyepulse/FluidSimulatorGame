@@ -54,6 +54,8 @@ protected:
 	uint32_t m_MaxParticle = 1000;
 
 	int winningGlassParticles;
+
+	Real _dt = 0.0f;
 private:
 	glm::vec4 m_GlassColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 	glm::vec4 m_WinningGlassColor = glm::vec4(0.0, 1.0, 0.0, 1.0);

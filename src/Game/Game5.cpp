@@ -75,8 +75,6 @@ void Game5::OnDetach()
 
 void Game5::UpdateGame()
 {	
-	float _dt = Time::GetDeltaTime();
-
 	rotatecenter += _dt * velVec;
 
 	if (isRotatingGlass) {
@@ -90,30 +88,6 @@ void Game5::UpdateGame()
 	if (moveIntermGlassUp) velVec.y += moveSpeedGlass;
 	if (moveIntermGlassDown) velVec.y -= moveSpeedGlass;
 	m_Solver.moveGlass(rotatingGlassIndex, velVec);
-		
-	vector<Particle> particleManager = m_Solver.getParticleManager();
-
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-	vector<Vec2f> viscousLiquidPositions;
-
-	for (size_t i = 0; i < particleManager.size(); i++)
-	{
-		if (particleManager[i].type == 1)
-			wallsPositions.push_back(particleManager[i].pos);
-		else if (particleManager[i].type == 0)
-			if (particleManager[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(particleManager[i].pos);
-			else viscousLiquidPositions.push_back(particleManager[i].pos);
-		else
-			glassPositions.push_back(particleManager[i].pos);
-
-	}
-
-	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
 }
 
 bool Game5::OnEvent(Event& e)

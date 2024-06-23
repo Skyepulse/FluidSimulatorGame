@@ -64,7 +64,7 @@ void LevelLayer::Update()
 
 void LevelLayer::HandleFramerate()
 {
-	Real _dt = 0.0f;
+	_dt = 0.0f;
 	double currentTime = Time::GetSeconds();
 	double frameTime = currentTime - previousTime;
 	previousTime = currentTime;
