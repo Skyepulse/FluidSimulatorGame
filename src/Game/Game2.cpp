@@ -1,7 +1,7 @@
 #include "Game2.h"
 #include <algorithm>
 
-Game2::Game2() : LevelLayer("Game Layer", Bound(glm::vec2(36.0f, 50.0f)))
+Game2::Game2() : LevelLayer("Game Layer", Bound(glm::vec2(36.0f, 50.0f)), false)
 {
 }
 

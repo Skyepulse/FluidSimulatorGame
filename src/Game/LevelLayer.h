@@ -16,7 +16,7 @@ class LevelLayer : public Layer
 		float LowDensityThreshold;
 	};
 public:
-	LevelLayer(const std::string& name, const Bound& levelBound);
+	LevelLayer(const std::string& name, const Bound& levelBound, bool drawWalls=true);
 	~LevelLayer() {}
 
 	virtual void OnAttach() = 0;

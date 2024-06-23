@@ -1,6 +1,6 @@
 #include "LevelLayer.h"
 
-LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound)
+LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool drawWalls)
 	: Layer(name), m_Bound(levelBound), m_Solver(Solver()), m_DensityCompute("src/Game/Compute/density.comp"), m_ResetCompute("src/Game/Compute/resetTex.comp"), m_SpatialHashCompute("src/Game/Compute/SpatialGrid.comp"), m_PartCountCompute("src/Game/Compute/partCount.comp")
 {
 	m_Size = glm::ivec2(levelBound.MaxCorner - levelBound.MinCorner);
@@ -27,7 +27,7 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound)
 
 	glm::vec2 BoundSize = m_Bound.GetSize();
 	m_Solver.initSimulation(BoundSize.x, BoundSize.y);
-	m_Solver.drawWalls(BoundSize.x, BoundSize.y);
+	if (drawWalls) m_Solver.drawWalls(BoundSize.x, BoundSize.y);
 
 	Application::Get()->GetCameraController()->SetCameraMovementBound(m_Bound);
 	Application::Get()->GetCameraController()->SetCameraPosition(levelBound.MaxCorner / 2.0f + levelBound.MinCorner);
