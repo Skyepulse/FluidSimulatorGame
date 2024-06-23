@@ -28,10 +28,9 @@ private:
 	Real glassWidth = 0.0f;
 
 	int glassIndex = 0;
-	Real _glassSpeedY = 2.0f;
-	Real _glassSpeedX = 4.0f;
-	bool _glassMoveDown = false;
-	bool _glassMoveUp = false;
+	float _glassPeriod = 10.0;
+	float _glassRange;
+	float startTime;
 
 	int _maxParticles;
 };

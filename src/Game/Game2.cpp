@@ -29,7 +29,6 @@ void Game2::OnAttach()
 	_resX = resX;
 	_resY = resY;
 
-
 	_maxParticles = 100;
 	m_Solver.setMaxParticles(_maxParticles);
 
@@ -58,7 +57,9 @@ void Game2::OnAttach()
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
-	_glassMoveUp = true;
+	_glassRange = resY / 8 * 0.8;
+
+	startTime = maxTime;
 
 	Application::Get()->GetUI()->setHintMessage("Press P to release water !");
 }
@@ -69,22 +70,7 @@ void Game2::OnDetach()
 
 void Game2::UpdateGame()
 {
-	Vec2f glassPosition = m_Solver.getGlassPosition();
-	Vec2f velocityVector = Vec2f(0, 0);
-	if (glassPosition.y >= _resY - glassHeight)
-	{
-		_glassMoveUp = false;
-		_glassMoveDown = true;
-	}
-	else if (glassPosition.y <= 1)
-	{
-		_glassMoveDown = false;
-		_glassMoveUp = true;
-	}
-	if(_glassMoveUp)
-		velocityVector = Vec2f(0, _glassSpeedY);
-	else if(_glassMoveDown)
-		velocityVector = Vec2f(0, -_glassSpeedY);
+	Vec2f velocityVector = Vec2f(0, _glassRange * glm::sin((startTime - maxTime) * M_PI / _glassPeriod));
 	m_Solver.moveGlass(glassIndex, velocityVector, true);
 
 	Renderer::DrawShape(pipe);

@@ -68,12 +68,12 @@ protected:
 	std::shared_ptr<Rectangle> pipe;
 	std::shared_ptr<Texture2D> pipeTex;
 	
+	float maxTime = 100.0f;
 private:
 	glm::vec4 m_GlassColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 	glm::vec4 m_WinningGlassColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
 
 	double previousTime;
-	float maxTime = 100.0f;
 
 	const double MIN_FRAME_TIME = 1.0f / 30.0f;
 	double accumulator;
