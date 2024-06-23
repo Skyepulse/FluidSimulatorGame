@@ -20,6 +20,7 @@ public:
 
   const glm::mat4& GetVPMatrix() { m_VPMatrix = m_ProjectionMatrix * m_ViewMatrix; return m_VPMatrix; }
   void Translate(const glm::vec2& translation);
+  void SetPosition(const glm::vec2& position);
 private:
   void RecalculateViewMatrix() { m_ViewMatrix = glm::inverse(m_Transform2D.GetModelMatrix()); }
 private:

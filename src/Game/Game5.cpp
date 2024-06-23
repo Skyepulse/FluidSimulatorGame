@@ -1,7 +1,7 @@
 #include "Game5.h"
 #include <algorithm>
 
-Game5::Game5() : LevelLayer("Game5 Layer")
+Game5::Game5() : LevelLayer("Game5 Layer", Bound(glm::vec2(36.0, 50.0)))
 {
 }
 
@@ -30,28 +30,27 @@ void Game5::OnAttach()
 
 	Real resX = 36.0f;
 	Real resY = 50.0f;
-	solver.initSimulation(resX, resY);
 
 	//Draw level
-	solver.drawAngleLineWall(Vec2f(15.0f, 6.0f * resY / 10.0f), 45, 20, 1, true);
+	m_Solver.drawAngleLineWall(Vec2f(15.0f, 6.0f * resY / 10.0f), 45, 20, 1, true);
 	rotatingWallIndex = 0;
-	solver.drawAngleLineWall(Vec2f(0, resY - 1), resX * 2, 0, 1);
-	solver.drawAngleLineWall(Vec2f(1, 1), resY * 2 - 4, 90, 1);
-	solver.drawAngleLineWall(Vec2f(resX, 1), resY * 2 - 4, 90, 1);
-	solver.drawRegularGlass(10, 15, Vec2f(2, 10));
+	m_Solver.drawAngleLineWall(Vec2f(0, resY - 1), resX * 2, 0, 1);
+	m_Solver.drawAngleLineWall(Vec2f(1, 1), resY * 2 - 4, 90, 1);
+	m_Solver.drawAngleLineWall(Vec2f(resX, 1), resY * 2 - 4, 90, 1);
+	m_Solver.drawRegularGlass(10, 15, Vec2f(2, 10));
 	rotatecenter = Vec2f(4.5, 10);
 	rotatingGlassIndex = 0;
 	int width = 20;
 	int height = 7;
-	solver.drawWinningGlass(width, height, Vec2f(15, 1));
+	m_Solver.drawWinningGlass(width, height, Vec2f(15, 1));
 
-	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
-	solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 5), 10, 5, 0, ViscosityType::FLUID);
+	m_Solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
+	m_Solver.spawnLiquidRectangle(Vec2f(resX - 12, resY - 5), 10, 5, 0, ViscosityType::FLUID);
 
-	solver.init();
+	m_Solver.init();
 
-	winningGlassParticles = solver.getWinningGlass();
-	particleSpawnPosition = solver.getSpawnPosition();
+	winningGlassParticles = m_Solver.getWinningGlass();
+	particleSpawnPosition = m_Solver.getSpawnPosition();
 
 	rectangle = std::make_shared<Rectangle>();
 	rectangle->Transform->SetSize(glm::vec2(100.0f));
@@ -66,52 +65,23 @@ void Game5::OnAttach()
 	Bound a_inter_b = Bound::Intersection(a, b);
 	Bound a_inter_c = Bound::Intersection(a, c);
 	Bound b_inter_c = Bound::Intersection(c, b);
+
+	Application::Get()->GetUI()->setHintMessage("Press C or B to rotate the glass !");
 }
 
 void Game5::OnDetach()
 {
 }
 
-void Game5::Update()
-{
-	Renderer::DrawShape(rectangle);
-
-	// ----------- HANDLE FRAMERATE ----------
-	Real _dt = 0.0f;
-	double currentTime = Time::GetSeconds();
-	double frameTime = currentTime - previousTime;
-	previousTime = currentTime;
-	accumulator += frameTime;
-
-	if (!SHOULD_FPSCAP) accumulator = 0.0;
-
-	while (accumulator >= MIN_FRAME_TIME) {
-		if(state != GameState::PAUSED){
-            double step = solver.update();
-            accumulator -= step;
-			_dt += step;
-        } else {
-			accumulator = 0.0;
-			break;
-		}
-	}
-	if(state == GameState::RUNNING) maxTime -= _dt;
-	if (maxTime < 0.0) {
-		maxTime = 0.0;
-		state = GameState::LOSE;
-	}
-
-	if (accumulator > MIN_FRAME_TIME) return;
-
-	// ----------- END HANDLE FRAMERATE ----------
-
-	timer += _dt;
+void Game5::UpdateGame()
+{	
+	float _dt = Time::GetDeltaTime();
 
 	rotatecenter += _dt * velVec;
 
 	if (isRotatingGlass) {
 		timerGlass += _dt * rotationDirection;
-		solver.rotateGlass(rotatingGlassIndex, 360.0f * timerGlass / (rotateSpeed * 1000), rotatecenter);
+		m_Solver.rotateGlass(rotatingGlassIndex, 360.0f * timerGlass / (rotateSpeed * 1000), rotatecenter);
 	}
 
 	velVec = Vec2f(0.0f, 0.0f);
@@ -119,11 +89,9 @@ void Game5::Update()
 	if (moveIntermGlassRight) velVec.x += moveSpeedGlass;
 	if (moveIntermGlassUp) velVec.y += moveSpeedGlass;
 	if (moveIntermGlassDown) velVec.y -= moveSpeedGlass;
-	solver.moveGlass(rotatingGlassIndex, velVec);
+	m_Solver.moveGlass(rotatingGlassIndex, velVec);
 		
-
-
-	vector<Particle> particleManager = solver.getParticleManager();
+	vector<Particle> particleManager = m_Solver.getParticleManager();
 
 	vector<Vec2f> wallsPositions;
 	vector<Vec2f> liquidPositions;
@@ -146,13 +114,6 @@ void Game5::Update()
 	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
 	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
 	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
-
-	int particlesInGlass = solver.getParticlesInGlass();
-	if (particlesInGlass >= winningGlassParticles)
-	{
-		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		state = GameState::WIN;
-	}
 }
 
 bool Game5::OnEvent(Event& e)
@@ -165,7 +126,7 @@ bool Game5::OnEvent(Event& e)
 			&& keypressed.GetKey() != CORE_KEY_C && keypressed.GetKey() != CORE_KEY_B)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
+		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveIntermGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveIntermGlassRight = true;
 		if (keypressed.GetKey() == CORE_KEY_UP) moveIntermGlassUp = true;

@@ -16,6 +16,9 @@ public:
   ///@brief Return a copy of the Transform translated
   Transform GetTranslated(const glm::vec3& translation) const {Transform transform(*this); transform.Translate(translation); return transform; }
 
+  void SetPosition(const glm::vec3& position) { m_Position = glm::translate(glm::mat4(1.0), position); }
+
+
   void Scale(const glm::vec3& scale) { m_Scale = glm::scale(m_Scale, scale); }
   void Scale(float scale) { Scale(glm::vec3(scale)); }
   Transform GetScaled(const glm::vec3& scale) const {Transform transform(*this); transform.Scale(scale); return transform; }
@@ -37,6 +40,8 @@ public:
   // Transformation function
   void Translate2D(const glm::vec2& translation) { Translate(glm::vec3(translation, 0.0f)); }
   Transform2D GetTranslated2D(const glm::vec2& translation) const {Transform2D transform(*this); transform.Translate2D(translation); return transform; }
+
+  void SetPosition2D(const glm::vec2& position) { SetPosition(glm::vec3(position, 0.0)); }
 
   void Scale2D(const glm::vec2 scale) { Scale(glm::vec3(scale, 0.0f)); }
   void Scale2D(float scale) { Scale2D(glm::vec2(scale)); }

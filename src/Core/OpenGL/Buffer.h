@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <glad/glad.h>
 
 enum class ShaderDataType
 {
@@ -132,18 +133,60 @@ private:
 	uint32_t m_Count;
 };
 
+template <typename T>
+class BufferObject
+{
+public:
+	BufferObject(const T* data, size_t size);
+	~BufferObject() {}
+
+	void Bind(unsigned int index = 0) const;
+	void Unbind() const;
+
+	void SetLayout(const BufferLayout& layout) { m_Layout = layout; }
+	const BufferLayout& GetLayout() const { return m_Layout; }
+
+private:
+	unsigned int m_RendererID;
+	unsigned int m_Size;
+	BufferLayout m_Layout;
+};
+
 class DataBufferObject
-	{
-	public:
-		DataBufferObject(const std::shared_ptr<void>& data, size_t size);
-		~DataBufferObject() {}
+{
+public:
+	DataBufferObject() {}
+	DataBufferObject(const void* data, size_t size);
+	~DataBufferObject() {}
 
-		void Bind(unsigned int index = 0) const;
-		void Unbind() const;
+	void Bind(unsigned int index = 0) const;
+	void Unbind() const;
 
-		void UpdateData(const std::shared_ptr<void>& data) const;
+	void UpdateData(const void* data, uint32_t size = 0) const;
 
-	private:
-		unsigned int m_RendererID; 
-		unsigned int m_Size;
-	};
+private:
+	unsigned int m_RendererID; 
+	unsigned int m_Size;
+};
+
+// Def BufferObject
+
+template<typename T>
+inline BufferObject<T>::BufferObject(const T* data, size_t size)
+{
+	glGenBuffers(1, &m_RendererID);
+	glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STREAM_READ);
+}
+
+template<typename T>
+inline void BufferObject<T>::Bind(unsigned int index) const
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+}
+
+template<typename T>
+inline void BufferObject<T>::Unbind() const
+{
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}

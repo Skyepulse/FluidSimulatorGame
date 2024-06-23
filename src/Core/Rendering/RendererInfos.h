@@ -29,6 +29,7 @@ public:
     // Assert that the data used is not null
     CORE_ASSERT(m_Texture, "The Texture in the RenderProperty is null, you must not free it while having a RenderProperty holding a pointer to it");
     
+    m_Texture->Bind(0);
     shader->SetInt("u_UseTexture", 1);
     // TEMPORARY ------------------ //
     shader->SetInt("u_Texture", 0); // => TODO change for multiple texture binding support

@@ -25,3 +25,9 @@ void Camera::Translate(const glm::vec2& translation)
 	m_Transform2D.Translate2D(translation); 
 	RecalculateViewMatrix();
 }
+
+void Camera::SetPosition(const glm::vec2& position)
+{
+	m_Transform2D.SetPosition2D(position);
+	RecalculateViewMatrix();
+}

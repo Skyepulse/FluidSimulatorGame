@@ -31,9 +31,10 @@ Application::Application()
 	m_Window = std::make_shared<Window>(windowProps, eventCallback);
 	m_Window->EnableVSync(true);
 
-	userInterface.init(m_Window.get());
+	userInterface = std::make_shared<UserInterface>();
+	userInterface->init(m_Window.get());
 
-  // TEMP A CHANGER
+	// TEMP A CHANGER
 	// Enable Blending
 	RendererCommand::EnableBlending(true);
 }
@@ -53,7 +54,7 @@ void Application::Start()
 	{
 		Renderer::BeginScene(m_Controller->GetCamera());
 
-		userInterface.newFrame();
+		userInterface->newFrame();
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -61,7 +62,7 @@ void Application::Start()
 		for(auto& layer : m_Layers)
 			layer->Update();
 
-		userInterface.show();
+		userInterface->show();
 
 		Renderer::EndScene();
 		m_Window->OnUpdate();
@@ -73,7 +74,7 @@ void Application::OnEvent(Event &e)
 	for(auto it = m_Layers.begin(); it != m_Layers.end(); it++)
 		(*it)->OnEvent(e);
 
-	userInterface.onEvent(e);
+	userInterface->onEvent(e);
 
 	// TEMP ?
 	if(m_Controller->OnEvent(e))

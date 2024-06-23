@@ -28,6 +28,7 @@ public:
 
   const glm::vec3& GetColor() const { return m_Color; }
   void SetColor(const glm::vec3& color) { m_Color = color;}
+  void SetTexture(const Texture* texture);
 protected:
   Shape();
   void SetRendererData(const ShapeInfos& shapeInfos);
