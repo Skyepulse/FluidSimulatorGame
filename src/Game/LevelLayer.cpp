@@ -33,6 +33,8 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound)
 	Application::Get()->GetCameraController()->SetCameraPosition(levelBound.MaxCorner / 2.0f + levelBound.MinCorner);
 
 	ComputeStaticWallParticleTexture();
+
+	previousTime = Time::GetSeconds();
 }
 
 void LevelLayer::Update()
