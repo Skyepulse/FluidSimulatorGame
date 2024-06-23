@@ -25,7 +25,6 @@ bool CameraController::OnEvent(Event & e)
   EventDispatcher dispatcher(e);
 
   dispatcher.Dispatch<WindowResizedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnWindowResized));
-  dispatcher.Dispatch<MouseScrolledEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnMouseScrolled));
   dispatcher.Dispatch<KeyPressedEvent>(CORE_BIND_EVENT_METHOD(CameraController, OnKeyPressed));
 
   return true;
@@ -50,6 +49,12 @@ void CameraController::SetCameraPosition(const glm::vec2& position)
 
     m_CameraPosition = position;
     m_Camera->SetPosition(position);
+}
+
+void CameraController::AdaptZoomLevel(const Bound& levelBound)
+{
+    m_ZoomLevel = (levelBound.MaxCorner.y + levelBound.MinCorner.y) / 2.0f;
+    m_Camera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 }
 
 bool CameraController::OnKeyPressed(KeyPressedEvent &e)
@@ -81,14 +86,6 @@ bool CameraController::OnKeyPressed(KeyPressedEvent &e)
   m_CameraPosition = newCameraPosition;
   m_Camera->Translate(translation);
   return true;
-}
-
-bool CameraController::OnMouseScrolled(MouseScrolledEvent& e)
-{
-    m_ZoomLevel -= (float)e.GetYOffset();
-    
-    m_Camera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-    return true;
 }
 
 bool CameraController::OnWindowResized(WindowResizedEvent& e)
