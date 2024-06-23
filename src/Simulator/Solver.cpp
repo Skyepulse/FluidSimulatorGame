@@ -280,7 +280,8 @@ void Solver::updatePos(const Real dt) {
 		}
 
 		//We check if the particle is inside the glass
-		if (_particleData[i].pos.x >= _glasscorner.x && _particleData[i].pos.x <= _glasscorner.x + _glassSize.x && _particleData[i].pos.y >= _glasscorner.y && _particleData[i].pos.y <= _glasscorner.y + _glassSize.y) {
+		Vec2f glassPos = getGlassPosition();
+		if (_particleData[i].pos.x >= glassPos.x && _particleData[i].pos.x <= glassPos.x + _glassSize.x && _particleData[i].pos.y >= glassPos.y && _particleData[i].pos.y <= glassPos.y + _glassSize.y) {
 			if (_specificParticlesWin && find(_specificParticlesViscosity.begin(), _specificParticlesViscosity.end(), _particleData[i].viscosityType) != _specificParticlesViscosity.end()) {
 				if (!_particleData[i].isInGlass) _particlesInGlass++;
 				_particleData[i].isInGlass = true;
@@ -294,10 +295,6 @@ void Solver::updatePos(const Real dt) {
 			if (_particleData[i].isInGlass) _particlesInGlass--;
 			_particleData[i].isInGlass = false;
 		}	
-	}
-	if (_moveGlassCorner) {
-		_glasscorner += _winningGlassVel * dt;
-		_moveGlassCorner = false;
 	}
 
 	for (auto &pGroup: _wallGroups){
@@ -544,6 +541,7 @@ void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
 	for (int i=start; i<_particleCount; i++){
 		pGroup.initPos[i - start] = _particleData[i].pos;
 	}
+	winGlassIdx = _glassGroups.size();
 	_glassGroups.push_back(pGroup);
 }
 
@@ -645,15 +643,10 @@ void Solver::moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass) {
 		tIndex iGroup = i - pGroup.startIdx;
 		_particleData[i].vel = moveVector;
 	}
-	if (isWinningGlass) {
-		_moveGlassCorner = true;
-		_winningGlassVel = moveVector;
-
-	}
 }
 
 Vec2f Solver::getGlassPosition() {
-	return _glasscorner;
+	return _glasscorner + _glassGroups[winGlassIdx].displacement;
 }
 
 //OPENGL

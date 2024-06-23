@@ -186,6 +186,7 @@ private:
 	Vec2f _glassSize;
 	int _particlesInGlass = 0;
 	int _winningGlass = 0;
+	int winGlassIdx=0;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
