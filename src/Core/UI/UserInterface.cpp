@@ -3,6 +3,7 @@
 #include "../Application.h"
 #include <cmath>
 #include <algorithm>
+#include "../../Simulator/kernel.h"
 
 
 UserInterface::~UserInterface(){
