@@ -61,9 +61,9 @@ private:
 	double previousTime;
 	float maxTime = 100.0f;
 
-	const double MIN_FRAME_TIME = 0.0f;
+	const double MIN_FRAME_TIME = 1.0f / 30.0f;
 	double accumulator;
-	const bool SHOULD_FPSCAP = false;
+	const bool SHOULD_FPSCAP = true;
 
 	std::shared_ptr<Rectangle> m_MovingWallParticleRect;
 	std::shared_ptr<Rectangle> m_StaticWallParticleRect;

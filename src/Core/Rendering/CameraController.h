@@ -17,11 +17,11 @@ public:
 	bool OnEvent(Event& e);
 	void SetCameraMovementBound(const Bound bound);
 	void SetCameraPosition(const glm::vec2& position);
+	void AdaptZoomLevel(const Bound& levelBound);
 
 	std::shared_ptr<Camera> GetCamera() const { return m_Camera; }
 private:
 	bool OnKeyPressed(KeyPressedEvent& e);
-	bool OnMouseScrolled(MouseScrolledEvent& e);
 	bool OnWindowResized(WindowResizedEvent& e);
 private:
 	std::shared_ptr<Camera> m_Camera;

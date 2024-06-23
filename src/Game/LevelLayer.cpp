@@ -31,10 +31,12 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 
 	Application::Get()->GetCameraController()->SetCameraMovementBound(m_Bound);
 	Application::Get()->GetCameraController()->SetCameraPosition(levelBound.MaxCorner / 2.0f + levelBound.MinCorner);
+	Application::Get()->GetCameraController()->AdaptZoomLevel(m_Bound);
 
 	ComputeStaticWallParticleTexture();
 
 	previousTime = Time::GetSeconds();
+	accumulator = 0.0;
 }
 
 void LevelLayer::Update()
@@ -70,7 +72,7 @@ void LevelLayer::HandleFramerate()
 
 	if (!SHOULD_FPSCAP) accumulator = 0.0;
 
-	while (accumulator >= MIN_FRAME_TIME) {
+	while (accumulator >= MIN_FRAME_TIME && Time::GetSeconds() - currentTime < 0.5f * MIN_FRAME_TIME) {
 		if (m_State != GameState::PAUSED) {
 			double step = m_Solver.update();
 			accumulator -= step;
