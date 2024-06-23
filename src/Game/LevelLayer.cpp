@@ -37,6 +37,12 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 
 	previousTime = Time::GetSeconds();
 	accumulator = 0.0;
+
+	pipeTex = std::make_shared<Texture2D>("src/data/pipe.png");
+	pipe = std::make_shared<Rectangle>();
+	pipe->SetTexture(pipeTex.get());
+	pipe->Transform->Scale2D(glm::vec2(5.0, 5.0 * 50.0 / 15.0));
+	pipe->Transform->Translate2D(glm::vec2(0, 9));
 }
 
 void LevelLayer::Update()

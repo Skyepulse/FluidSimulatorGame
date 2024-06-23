@@ -560,27 +560,20 @@ void Solver::drawRegularGlass(int width, int height, Vec2f cornerPosition) {
 	_glassGroups.push_back(pGroup);
 }
 
-void Solver::spawnParticle(Vec2f position, ViscosityType viscosityType) {
+void Solver::spawnParticle(Vec2f position, Real radius, ViscosityType viscosityType, Vec2f vel) {
 	if(_maxParticles == 0) return;
-	//We check the potential neighbors for this particle. If we find a neighbor too close, we don't spawn the particle
-	int x = position.x;
-	int y = position.y;
-	Real sr = _kernel->getSupportRad();
-	for (int dx = -1; dx <= 1; dx++) {
-		for (int dy = -1; dy <= 1; dy++) {
-			tIndex idx = idx1d(x + dx, y + dy);
-			if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
-				for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
-					tIndex p = _particlesInGrid[idx][j];
-					if ((position - _particleData[p].pos).length() <= sr/2) {
-						return;
-					}
-				}
-			}
-		}
+	double currentTime = Time::GetSeconds();
+
+	if (position.y - _particleData[_particleCount-1].pos.y < 1.2*_h) return;
+
+	lastSpawnTime = currentTime;
+	
+	int R = radius-2;
+	for (float i=-R; i<=R; i++){
+		addParticle(position + i * Vec2f(_h, 0), 0, viscosityType, vel);
+		addParticle(position + i * Vec2f(_h, 0) + Vec2f(0, _h), 0, viscosityType, vel);
+		_maxParticles-=2;
 	}
-	addParticle(position, 0, viscosityType);
-	_maxParticles--;
 }
 
 void Solver::setSpawnPosition(Vec2f position) {

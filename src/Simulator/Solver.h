@@ -116,7 +116,7 @@ public:
 	int getImmovableParticleCount() { return _immovableParticleCount; }
 	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
 	Vec2f getSpawnPosition() { return _spawnPosition; }
-	void spawnParticle(Vec2f position, ViscosityType viscosityType);
+	void spawnParticle(Vec2f position, Real radius, ViscosityType viscosityType, Vec2f vel=Vec2f(0));
 
 	void drawWalls(int resX, int resY);
 	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
@@ -222,6 +222,9 @@ private:
 
 	bool _specificParticlesWin = false;
 	vector<ViscosityType> _specificParticlesViscosity;
+
+	double lastSpawnTime = 0;
+
 public:
 	vector<ParticleGroup> _glassGroups;
 	vector<ParticleGroup> _wallGroups;

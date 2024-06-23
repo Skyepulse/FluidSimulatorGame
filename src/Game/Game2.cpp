@@ -49,7 +49,7 @@ void Game2::OnAttach()
 	m_Solver.drawWinningGlass(width, height, Vec2f(6, 1));
 	m_Solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 
-
+	pipe->Transform->Translate2D(glm::vec2(resX-4, resY - 4));
 
 	//m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
 
@@ -86,6 +86,8 @@ void Game2::UpdateGame()
 	else if(_glassMoveDown)
 		velocityVector = Vec2f(0, -_glassSpeedY);
 	m_Solver.moveGlass(glassIndex, velocityVector, true);
+
+	Renderer::DrawShape(pipe);
 }
 
 bool Game2::OnEvent(Event& e)
@@ -97,7 +99,7 @@ bool Game2::OnEvent(Event& e)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) {
-			m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
+			m_Solver.spawnParticle(particleSpawnPosition, particleSpawnRadius, ViscosityType::FLUID, Vec2f(0, -10));
 		}
 
 		return true;

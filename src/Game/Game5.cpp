@@ -100,7 +100,6 @@ bool Game5::OnEvent(Event& e)
 			&& keypressed.GetKey() != CORE_KEY_C && keypressed.GetKey() != CORE_KEY_B)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveIntermGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveIntermGlassRight = true;
 		if (keypressed.GetKey() == CORE_KEY_UP) moveIntermGlassUp = true;

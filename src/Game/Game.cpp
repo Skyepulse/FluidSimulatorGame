@@ -75,7 +75,6 @@ bool Game::OnEvent(Event& e)
 			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN)
 			return false;
 
-		if (keypressed.GetKey() == CORE_KEY_P) m_Solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius), ViscosityType::FLUID);
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
 
