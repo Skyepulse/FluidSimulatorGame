@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <set>
 #include "../Core/Log.h"
 #include <glad/glad.h>
 
@@ -144,7 +145,7 @@ public:
 	void activateInfiniteWalls() { _infiniteWalls = true; }
 	void deactivateInfiniteWalls() { _infiniteWalls = false; }
 
-	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.push_back(viscosityType); }
+	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.insert(viscosityType); }
 
 	Vec2f getGravity() { return _g; }
 	void setGravity( Vec2f &g ) { _g = g; }
@@ -221,7 +222,7 @@ private:
 	bool _infiniteWalls = false;
 
 	bool _specificParticlesWin = false;
-	vector<ViscosityType> _specificParticlesViscosity;
+	set<ViscosityType> _specificParticlesViscosity;
 
 	double lastSpawnTime = 0;
 

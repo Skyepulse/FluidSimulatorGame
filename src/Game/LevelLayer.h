@@ -57,6 +57,14 @@ protected:
 
 	Real _dt = 0.0f;
 
+	Real GlassMinX = -1.0f;
+	Real GlassMaxX = 1.0f;
+	Real GlassMinY = -1.0f;
+	Real GlassMaxY = 1.0f;
+
+	Real resX;
+	Real resY;
+
 	std::shared_ptr<Rectangle> pipe;
 	std::shared_ptr<Texture2D> pipeTex;
 	

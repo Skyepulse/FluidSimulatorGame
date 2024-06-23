@@ -57,7 +57,7 @@ void Game8::OnAttach()
 	arrow = std::make_shared<Rectangle>();
 	arrow->SetTexture(arrowTex.get());
 	arrow->Transform->Scale2D(glm::vec2(8.0, 8.0 * 9.0 / 14.0));
-	arrow->Transform->Rotate2D(-M_PI_2);
+	arrow->Transform->Rotate2D(-M_PI/2.0f);
 
 	arrowPos.emplace_back(-10, resY/2);
 	arrowPos.emplace_back(resX - 4, resY/2);
@@ -89,7 +89,7 @@ bool Game8::OnEvent(Event& e)
 
 		if (keypressed.GetKey() == CORE_KEY_G){ 
 			g.rotate90();
-			arrow->Transform->Rotate2D(M_PI_2);
+			arrow->Transform->Rotate2D(M_PI/2.0f);
 		}
 
 		m_Solver.setGravity(g);

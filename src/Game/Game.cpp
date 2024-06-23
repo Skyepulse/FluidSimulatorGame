@@ -49,6 +49,9 @@ void Game::OnAttach()
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
+	GlassMinX = 1;
+	GlassMaxX = -width/2.0f - 1;
+
 	Application::Get()->GetUI()->setHintMessage("Press <- and -> to move the glass !");
 }
 
@@ -59,8 +62,9 @@ void Game::OnDetach()
 void Game::UpdateGame()
 {
 	Vec2f velVec = Vec2f(0, 0);
-	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
-	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
+	Vec2f pos = m_Solver.getGlassPosition();
+	if (moveGlassLeft && pos.x > GlassMinX) velVec.x -= _moveGlassSpeedX;
+	if (moveGlassRight && pos.x < resX + GlassMaxX) velVec.x += _moveGlassSpeedX;
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	m_Solver.moveGlass(winningGlassIndex, velVec, true);
