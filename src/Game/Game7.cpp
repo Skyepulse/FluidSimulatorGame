@@ -1,7 +1,7 @@
 #include "Game7.h"
 #include <algorithm>
 
-Game7::Game7() : LevelLayer("Game7 Layer")
+Game7::Game7() : LevelLayer("Game7 Layer", Bound(glm::vec2(50.0f, 50.0f)))
 {
 }
 
@@ -74,77 +74,14 @@ void Game7::OnDetach()
 {
 }
 
-void Game7::Update()
+void Game7::UpdateGame()
 {
-	Renderer::DrawShape(rectangle);
-
-	// ----------- HANDLE FRAMERATE ----------
-	Real _dt = 0.0f;
-	double currentTime = Time::GetSeconds();
-	double frameTime = currentTime - previousTime;
-	previousTime = currentTime;
-	accumulator += frameTime;
-
-	if (!SHOULD_FPSCAP) accumulator = 0.0;
-
-	while (accumulator >= MIN_FRAME_TIME) {
-		if (state != GameState::PAUSED) {
-			double step = solver.update();
-			accumulator -= step;
-			_dt += step;
-		}
-		else {
-			accumulator = 0.0;
-			break;
-		}
-	}
-	if (state == GameState::RUNNING) maxTime -= _dt;
-	if (maxTime < 0.0) {
-		maxTime = 0.0;
-		state = GameState::LOSE;
-	}
-
-	if (accumulator > MIN_FRAME_TIME) return;
-
-	// ----------- END HANDLE FRAMERATE ----------
-
-	vector<Particle> particleManager = solver.getParticleManager();
-
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-	vector<Vec2f> viscousLiquidPositions;
-
 	Vec2f velVec = Vec2f(0, 0);
 	if (moveGlassLeft) velVec.x -= _moveGlassSpeedX;
 	if (moveGlassRight) velVec.x += _moveGlassSpeedX;
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	solver.moveGlass(winningGlassIndex, velVec, true);
-
-	for (size_t i = 0; i < particleManager.size(); i++)
-	{
-		if (particleManager[i].type == 1)
-			wallsPositions.push_back(particleManager[i].pos);
-		else if (particleManager[i].type == 0)
-			if (particleManager[i].viscosityType == ViscosityType::FLUID)liquidPositions.push_back(particleManager[i].pos);
-			else viscousLiquidPositions.push_back(particleManager[i].pos);
-		else
-			glassPositions.push_back(particleManager[i].pos);
-
-	}
-
-	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-	Renderer::DrawShapeDuplicate(circleViscousLiquid, viscousLiquidPositions);
-
-	int particlesInGlass = solver.getParticlesInGlass();
-	if (particlesInGlass >= winningGlassParticles)
-	{
-		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		state = GameState::WIN;
-	}
 }
 
 bool Game7::OnEvent(Event& e)

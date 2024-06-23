@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameLayer.h"
+#include "LevelLayer.h"
 
 class Game7 : public LevelLayer
 {
@@ -11,10 +11,8 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void Update() override;
+	virtual void UpdateGame() override;
 	virtual bool OnEvent(Event& e) override;
-
-	float getTime() const override { return maxTime; }
 
 private:
 	Vec2f getRandomPointInCircle(const Vec2f& center, const Real radius);
