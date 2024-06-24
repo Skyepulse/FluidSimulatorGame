@@ -10,6 +10,7 @@
 #include "Game6.h"
 #include "Game7.h"
 #include "Game8.h"
+#include "Game9.h"
 
 class GameApplication : public Application
 {
@@ -48,6 +49,9 @@ public:
 		case 8:
 			m_game = new Game8();
 			break;
+		case 9:
+			m_game = new Game9();
+			break;
 		default:
 			m_game = new Game();
 			break;
@@ -55,6 +59,7 @@ public:
 		game_index = index;
 
 		PushLayer(m_game);
+		setBgSize();
 	}
 
 	void unloadGame() override {

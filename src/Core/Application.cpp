@@ -37,10 +37,21 @@ Application::Application()
 	// TEMP A CHANGER
 	// Enable Blending
 	RendererCommand::EnableBlending(true);
+
+	backgroundTex = std::make_shared<Texture2D>("src/data/bg.png");
+	background = std::make_shared<Rectangle>();
+	background->SetTexture(backgroundTex.get());
 }
 
 Application::~Application()
 {
+}
+
+void Application::setBgSize(){
+	background->Transform->SetPosition2D(m_Controller->getCenterBound());
+	glm::vec2 size = glm::vec2(4401.0/2466.0, 1)*(2.0f*m_Controller->getZoomLevel());
+	if (m_Controller->getAspectRatio() > 4401.0/2466.0) size *= m_Controller->getAspectRatio() / (4401.0/2466.0);
+	background->Transform->SetSize(size);
 }
 
 void Application::Start()
@@ -49,6 +60,7 @@ void Application::Start()
 
 	// TEMP ?
 	m_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 35.99162f, 2.0f);
+	setBgSize();
 
 	while (!m_Window->ShouldClose()) 
 	{
@@ -58,6 +70,8 @@ void Application::Start()
 
 		RendererCommand::Clear();
 		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+		Renderer::DrawShape(background);
 
 		for(auto& layer : m_Layers)
 			layer->Update();
@@ -75,6 +89,10 @@ void Application::OnEvent(Event &e)
 		(*it)->OnEvent(e);
 
 	userInterface->onEvent(e);
+
+	if (e.GetEventType() == EventType::WindowResized) {
+		setBgSize();
+    }
 
 	// TEMP ?
 	if(m_Controller->OnEvent(e))
