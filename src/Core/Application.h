@@ -26,6 +26,7 @@ public:
 
   void Start();
   void OnEvent(Event& e);
+  bool OnWindowResized(WindowResizedEvent& e);
 
   void PushOverlay(Layer* overlay) { m_Layers.PushOverlay(overlay); }
   void PushLayer(Layer* layer) { m_Layers.PushLayer(layer); }
@@ -57,11 +58,10 @@ private:
   static Application* s_Instance; 
   std::shared_ptr<Window> m_Window;
   LayerStack m_Layers;
+  bool m_Minimized = false;
 
   std::shared_ptr<CameraController> m_Controller;
 
   std::shared_ptr<Shape> background;
-	std::shared_ptr<Texture2D> backgroundTex;
-
-
+  std::shared_ptr<Texture2D> backgroundTex;
 };
