@@ -62,7 +62,7 @@ uint KeyFromHash(uint hash, uint tableSize)
 }
 
 // viscosityCount;
-float densityPerViscosity[2];
+float densityPerViscosity[4];
 
 // Density kernel
 const float h = 2.0;
@@ -76,7 +76,7 @@ void main() {
 	ivec2 cell = ivec2(cell_pos);
 
 	// Reset array
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < 4; i++)
 		densityPerViscosity[i] = 0.0;
 
 	// neighbour search
@@ -115,13 +115,13 @@ void main() {
 	}
 
 	float density = 0;
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < 4; i++)
 		density += densityPerViscosity[i];
 
 	vec4 col = vec4(0);
 	if(density > lowDensityThreshold)
 	{
-		for(int i = 0; i < 2; i++)
+		for(int i = 0; i < 4; i++)
 		{
 			float t = 3.0 * densityPerViscosity[i];
 			col += densityPerViscosity[i] * mix(colorPerViscosity[2 * i], colorPerViscosity[2 * i + 1], t);
