@@ -9,7 +9,6 @@
 class CameraController
 {
 public:
-	CameraController() {}
 	CameraController(float aspectRatio, float zoomLevel, float cameraSpeed, Bound bound);
 	CameraController(float aspectRatio, float zoomLevel, float cameraSpeed);
 	~CameraController();
@@ -25,7 +24,6 @@ public:
 
 	std::shared_ptr<Camera> GetCamera() const { return m_Camera; }
 private:
-	bool OnKeyPressed(KeyPressedEvent& e);
 	bool OnWindowResized(WindowResizedEvent& e);
 private:
 	std::shared_ptr<Camera> m_Camera;

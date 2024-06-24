@@ -64,31 +64,39 @@ void Application::Start()
 
 	while (!m_Window->ShouldClose()) 
 	{
-		Renderer::BeginScene(m_Controller->GetCamera());
+		if (!m_Minimized)
+		{
+			Renderer::BeginScene(m_Controller->GetCamera());
 
-		userInterface->newFrame();
+			userInterface->newFrame();
 
-		RendererCommand::Clear();
-		RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+			RendererCommand::Clear();
+			RendererCommand::ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-		Renderer::DrawShape(background);
+			Renderer::DrawShape(background);
 
-		for(auto& layer : m_Layers)
-			layer->Update();
+			for (auto& layer : m_Layers)
+				layer->Update();
 
-		userInterface->show();
+			userInterface->show();
 
-		Renderer::EndScene();
+			Renderer::EndScene();
+		}
+
 		m_Window->OnUpdate();
 	}
 }
 
 void Application::OnEvent(Event &e)
 {
+	EventDispatcher dispatcher(e);
+	dispatcher.Dispatch<WindowResizedEvent>(CORE_BIND_EVENT_METHOD(Application, OnWindowResized));
+
 	for(auto it = m_Layers.begin(); it != m_Layers.end(); it++)
 		(*it)->OnEvent(e);
 
-	userInterface->onEvent(e);
+	if(!m_Minimized)
+		userInterface->onEvent(e);
 
 	if (e.GetEventType() == EventType::WindowResized) {
 		setBgSize();
@@ -97,4 +105,17 @@ void Application::OnEvent(Event &e)
 	// TEMP ?
 	if(m_Controller->OnEvent(e))
 		return;
+}
+
+bool Application::OnWindowResized(WindowResizedEvent& e)
+{
+	CORE_DEBUG("REsized event")
+	if (e.GetSize().x == 0 || e.GetSize().y == 0)
+	{
+		m_Minimized = true;
+		return false;
+	}
+
+	m_Minimized = false;
+	return false;
 }

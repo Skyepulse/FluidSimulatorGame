@@ -178,7 +178,6 @@ void Window::Init()
 	{
 		WindowData* windowData = (WindowData*)glfwGetWindowUserPointer(window);
 
-		// TEMP ??
 		RendererCommand::SetViewportSize(glm::ivec2(width, height));
 		WindowResizedEvent e(width, height);
 		windowData->eventCallback(e);
