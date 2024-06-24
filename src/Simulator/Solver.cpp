@@ -308,6 +308,15 @@ void Solver::updatePos(const Real dt) {
 			if (_particleData[i].isInGlass) _particlesInGlass--;
 			_particleData[i].isInGlass = false;
 		}	
+
+		//We check if we are in the lose zone
+		if (_loseZoneActive) {
+			if(_particleData[i].pos.x >=_loseZoneTopLeft.x && _particleData[i].pos.x <= _loseZoneBottomRight.x && _particleData[i].pos.y >= _loseZoneBottomRight.y && _particleData[i].pos.y <= _loseZoneTopLeft.y) {
+				if(_loseZoneOnlyDelete) removeParticle(i);
+				else _inLoseZone = true;
+				continue;
+			}
+		}
 	}
 
 	for (auto &pGroup: _wallGroups){
