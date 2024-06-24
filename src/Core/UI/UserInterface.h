@@ -32,7 +32,7 @@ private:
     // 0: Menu, 1: Game, 2: Pause
     int state=0;
     int windowWidth, windowHeight;
-    char hintString[50];
+    char hintString[100];
     float hintStartTime;
     bool shouldRestart = false;
 

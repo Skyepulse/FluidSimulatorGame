@@ -21,11 +21,14 @@ void Game11::OnAttach()
 	int height = 10;
 	regularGlassIndex = 0;
 	m_Solver.drawWinningGlass(width, height, Vec2f(1, 1));
-	m_Solver.setSpawnPosition(Vec2f(4, resY - 4));
 
 	m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 5), 4, 3, 0, ViscosityType::FLUID);
 	
 	m_Solver.setLoseZone(Vec2f(0.0f, 2.0f), Vec2f(resX, 0.0f));
+
+	m_Solver.setSpawnPosition(Vec2f(resX - 4, resY - 4));
+
+	pipe->Transform->Translate2D(glm::vec2(resX - 4, resY - 4));
 
 	m_Solver.init();
 
@@ -52,6 +55,8 @@ void Game11::UpdateGame()
 	if (moveGlassUp) velVec.y += _moveGlassSpeedY;
 	if (moveGlassDown) velVec.y -= _moveGlassSpeedY;
 	m_Solver.moveGlass(regularGlassIndex, velVec, true);
+
+	Renderer::DrawShape(pipe);
 }
 
 bool Game11::OnEvent(Event& e)
@@ -60,13 +65,17 @@ bool Game11::OnEvent(Event& e)
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
 		if (keypressed.GetKey() != CORE_KEY_P && keypressed.GetKey() != CORE_KEY_LEFT && keypressed.GetKey() != CORE_KEY_RIGHT
-			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN)
+			&& keypressed.GetKey() != CORE_KEY_UP && keypressed.GetKey() != CORE_KEY_DOWN && keypressed.GetKey() != CORE_KEY_P)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_LEFT) moveGlassLeft = true;
 		if (keypressed.GetKey() == CORE_KEY_RIGHT) moveGlassRight = true;
 		if (keypressed.GetKey() == CORE_KEY_UP) SpeedUpGlass();
 		if (keypressed.GetKey() == CORE_KEY_DOWN) SpeedDownGlass();
+
+		if (keypressed.GetKey() == CORE_KEY_P) {
+			m_Solver.spawnParticle(particleSpawnPosition, particleSpawnRadius, ViscosityType::FLUID, Vec2f(0, -10));
+		}
 
 		return true;
 	}

@@ -176,9 +176,7 @@ void UserInterface::buildHint(const char* message){
         hintStartTime = time;
         shouldRestart = false;
     }
-    CORE_DEBUG(time - hintStartTime)
     if (time - hintStartTime > HINT_DURATION) return;
-
     ImVec2 textSize = ImGui::CalcTextSize(message);
     ImVec2 textPos((windowWidth - textSize.x) / 2, (windowHeight - textSize.y) / 2);
     ImGui::SetCursorPos(textPos);
