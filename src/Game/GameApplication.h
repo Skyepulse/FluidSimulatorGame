@@ -25,6 +25,7 @@ public:
 		unloadGame();
 		userInterface->reset();
 
+
 		switch (index)
 		{
 		case 1:

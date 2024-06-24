@@ -14,9 +14,9 @@ void Game11::OnAttach()
 	Real resX = 36.0f;
 	Real resY = 50.0f;
 	//Draw level
-	m_Solver.drawAngleLineWall(Vec2f(0, 7 * resY / 10), 50, -20, 1);
-	m_Solver.drawAngleLineWall(Vec2f(6, 2.5 * resY / 10), 52, 20, 1);
-	m_Solver.drawAngleLineWall(Vec2f(resX - 6, resY - 1), 56, -90, 1);
+	m_Solver.drawAngleLineWall(Vec2f(0, 8.5 * resY / 10), 50, -30, 1);
+	m_Solver.drawAngleLineWall(Vec2f(6, 2.5 * resY / 10), 52, 30, 1);
+	m_Solver.drawAngleLineWall(Vec2f(resX - 8, resY - 1), 46, -90, 1);
 	int width = 14;
 	int height = 10;
 	regularGlassIndex = 0;
@@ -36,6 +36,7 @@ void Game11::OnAttach()
 	GlassMaxX = -width / 2.0f - 1;
 
 	Application::Get()->GetUI()->setHintMessage("Don't spill the water! Change glass velocity with up and down arrows!");
+
 }
 
 void Game11::OnDetach()

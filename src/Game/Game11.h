@@ -22,8 +22,6 @@ private:
 
 	Vec2f particleSpawnPosition = Vec2f(0.0f, 0.0f);
 	Real particleSpawnRadius = 4.0f;
-	Real _resX;
-	Real _resY;
 	Real glassHeight = 0.0f;
 	Real glassWidth = 0.0f;
 
