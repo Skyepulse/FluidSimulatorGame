@@ -33,3 +33,7 @@ void Transform2D::SetDirection(const glm::vec2& direction)
   double angle = glm::orientedAngle(glm::vec2(0.0f, 1.0f), direction);
   SetRotation2D(angle);
 }
+
+glm::vec2 Transform2D::GetPosition() {
+    return m_Position * glm::vec4(0, 0, 0, 1);
+}

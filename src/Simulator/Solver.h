@@ -154,6 +154,10 @@ public:
 
 	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
 
+	Vec2f getRigidPosition(int index) { return _rigidBodies[index].pos; }
+	Vec2f getWallPos(int index) { return _wallGroups[index].displacement; }
+	Vec2f getWallVel(int index) { return _wallGroups[index].vel; }
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);

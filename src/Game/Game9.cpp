@@ -18,6 +18,7 @@ void Game9::OnAttach()
 
 	//Draw level
 	m_Solver.drawAngleLineWall(Vec2f(26, 0), 60, 90);
+	m_Solver.drawAngleLineWall(Vec2f(0, 20), 50, 0);
 
 	int width = 10;
 	int height = 10;
@@ -39,7 +40,13 @@ void Game9::OnAttach()
 
 	startTime = maxTime;
 
-	Application::Get()->GetUI()->setHintMessage("Press P to release water !");
+	objectiveTex = std::make_shared<Texture2D>("src/data/rigidHint.png");
+	objective = std::make_shared<Rectangle>();
+	objective->SetTexture(objectiveTex.get());
+	objective->Transform->Scale2D(glm::vec2(width-1, 7));
+	objective->Transform->SetPosition2D(glm::vec2(30.5, 20));
+
+	Application::Get()->GetUI()->setHintMessage("Press <- or -> to move the pipe !");
 }
 
 void Game9::OnDetach()
@@ -48,6 +55,20 @@ void Game9::OnDetach()
 
 void Game9::UpdateGame()
 {
+	Vec2f wallPos = m_Solver.getWallPos(1);
+
+	if (m_Solver.getRigidPosition(0).y > 18.5 && m_Solver.getRigidPosition(0).y < 21.5){
+		m_Solver.moveWall(1, Vec2f(-2, 0));
+	} else {
+		m_Solver.moveWall(1, Vec2f(4, 0));
+	}
+
+	Vec2f wallVel = m_Solver.getWallVel(1);
+
+	if (wallPos.x < -25 && wallVel.x < 0) m_Solver.moveWall(1, Vec2f(0, 0));
+	if (wallPos.x > 0.1 && wallVel.x > 0) m_Solver.moveWall(1, Vec2f(0, 0));
+
+	Renderer::DrawShape(objective);
 	Renderer::DrawShape(pipe);
 }
 
@@ -56,8 +77,18 @@ bool Game9::OnEvent(Event& e)
 	if (e.GetEventType() == EventType::KeyPressed) {
 		KeyPressedEvent& keypressed = dynamic_cast<KeyPressedEvent&>(e);
 
-		if (keypressed.GetKey() == CORE_KEY_LEFT) pipe->Transform->Translate2D(glm::vec2(-1, 0));
-		if (keypressed.GetKey() == CORE_KEY_RIGHT) pipe->Transform->Translate2D(glm::vec2(1, 0));
+		glm::vec2 pos = pipe->Transform->GetPosition();
+
+		if (keypressed.GetKey() == CORE_KEY_LEFT && pos.x > 4) {
+			pipe->Transform->Translate2D(glm::vec2(-1, 0));
+			glm::vec2 newPos = pipe->Transform->GetPosition();
+			particleSpawnPosition = Vec2f(newPos.x, newPos.y - 9);		
+		}
+		if (keypressed.GetKey() == CORE_KEY_RIGHT && pos.x < resX - 4){ 
+			pipe->Transform->Translate2D(glm::vec2(1, 0));
+			glm::vec2 newPos = pipe->Transform->GetPosition();
+			particleSpawnPosition = Vec2f(newPos.x, newPos.y - 9);
+		}
 
 		if (keypressed.GetKey() == CORE_KEY_P) {
 			m_Solver.spawnParticle(particleSpawnPosition, particleSpawnRadius, ViscosityType::FLUID, Vec2f(0, -10));

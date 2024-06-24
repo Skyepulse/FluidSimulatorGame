@@ -55,4 +55,5 @@ public:
 
   void SetRotation2D(float angle) { SetRotation(angle, glm::vec3(0.0f, 0.0f, 1.0f)); }
   void SetDirection(const glm::vec2& direction); // TO DO : Maybe keep a direction vector ? Must be coherent with matrices !
+  glm::vec2 GetPosition();
 };

@@ -29,4 +29,7 @@ private:
 	float startTime;
 
 	int _maxParticles;
+
+	std::shared_ptr<Shape> objective;
+	std::shared_ptr<Texture2D> objectiveTex;
 };
