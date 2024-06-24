@@ -33,7 +33,7 @@ private:
     int state=0;
     int windowWidth, windowHeight;
     char hintString[100];
-    float hintStartTime;
+    float hintStartTime=0;
     bool shouldRestart = false;
 
     const float HINT_DURATION = 5.0;
