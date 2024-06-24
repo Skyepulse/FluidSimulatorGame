@@ -214,7 +214,20 @@ void Solver::computeNPforces() {
 			// viscosity force
 			Vec2f x = (_particleData[i].pos - _particleData[p].pos);
             Vec2f u = (_particleData[i].vel - _particleData[p].vel);
-			visc = _particleData[i].viscosityType == ViscosityType::VISCOUS ? 50.0f : 2.0f;
+			switch (_particleData[i].viscosityType)
+			{
+			case VISCOUS:
+				visc = 50.0f;
+				break;
+			case SLIGHTLY:
+				visc = 20.0f;
+				break;
+			case MEDIUM:
+				visc = 35.0f;
+				break;
+			default:
+				visc = 2.0f;
+			}
             _particleData[i].acc += visc * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
 		}
 	}
