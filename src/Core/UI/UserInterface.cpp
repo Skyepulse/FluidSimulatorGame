@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include "../../Simulator/kernel.h"
+#include "../Time.h"
 
 
 UserInterface::~UserInterface(){
@@ -28,7 +29,7 @@ void UserInterface::init(Window *window){
 }
 
 void UserInterface::reset(){
-    hintStartTime = -1;
+    shouldRestart = true;
     setHintMessage("");
 }
 
@@ -169,18 +170,20 @@ void UserInterface::buildMenu(){
 
 void UserInterface::buildHint(const char* message){
 
-    float time = ImGui::GetTime();
+    float time = Time::GetSeconds();
 
-    if (hintStartTime == -1) hintStartTime = time;
+    if (shouldRestart) {
+        hintStartTime = time;
+        shouldRestart = false;
+    }
     if (time - hintStartTime > HINT_DURATION) return;
-
     ImVec2 textSize = ImGui::CalcTextSize(message);
     ImVec2 textPos((windowWidth - textSize.x) / 2, (windowHeight - textSize.y) / 2);
     ImGui::SetCursorPos(textPos);
 
     float alpha = (std::sin(time * 2.0f * M_PI * 0.5f) * 0.5f) + 0.5f;
 
-    ImVec4 textColor(1.0f, 1.0f, 1.0f, alpha);
+    ImVec4 textColor(0.0f, 0.0f, 0.0f, alpha);
     ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
     ImGui::Text("%s", message);

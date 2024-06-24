@@ -12,6 +12,8 @@
 #include "Game8.h"
 #include "Game9.h"
 #include "Game10.h"
+#include "Game11.h"
+#include "Game12.h"
 
 class GameApplication : public Application
 {
@@ -23,6 +25,7 @@ public:
     void loadGame(int index) override {
 		unloadGame();
 		userInterface->reset();
+
 
 		switch (index)
 		{
@@ -55,6 +58,12 @@ public:
 			break;
 		case 10:
 			m_game = new Game10();
+			break;
+		case 11:
+			m_game = new Game11();
+			break;
+		case 12:
+			m_game = new Game12();
 			break;
 		default:
 			m_game = new Game();

@@ -154,6 +154,10 @@ public:
 
 	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
 
+	void setLoseZone(Vec2f topLeft, Vec2f bottomRight) { _loseZoneTopLeft = topLeft; _loseZoneBottomRight = bottomRight; _loseZoneActive = true; }
+	bool isInLoseZone() { return _inLoseZone; }
+	void setLoseZoneOnlyDelete(bool onlyDelete) { _loseZoneOnlyDelete = onlyDelete; }
+
 	Vec2f getRigidPosition(int index) { return _rigidBodies[index].pos; }
 	Vec2f getWallPos(int index) { return _wallGroups[index].displacement; }
 	Vec2f getWallVel(int index) { return _wallGroups[index].vel; }
@@ -232,6 +236,12 @@ private:
 	set<ViscosityType> _specificParticlesViscosity;
 
 	double lastSpawnTime = 0;
+
+	Vec2f _loseZoneTopLeft = Vec2f(0.0f);
+	Vec2f _loseZoneBottomRight = Vec2f(0.0f);
+	bool _inLoseZone = false;
+	bool _loseZoneActive = false;
+	bool _loseZoneOnlyDelete = false;
 
 public:
 	vector<ParticleGroup> _glassGroups;

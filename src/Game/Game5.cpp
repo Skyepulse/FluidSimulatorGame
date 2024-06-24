@@ -49,9 +49,6 @@ void Game5::OnDetach()
 
 void Game5::UpdateGame()
 {	
-	rotatecenter += _dt * velVec;
-
-	circleDebug->Transform->SetPosition2D(glm::vec2(rotatecenter.x, rotatecenter.y));
 	Renderer::DrawShape(circleDebug);
 
 	if (isRotatingGlass) {
