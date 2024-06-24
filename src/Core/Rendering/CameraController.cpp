@@ -97,3 +97,7 @@ bool CameraController::OnWindowResized(WindowResizedEvent& e)
    
     return true;
 }
+
+glm::vec2 CameraController::getCenterBound(){
+  return (m_LimitBound.MaxCorner + m_LimitBound.MinCorner)/2.0f;
+}

@@ -5,6 +5,7 @@
 #include "Layer.h"
 
 #include "Rendering/CameraController.h"
+#include "Scene/Rectangle.h"
 
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
@@ -50,6 +51,7 @@ public:
 protected:
   Application();
   std::shared_ptr<UserInterface> userInterface;
+  void setBgSize();
 
 private:
   static Application* s_Instance; 
@@ -57,5 +59,9 @@ private:
   LayerStack m_Layers;
 
   std::shared_ptr<CameraController> m_Controller;
+
+  std::shared_ptr<Shape> background;
+	std::shared_ptr<Texture2D> backgroundTex;
+
 
 };

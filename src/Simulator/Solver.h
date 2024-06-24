@@ -16,7 +16,9 @@ using namespace std;
 enum ViscosityType
 {
 	FLUID = 0,
-	VISCOUS = 1
+	VISCOUS = 1,
+	SLIGHTLY = 2,
+	MEDIUM = 3
 };
 
 struct Particle {

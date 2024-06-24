@@ -16,8 +16,12 @@ LevelLayer::LevelLayer(const std::string& name, const Bound& levelBound, bool dr
 	m_ColorPerViscosity = {
 		glm::vec4(0.0, 0.902, 1.0, 0.8),
 		glm::vec4(0.0, 0.447, 0.839, 0.8),
-		glm::vec4(1.0, 0.0, 1.0, 0.8),
-		glm::vec4(1.0, 0.0, 0.0, 0.8),
+		glm::vec4(1.0, 0.698, 0.0, 0.8),
+		glm::vec4(1.0, 0.235, 0.0, 0.8),
+		glm::vec4(1.0, 0.541, 0.941, 0.8),
+		glm::vec4(0.78, 0.0, 1.0, 0.8),
+		glm::vec4(0.553, 1.0, 0.776, 0.8),
+		glm::vec4(0.0, 1.0, 0.5, 0.8),
 	};
 	m_ParticleViscosityColorBuffer = DataBufferObject(m_ColorPerViscosity.data(), m_ColorPerViscosity.size() * sizeof(glm::vec4));
 
