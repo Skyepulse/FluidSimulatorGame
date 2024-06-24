@@ -1,6 +1,6 @@
 #version 430
 
-layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 layout(std430, binding = 1) buffer Particles {
@@ -56,7 +56,7 @@ uint KeyFromHash(uint hash, uint tableSize)
 void main() {
 	ivec2 x = ivec2(gl_GlobalInvocationID.xy);
 
-	uint index = uint(x.x);
+	uint index = uint(x.x * 32 + x.y);
 	if(index >= particleCount)
 		return;
 
@@ -77,5 +77,5 @@ void main() {
 	else if(count == 2)
 		atomicExchange(particleindex[key].w, index);
 
-	//imageStore(imgOutput, cell, float(count) * vec4(vec3(1.0), 1.0));
+	imageStore(imgOutput, cell, float(count) * vec4(vec3(0.2), 1.0));
 }
