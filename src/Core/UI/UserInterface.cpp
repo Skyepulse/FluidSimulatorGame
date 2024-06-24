@@ -183,7 +183,7 @@ void UserInterface::buildHint(const char* message){
 
     float alpha = (std::sin(time * 2.0f * M_PI * 0.5f) * 0.5f) + 0.5f;
 
-    ImVec4 textColor(1.0f, 1.0f, 1.0f, alpha);
+    ImVec4 textColor(0.0f, 0.0f, 0.0f, alpha);
     ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
     ImGui::Text("%s", message);
