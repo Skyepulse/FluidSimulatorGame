@@ -13,6 +13,7 @@
 #include "Game9.h"
 #include "Game10.h"
 #include "Game11.h"
+#include "Game12.h"
 
 class GameApplication : public Application
 {
@@ -60,6 +61,9 @@ public:
 			break;
 		case 11:
 			m_game = new Game11();
+			break;
+		case 12:
+			m_game = new Game12();
 			break;
 		default:
 			m_game = new Game();
