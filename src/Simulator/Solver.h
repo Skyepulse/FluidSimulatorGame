@@ -152,6 +152,10 @@ public:
 
 	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
 
+	void setLoseZone(Vec2f topLeft, Vec2f bottomRight) { _loseZoneTopLeft = topLeft; _loseZoneBottomRight = bottomRight; _loseZoneActive = true; }
+	bool isInLoseZone() { return _inLoseZone; }
+	void setLoseZoneOnlyDelete(bool onlyDelete) { _loseZoneOnlyDelete = onlyDelete; }
+
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
 	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
@@ -226,6 +230,12 @@ private:
 	set<ViscosityType> _specificParticlesViscosity;
 
 	double lastSpawnTime = 0;
+
+	Vec2f _loseZoneTopLeft = Vec2f(0.0f);
+	Vec2f _loseZoneBottomRight = Vec2f(0.0f);
+	bool _inLoseZone = false;
+	bool _loseZoneActive = false;
+	bool _loseZoneOnlyDelete = false;
 
 public:
 	vector<ParticleGroup> _glassGroups;

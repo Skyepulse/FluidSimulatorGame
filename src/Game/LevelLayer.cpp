@@ -107,9 +107,17 @@ void LevelLayer::HandleFramerate()
 
 void LevelLayer::CheckPlayerWin()
 {
+	if (m_State != GameState::RUNNING && m_State != GameState::PAUSED) return;
+	if(m_Solver.isInLoseZone())
+	{
+		m_State = GameState::LOSE;
+		return;
+	}
+
 	if (maxTime < 0.0) {
 		maxTime = 0.0;
 		m_State = GameState::LOSE;
+		return;
 	}
 
 	int particlesInGlass = m_Solver.getParticlesInGlass();
@@ -117,6 +125,7 @@ void LevelLayer::CheckPlayerWin()
 	{
 		m_GlassColor = m_WinningGlassColor;
 		m_State = GameState::WIN;
+		return;
 	}
 }
 
