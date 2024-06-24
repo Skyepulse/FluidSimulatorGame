@@ -18,6 +18,11 @@ inline Real clamp(const Real v, const Real vmin, const Real vmax)
 
 template<typename T>
 class Vector2 {
+private:
+    static T lastAngle;
+    static T lastCos;
+    static T lastSin;
+
 public:
     enum { D = 2 };
 
@@ -138,8 +143,17 @@ public:
     Vector2& rotate(const Real radian) { return *this = rotated(radian); }
     Vector2 rotated(const Real radian) const
     {
-        const Real cost = std::cos(radian);
-        const Real sint = std::sin(radian);
+        Real cost, sint;
+        if (radian == lastAngle){
+            cost = lastCos;
+            sint = lastSin;
+        } else {
+            cost = std::cos(radian);
+            sint = std::sin(radian);
+            lastCos = cost;
+            lastSin = sint;
+            lastAngle = radian;
+        }
         return Vector2(cost * x - sint * y, sint * x + cost * y);
     }
     Vector2& rotate90() { return *this = rotated90(); }
@@ -176,6 +190,16 @@ public:
     }
 };
 typedef Vector2<Real> Vec2f;
+
+template<typename T>
+T Vector2<T>::lastAngle = 0.0;
+
+template<typename T>
+T Vector2<T>::lastCos = 1.0;
+
+template<typename T>
+T Vector2<T>::lastSin = 0.0;
+
 inline const Vec2f operator*(const Real s, const Vec2f& r) { return r * s; }
 
 #endif

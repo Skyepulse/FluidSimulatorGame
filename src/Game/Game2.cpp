@@ -1,7 +1,7 @@
 #include "Game2.h"
 #include <algorithm>
 
-Game2::Game2() : LevelLayer("Game Layer")
+Game2::Game2() : LevelLayer("Game Layer", Bound(glm::vec2(36.0f, 50.0f)), false)
 {
 }
 
@@ -11,109 +11,54 @@ Game2::~Game2()
 
 void Game2::OnAttach()
 {
-	circleWalls = std::make_shared<Circle>();
-	circleLiquid = std::make_shared<Circle>();
-	circleGlass = std::make_shared<Circle>();
-
-	float circleRadius = 0.5f;
-	circleWalls->Transform->Scale2D(circleRadius);
-	circleLiquid->Transform->Scale2D(circleRadius);
-	circleGlass->Transform->Scale2D(circleRadius);
-
-	circleWalls->SetColor(glm::vec3(0.6f));
-	circleLiquid->SetColor(glm::vec3(0.2f, 0.3f, 1.0f));
-	circleGlass->SetColor(glm::vec3(0.8f, 0.3f, 0.2f));
-
 	Real resX = 36.0f;
 	Real resY = 50.0f;
 	_resX = resX;
 	_resY = resY;
 
 	_maxParticles = 100;
-	solver.setMaxParticles(_maxParticles);
-
-
-	solver.initSimulation(resX, resY);
+	m_Solver.setMaxParticles(_maxParticles);
 
 	//Draw level
-	//solver.drawWalls(resX, resY);
-	//solver.drawAngleLineWall(Vec2f(0, 0), resX*2, 0, 1);
-	solver.drawAngleLineWall(Vec2f(0, resY-1), resX*2, 0, 1);
-	solver.drawAngleLineWall(Vec2f(1, 1), resY*2 - 4, 90, 1);
-	solver.drawAngleLineWall(Vec2f(resX, 1), resY*2 - 4, 90, 1);
-	solver.drawAngleLineWall(Vec2f(20, 5 * resY / 10), 45, 30, 1);
+	m_Solver.drawAngleLineWall(Vec2f(0, resY-1), resX*2, 0, 1);
+
+	m_Solver.drawAngleLineWall(Vec2f(1, 1), resY*2 - 4, 90, 1);
+	m_Solver.drawAngleLineWall(Vec2f(resX, 1), resY*2 - 4, 90, 1);
+	m_Solver.drawAngleLineWall(Vec2f(20, 5 * resY / 10), 45, 30, 1);
 	int width = 16;
 	int height = 10;
 	glassWidth = width;
 	glassHeight = height;
-	solver.drawWinningGlass(width, height, Vec2f(6, 1));
-	solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 
-	//solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
-	solver.setGlassSpeed(0.0f, 4.0f);
+	m_Solver.drawWinningGlass(width, height, Vec2f(6, 1));
+	m_Solver.setSpawnPosition(Vec2f(resX-4, resY - 4));
 
-	solver.init();
+	pipe->Transform->Translate2D(glm::vec2(resX-4, resY - 4));
 
-	winningGlassParticles = solver.getWinningGlass();
-	particleSpawnPosition = solver.getSpawnPosition();
+	//m_Solver.spawnLiquidRectangle(Vec2f(2, resY - 15), 10, 10);
 
-	solver.moveGlassUp(true);
+	m_Solver.init();
+
+	winningGlassParticles = m_Solver.getWinningGlass();
+	particleSpawnPosition = m_Solver.getSpawnPosition();
+
+	_glassRange = resY / 8 * 0.8;
+
+	startTime = maxTime;
+
+	Application::Get()->GetUI()->setHintMessage("Press P to release water !");
 }
 
 void Game2::OnDetach()
 {
 }
 
-void Game2::Update()
+void Game2::UpdateGame()
 {
+	Vec2f velocityVector = Vec2f(0, _glassRange * glm::sin((startTime - maxTime) * M_PI / _glassPeriod));
+	m_Solver.moveGlass(glassIndex, velocityVector, true);
 
-	Vec2f glassPosition = solver.getGlassPosition();
-	if (glassPosition.y >= _resY - glassHeight)
-	{
-		solver.moveGlassUp(false);
-		solver.moveGlassDown(true);
-	}
-	else if (glassPosition.y <= 1)
-	{
-		solver.moveGlassDown(false);
-		solver.moveGlassUp(true);
-	}
-
-	Real _dt = 0.0f;
-	if (state != GameState::PAUSED) _dt = solver.update();
-	if (state == GameState::RUNNING) maxTime -= _dt;
-	if (maxTime < 0.0) {
-		maxTime = 0.0;
-		state = GameState::LOSE;
-	}
-	vector<Particle> particleManager = solver.getParticleManager();
-
-	vector<Vec2f> wallsPositions;
-	vector<Vec2f> liquidPositions;
-	vector<Vec2f> glassPositions;
-
-	for (size_t i = 0; i < particleManager.size(); i++)
-	{
-		if (particleManager[i].type == 1)
-			wallsPositions.push_back(particleManager[i].pos);
-		else if (particleManager[i].type == 0)
-			liquidPositions.push_back(particleManager[i].pos);
-		else
-			glassPositions.push_back(particleManager[i].pos);
-
-	}
-
-	Renderer::DrawShapeDuplicate(circleWalls, wallsPositions);
-	Renderer::DrawShapeDuplicate(circleLiquid, liquidPositions);
-	Renderer::DrawShapeDuplicate(circleGlass, glassPositions);
-
-	int particlesInGlass = solver.getParticlesInGlass();
-	if (particlesInGlass >= winningGlassParticles)
-	{
-		circleGlass->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		state = GameState::WIN;
-	}
-
+	Renderer::DrawShape(pipe);
 }
 
 bool Game2::OnEvent(Event& e)
@@ -125,7 +70,7 @@ bool Game2::OnEvent(Event& e)
 			return false;
 
 		if (keypressed.GetKey() == CORE_KEY_P) {
-			solver.spawnParticle(getRandomPointInCircle(particleSpawnPosition, particleSpawnRadius));
+			m_Solver.spawnParticle(particleSpawnPosition, particleSpawnRadius, ViscosityType::FLUID, Vec2f(0, -10));
 		}
 
 		return true;

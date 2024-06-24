@@ -18,6 +18,10 @@ void Solver::initSimulation(const Real resX, const Real resY)
 
 	_particleData.clear();
 
+	_wallGroups.clear();
+	_glassGroups.clear();
+	_rigidBodies.clear();
+
 	_neighbors.clear();
 
 	_particlesInGrid.clear();
@@ -26,11 +30,9 @@ void Solver::initSimulation(const Real resX, const Real resY)
 	_particleCount = 0;
 	_immovableParticleCount = 0;
 	_immovableGlassParticleCount = 0;
-
-	Real sr = _kernel->getSupportRad();
 }
 
-void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
+void Solver::addParticle(const Vec2f& pos, const int type, ViscosityType viscosityType ,const Vec2f& vel, const Vec2f& acc, const Real press, const Real density, const Real alpha)
 {
 	Particle p;
 	p.pos = pos;
@@ -40,6 +42,8 @@ void Solver::addParticle(const Vec2f& pos, const int type, const Vec2f& vel, con
 	p.type = type;
 	p.alpha = alpha;
 	p.isInGlass = false;
+	p.viscosityType = viscosityType;
+
 
 	_particleData.push_back(p);
 	_neighbors.push_back(vector<tIndex>());
@@ -79,12 +83,13 @@ Real Solver::update() {
 	computeNPforces();
 	//CORE_DEBUG("NP forces: {}", Time::GetDeltaTime());
 	adaptDt();
-	//CORE_DEBUG("Adapt dt: {}", Time::GetDeltaTime());
+	//CORE_DEBUG("Adapt dt: {}", _dt);
 	predictVel(_dt);
 	//CORE_DEBUG("Predict vel {}", Time::GetDeltaTime());
 	correctDensityError(_dt);
 	//CORE_DEBUG("Correct density: {}", Time::GetDeltaTime());
 	updatePos(_dt);
+	updateRigidBodies(_dt);
 	//CORE_DEBUG("Update pos: {}", Time::GetDeltaTime());
 	buildNeighbors();
 	//CORE_DEBUG("Build neighbors: {}", Time::GetDeltaTime());
@@ -95,32 +100,74 @@ Real Solver::update() {
 	return _dt;
 }
 
+bool Solver::isIdxValid(int x, int y){
+	return (x >= 0 && y >= 0 && x < _resX && y < _resY);
+}
+
+void Solver::extendGridUpdate(vector<bool> &grid){
+	vector<bool> orig(grid);
+
+	for (int x=0; x<_resX; x++){
+		for (int y=0; y<_resY; y++){
+			tIndex idx = idx1d(x, y);
+			if (!orig[idx]) continue;
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dy = -1; dy <= 1; dy++) {
+					if (isIdxValid(x+dx, y+dy)) {
+						grid[idx1d(x + dx, y + dy)] = true;
+					}
+				}
+			}
+		}
+	}
+}
+
 void Solver::buildNeighbors() {
 	// We first build the grid
+	vector<bool> gridNeedUpdate(_resX * _resY, false);
+
+	int count = 0;
 
 	Real R = _kernel->getSupportRad();
 	_particlesInGrid.clear();
 	_particlesInGrid.resize(_resX * _resY);
-	for (int i = 0; i < _particleCount; i++) {
+
+	bool checkingWalls = false;
+
+	for (int i = _particleCount-1; i >= 0; i--) {
 		int x = _particleData[i].pos.x / R;
 		int y = _particleData[i].pos.y / R;
 		tIndex idx = idx1d(x, y);
-		if (x >= 0 && y >= 0 && x < _resX && y < _resY) {
+		if (isIdxValid(x, y)) {
+			_particleData[i].needUpdate = true;
+			if (_particleData[i].type == 0 || _particleData[i].type == 3){
+				gridNeedUpdate[idx] = true;
+			} else {
+				if (!checkingWalls){
+					extendGridUpdate(gridNeedUpdate);
+					checkingWalls = true;
+				}
+				if (!gridNeedUpdate[idx]) _particleData[i].needUpdate = false;
+			}
 			_particlesInGrid[idx].push_back(i);
+		} else {
+			_particleData[i].needUpdate = false;
 		}
 	}
 
 	_neighbors.clear();
 	_neighbors.resize(_particleCount);
 
+
 	// Then we build the neighbors
 	for (int i = 0; i < _particleCount; i++) {
+		if (!_particleData[i].needUpdate) continue;
 		int x = _particleData[i].pos.x / R;
 		int y = _particleData[i].pos.y / R;
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dy = -1; dy <= 1; dy++) {
 				tIndex idx = idx1d(x + dx, y + dy);
-				if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
+				if (isIdxValid(x+dx, y+dy)) {
 					for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
 						tIndex p = _particlesInGrid[idx][j];
 						if ((_particleData[i].pos - _particleData[p].pos).length() <= R) {
@@ -135,6 +182,7 @@ void Solver::buildNeighbors() {
 
 void Solver::computeDensityAlpha() {
 	for (int i = 0; i < _particleCount; i++) {
+		if (!_particleData[i].needUpdate) continue;
 		_particleData[i].density = 0;
 		Vec2f a = Vec2f(0e0);
 		Real b = 0e0;
@@ -153,16 +201,9 @@ void Solver::computeDensityAlpha() {
 
 void Solver::computeNPforces() {
 	Real visc = 2.0f;
-	switch (_viscosityType) {
-		case ViscosityType::VISCOUS:
-			visc = 60.0f;
-			break;
-		case ViscosityType::FLUID:
-			visc = 2.0f;
-			break;
-	}
 	for (int i = 0; i < _particleCount; i++) {
-		if(_particleData[i].type == 1 || _particleData[i].type == 2) continue;
+		if (!_particleData[i].needUpdate) continue;
+		if(_particleData[i].type == 1 || _particleData[i].type == 2 || _particleData[i].type == 3) continue;
 		// gravity
 		_particleData[i].acc = _g;
 
@@ -173,45 +214,48 @@ void Solver::computeNPforces() {
 			// viscosity force
 			Vec2f x = (_particleData[i].pos - _particleData[p].pos);
             Vec2f u = (_particleData[i].vel - _particleData[p].vel);
+			switch (_particleData[i].viscosityType)
+			{
+			case VISCOUS:
+				visc = 50.0f;
+				break;
+			case SLIGHTLY:
+				visc = 20.0f;
+				break;
+			case MEDIUM:
+				visc = 35.0f;
+				break;
+			default:
+				visc = 2.0f;
+			}
             _particleData[i].acc += visc * _nu * _m0 / _particleData[p].density * u * x.dotProduct(_kernel->gradW(_particleData[i].pos - _particleData[p].pos)) / (x.dotProduct(x) + 0.01f * _h * _h);
 		}
 	}
 }
 
 void Solver::predictVel(const Real dt){
+
 	for (int i = 0; i < _particleCount; i++) {
-		if (_particleData[i].type == 2) {
-			if (this->_moveGlassRight) {
-				_particleData[i].vel = _moveGlassSpeedX * Vec2f(1.0f, 0.0f);
-			}
-			else if (this->_moveGlassLeft) {
-				_particleData[i].vel = _moveGlassSpeedX * Vec2f(-1.0f, 0.0f);
-			}
-			else if (this->_moveGlassUp) {
-				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, 1.0f);
-			}
-			else if (this->_moveGlassDown) {
-				_particleData[i].vel = _moveGlassSpeedY * Vec2f(0.0f, -1.0f);
-			}
-			else {
-				_particleData[i].vel = Vec2f(0.0f, 0.0f);
-			}
-			continue;
-		}
 		if (_particleData[i].type == 0)
 			_particleData[i].vel += dt * (_particleData[i].acc);
 	}
+
+	for (auto &rBody: _rigidBodies) rBody.vel += dt * _g;
 }
 
 void Solver::adaptDt() {
 	Real maxVel2 = 0e0;
 	for (int i = 0; i < _particleCount; i++) {
+		if (!_particleData[i].needUpdate) continue;
 		Real particleVel2 = _particleData[i].vel.lengthSquare();
 		if (particleVel2 > MAX_PARTICLE_VEL * MAX_PARTICLE_VEL) {
 			_particleData[i].vel *= MAX_PARTICLE_VEL / sqrt(particleVel2);
 			particleVel2 = MAX_PARTICLE_VEL * MAX_PARTICLE_VEL;
 		}
 		maxVel2 = max(maxVel2, particleVel2);
+	}
+	for (auto& rBody : _rigidBodies) {
+		maxVel2 = max(maxVel2, rBody.vel.lengthSquare());
 	}
 	Real maxVel = sqrt(maxVel2);
 	//CORE_DEBUG("Max velocity: {}", maxVel);
@@ -221,12 +265,9 @@ void Solver::adaptDt() {
 }
 
 void Solver::updatePos(const Real dt) {
-	Vec2f glassVel = Vec2f(0.0f, 0.0f);
 	for (int i = _particleCount - 1; i >= 0; i--) {
-		if(_particleData[i].type == 1) continue;
-		if (_particleData[i].type == 2) {
+		if (_particleData[i].type == 1 || _particleData[i].type == 3 || _particleData[i].type == 2) {
 			_particleData[i].pos += dt * _particleData[i].vel;
-			glassVel = _particleData[i].vel;
 			continue;
 		}
 		_particleData[i].pos += dt * _particleData[i].vel;
@@ -234,21 +275,80 @@ void Solver::updatePos(const Real dt) {
 		//We check if the particle is out of bounds
 		Vec2f pos = _particleData[i].pos;
 		if (pos.x < 0 || pos.x >= _resX * _kernel->getSupportRad() || pos.y < 0 || pos.y >= _resY * _kernel->getSupportRad()) {
+			if (_infiniteWalls) {
+				Vec2f newPos = Vec2f(0.0f);
+				if(pos.x < 0) newPos.x = _resX * _kernel->getSupportRad() + pos.x;
+				else if(pos.x >= _resX * _kernel->getSupportRad()) newPos.x = pos.x - _resX * _kernel->getSupportRad();
+				else newPos.x = pos.x;
+
+				if(pos.y < 0) newPos.y = _resY * _kernel->getSupportRad() + pos.y;
+				else if(pos.y >= _resY * _kernel->getSupportRad()) newPos.y = pos.y - _resY * _kernel->getSupportRad();
+				else newPos.y = pos.y;
+
+				_particleData[i].pos = newPos;
+				continue;
+			}
 			removeParticle(i);
 			continue;
 		}
 
 		//We check if the particle is inside the glass
-		if (_particleData[i].pos.x >= _glasscorner.x && _particleData[i].pos.x <= _glasscorner.x + _glassSize.x && _particleData[i].pos.y >= _glasscorner.y && _particleData[i].pos.y <= _glasscorner.y + _glassSize.y) {
-			if (!_particleData[i].isInGlass) _particlesInGlass++;
-			_particleData[i].isInGlass = true;
+		Vec2f glassPos = getGlassPosition();
+		if (_particleData[i].pos.x >= glassPos.x && _particleData[i].pos.x <= glassPos.x + _glassSize.x && _particleData[i].pos.y >= glassPos.y && _particleData[i].pos.y <= glassPos.y + _glassSize.y) {
+			if (_specificParticlesWin && find(_specificParticlesViscosity.begin(), _specificParticlesViscosity.end(), _particleData[i].viscosityType) != _specificParticlesViscosity.end()) {
+				if (!_particleData[i].isInGlass) _particlesInGlass++;
+				_particleData[i].isInGlass = true;
+			}
+			else if(!_specificParticlesWin) {
+				if (!_particleData[i].isInGlass) _particlesInGlass++;
+				_particleData[i].isInGlass = true;
+			}
 		}
 		else {
 			if (_particleData[i].isInGlass) _particlesInGlass--;
 			_particleData[i].isInGlass = false;
 		}	
+
+		//We check if we are in the lose zone
+		if (_loseZoneActive) {
+			if(_particleData[i].pos.x >=_loseZoneTopLeft.x && _particleData[i].pos.x <= _loseZoneBottomRight.x && _particleData[i].pos.y >= _loseZoneBottomRight.y && _particleData[i].pos.y <= _loseZoneTopLeft.y) {
+				if(_loseZoneOnlyDelete) removeParticle(i);
+				else _inLoseZone = true;
+				continue;
+			}
+		}
 	}
-	_glasscorner += dt * glassVel;
+
+	for (auto &pGroup: _wallGroups){
+		pGroup.displacement += pGroup.vel * dt;
+	}
+
+	for (auto &pGroup: _glassGroups){
+		pGroup.displacement += pGroup.vel * dt;
+	}
+}
+
+void Solver::updateRigidBodies(const Real dt){
+	for (auto &rBody: _rigidBodies){
+		Vec2f bufferMov(0);
+		Real bufferRot = 0;
+
+		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
+			bufferMov += _particleData[i].vel;
+			bufferRot += (_particleData[i].pos - rBody.pos).crossProduct(_particleData[i].vel);
+		}
+		bufferRot *= rBody.invI;
+
+		rBody.omega += bufferRot;
+		rBody.theta += rBody.omega * dt;
+
+		rBody.vel += bufferMov * rBody.relInvMass;
+		rBody.pos += rBody.vel * dt;
+		for (int i=rBody.startIdx; i<rBody.endIdx; i++){
+			_particleData[i].vel = Vec2f(0);
+			_particleData[i].pos = rBody.pos + rBody.initPos[i-rBody.startIdx].rotated(rBody.theta);
+		}
+	}
 }
 
 void Solver::correctDivergenceError(const Real dt){
@@ -260,12 +360,14 @@ void Solver::correctDivergenceError(const Real dt){
 	int iter = 0;
 
 	for (int i=0; i<_particleCount; i++){
+		if (!_particleData[i].needUpdate) continue;
 		_particleData[i].alpha *= dtInv;
 	}
 
 	while ((abs(dpAvg) > eta || iter < 1) && iter < 10){
 		dpAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
+			if (!_particleData[i].needUpdate) continue;
 			dp[i] = 0e0f;
 			for (int p = 0; p < _neighbors[i].size(); p++) {
 				tIndex j = _neighbors[i][p];
@@ -276,7 +378,7 @@ void Solver::correctDivergenceError(const Real dt){
 		dpAvg /= _particleCount;
 
 		for (tIndex i=0; i<_particleCount; i++){
-			if (_particleData[i].type != 0) continue;
+			if (_particleData[i].type == 1 || _particleData[i].type == 2) continue;
 			Real ki = dp[i] * _particleData[i].alpha;
 			Vec2f sum(0);
 			for (int p=0; p<_neighbors[i].size(); p++) {
@@ -290,6 +392,7 @@ void Solver::correctDivergenceError(const Real dt){
 	}
 
 	for (int i=0; i<_particleCount; i++){
+		if (!_particleData[i].needUpdate) continue;
 		_particleData[i].alpha *= dt;
 	}
 }
@@ -306,6 +409,7 @@ void Solver::correctDensityError(const Real dt){
 	float secondCount=0;
 
 	for (int i=0; i<_particleCount; i++){
+		if (!_particleData[i].needUpdate) continue;
 		_particleData[i].alpha *= dt2Inv;
 	}
 
@@ -313,6 +417,7 @@ void Solver::correctDensityError(const Real dt){
 		Time::GetDeltaTime();
 		densAvg = 0.0f;
 		for (tIndex i=0; i<_particleCount; i++){
+			if (!_particleData[i].needUpdate) continue;
 			Real factor = 0e0f;
 			for (int p = 0; p < _neighbors[i].size(); p++) {
 				tIndex j = _neighbors[i][p];
@@ -343,6 +448,7 @@ void Solver::correctDensityError(const Real dt){
 	}
 
 	for (int i=0; i<_particleCount; i++){
+		if (!_particleData[i].needUpdate) continue;
 		_particleData[i].alpha *= dt*dt;
 	}
 }
@@ -372,7 +478,9 @@ void Solver::drawWalls(int resX, int resY) {
 	}
 }
 
-void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type) {
+void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type, bool save) {
+	tIndex start = _particleCount;
+
 	Real sr = _kernel->getSupportRad(); 
 	for (int i = 0; i < particleLength; i++) {
 		Vec2f pos1 = p1 + Vec2f(0.25, 0.25) + Vec2f(0.5, 0.0) * i;
@@ -380,14 +488,23 @@ void Solver::drawStraightLineWall(const Vec2f& p1, int particleLength, int type)
 		Vec2f pos2 = p1 + Vec2f(0.25, 0.75) + Vec2f(0.5, 0.0) * i;
 		addParticle(sr * pos2, type);
 	}
+
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
-void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type) {
+void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type, bool save) {
 	Real sr = _kernel->getSupportRad();
 	Real radAngle = angle * M_PI / 180.0;
 	Real cosAngle = cos(radAngle);
 	Real sinAngle = sin(radAngle);
 
+	tIndex start = _particleCount;
 
 	//Turn the line by angle
 	for (int i = 0; i < particleLength; i++) {
@@ -399,13 +516,22 @@ void Solver::drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, 
 		Vec2f newPos2 = Vec2f(cosAngle * (pos2.x - p1.x) - sinAngle * (pos2.y - p1.y) + p1.x, sinAngle * (pos2.x - p1.x) + cosAngle * (pos2.y - p1.y) + p1.y);
 		addParticle(sr * newPos2, type);	
 	}
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
-void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type) {
+void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type, bool save) {
 	Real sr = _kernel->getSupportRad();
 	Real radAngle = angle * M_PI / 180.0;
 	Real cosAngle = cos(radAngle);
 	Real sinAngle = sin(radAngle);
+
+	tIndex start = _particleCount;
 
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
@@ -414,63 +540,135 @@ void Solver::drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real
 			addParticle(sr * newPos, type);
 		}
 	}
+	if (save){
+		ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+		for (int i=start; i<_particleCount; i++){
+			pGroup.initPos[i - start] = _particleData[i].pos;
+		}
+		_wallGroups.push_back(pGroup);
+	}
 }
 
 void Solver::drawWinningGlass(int width, int height, Vec2f cornerPosition) {
-	drawAngleLineWall(cornerPosition, width, 0, 2);
-	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2);
-	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2);
+	tIndex start = _particleCount;
+	drawAngleLineWall(cornerPosition, width, 0, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(width/2, 1.0f), height, 90, 2, false);
 	this->_glasscorner = cornerPosition;
 	this->_glassSize = Vec2f(width/2, height/2);
 	this->_winningGlass = (width - 2) * (height - 1) / 2;
+
+
+	ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+	for (int i=start; i<_particleCount; i++){
+		pGroup.initPos[i - start] = _particleData[i].pos;
+	}
+	winGlassIdx = _glassGroups.size();
+	_glassGroups.push_back(pGroup);
 }
 
-void Solver::spawnParticle(Vec2f position) {
-	if(_maxParticles == 0) return;
-	//We check the potential neighbors for this particle. If we find a neighbor too close, we don't spawn the particle
-	int x = position.x;
-	int y = position.y;
-	Real sr = _kernel->getSupportRad();
-	for (int dx = -1; dx <= 1; dx++) {
-		for (int dy = -1; dy <= 1; dy++) {
-			tIndex idx = idx1d(x + dx, y + dy);
-			if (x + dx >= 0 && y + dy >= 0 && x + dx < _resX && y + dy < _resY) {
-				for (int j = 0; j < _particlesInGrid[idx].size(); j++) {
-					tIndex p = _particlesInGrid[idx][j];
-					if ((position - _particleData[p].pos).length() <= sr/2) {
-						return;
-					}
-				}
-			}
-		}
+void Solver::drawRegularGlass(int width, int height, Vec2f cornerPosition) {
+	tIndex start = _particleCount;
+	drawAngleLineWall(cornerPosition, width, 0, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(1.0f), height, 90, 2, false);
+	drawAngleLineWall(cornerPosition + Vec2f(width / 2, 1.0f), height, 90, 2, false);
+
+	ParticleGroup pGroup(start, _particleCount, vector<Vec2f>(_particleCount - start));
+	for (int i = start; i < _particleCount; i++) {
+		pGroup.initPos[i - start] = _particleData[i].pos;
 	}
-	addParticle(position, 0);
-	_maxParticles--;
+	_glassGroups.push_back(pGroup);
+}
+
+void Solver::spawnParticle(Vec2f position, Real radius, ViscosityType viscosityType, Vec2f vel) {
+	if(_maxParticles == 0) return;
+	double currentTime = Time::GetSeconds();
+
+	if (position.y - _particleData[_particleCount-1].pos.y < 1.2*_h) return;
+
+	lastSpawnTime = currentTime;
+	
+	int R = radius-2;
+	for (float i=-R; i<=R; i++){
+		addParticle(position + i * Vec2f(_h, 0), 0, viscosityType, vel);
+		addParticle(position + i * Vec2f(_h, 0) + Vec2f(0, _h), 0, viscosityType, vel);
+		_maxParticles-=2;
+	}
 }
 
 void Solver::setSpawnPosition(Vec2f position) {
 	_spawnPosition = this->_kernel->getSupportRad()*position;
 }
 
-void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int type) {
+void Solver::spawnLiquidRectangle(Vec2f position, int width, int height, int type, ViscosityType viscosityType) {
 	Real sr = _kernel->getSupportRad();
 	for (int i = position.x; i < position.x + width; i++) {
 		for (int j = position.y; j < position.y + height; j++) {
-			addParticle(sr * Vec2f(i + 0.25, j + 0.25));
-			addParticle(sr * Vec2f(i + 0.75, j + 0.25));
-			addParticle(sr * Vec2f(i + 0.25, j + 0.75));
-			addParticle(sr * Vec2f(i + 0.75, j + 0.75));
+			addParticle(sr * Vec2f(i + 0.25, j + 0.25), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.75, j + 0.25), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.25, j + 0.75), 0, viscosityType);
+			addParticle(sr * Vec2f(i + 0.75, j + 0.75), 0, viscosityType);
 		}
 	}
 }
 
-Vec2f Solver::getGlassPosition() {
-	return _glasscorner;
+void Solver::addRigidBody(Vec2f pos, int width, int height, Real relMass) {
+	tIndex start = _particleCount;
+	drawAngleLineWall(pos, width, 0, 3, false);
+	drawAngleLineWall(pos + Vec2f(1.0f), height, 90, 3, false);
+	drawAngleLineWall(pos + Vec2f(width/2, 1.0f), height, 90, 3, false);
+	drawAngleLineWall(pos + Vec2f(1.0f, height/2), width-4, 0, 3, false);
+
+	if (relMass == 0) relMass = _particleCount - start;
+
+	pos += Vec2f(width/4, height/4);
+
+	RigidBody rBody(start, _particleCount, vector<Vec2f>(_particleCount - start), pos, relMass);
+	for (int i=start; i<_particleCount; i++){
+		rBody.initPos[i - start] = _particleData[i].pos - pos;
+	}
+	rBody.invI = 12.0/(relMass * (width*width/4 + height*height/4));
+	_rigidBodies.push_back(rBody);
 }
 
-void Solver::setGlassSpeed(Real speedX, Real speedY) {
-	_moveGlassSpeedX = speedX;
-	_moveGlassSpeedY = speedY;
+void Solver::rotateWall(int wallIdx, float angle, Vec2f orig){
+	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	Vec2f displacement = orig + pGroup.displacement;
+	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + displacement;
+	}
+}
+
+void Solver::moveWall(int wallIdx, Vec2f moveVector){
+	ParticleGroup &pGroup = _wallGroups[wallIdx];
+	pGroup.vel = moveVector;
+	for (int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].vel = moveVector;
+	}
+}
+
+void Solver::rotateGlass(int glassIdx, float angle, Vec2f orig) {
+	ParticleGroup &pGroup = _glassGroups[glassIdx];
+	Vec2f displacement = orig + pGroup.displacement;
+	for (int i = pGroup.startIdx; i < pGroup.endIdx; i++) {
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].pos = (pGroup.initPos[iGroup] - orig).rotated(angle) + displacement;
+	}
+}
+
+void Solver::moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass) {
+	ParticleGroup &pGroup = _glassGroups[glassIdx];
+	pGroup.vel = moveVector;
+	for(int i=pGroup.startIdx; i<pGroup.endIdx; i++){
+		tIndex iGroup = i - pGroup.startIdx;
+		_particleData[i].vel = moveVector;
+	}
+}
+
+Vec2f Solver::getGlassPosition() {
+	return _glasscorner + _glassGroups[winGlassIdx].displacement;
 }
 
 //OPENGL

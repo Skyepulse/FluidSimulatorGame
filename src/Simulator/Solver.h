@@ -6,11 +6,20 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <set>
 #include "../Core/Log.h"
 #include <glad/glad.h>
 
 
 using namespace std;
+
+enum ViscosityType
+{
+	FLUID = 0,
+	VISCOUS = 1,
+	SLIGHTLY = 2,
+	MEDIUM = 3
+};
 
 struct Particle {
 	Vec2f pos; // position
@@ -20,17 +29,45 @@ struct Particle {
 	Real alpha; // alpha
 	int type; // type of particle
 	bool isInGlass; // is particle in glass
+	bool needUpdate=true;
+	ViscosityType viscosityType;
+};
+
+
+struct ParticleGroup {
+	tIndex startIdx;
+	tIndex endIdx;
+	vector<Vec2f> initPos;
+	Vec2f displacement;
+	Vec2f vel;
+
+	ParticleGroup() : startIdx(0), endIdx(0), displacement(0), vel(0) {}
+
+    ParticleGroup(tIndex start, tIndex end, const std::vector<Vec2f>& positions)
+        : startIdx(start), endIdx(end), initPos(positions), displacement(0), vel(0) {}
+};
+
+struct RigidBody: ParticleGroup {
+	Vec2f pos;
+	Vec2f vel;
+	Real relInvMass;
+
+	Real omega; // angular velocity
+	Real theta; // angle
+	Real invI;
+
+	RigidBody() : ParticleGroup(), pos(0), vel(0), relInvMass(0), omega(0), theta(0), invI(0) {}
+
+    RigidBody(const tIndex start, const tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass)
+        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass), omega(0), theta(0), invI(0) {}
+
+	RigidBody(const tIndex start, const tIndex end, const std::vector<Vec2f>& positions, const Vec2f& position, const Real relMass, const Real theta_)
+        : ParticleGroup(start, end, positions), pos(position), vel(0), relInvMass(1.0/relMass), omega(0), theta(theta_),  invI(0)  {}
 };
 
 enum KernelType
 {
 	CUBIC_SPLINE = 0
-};
-
-enum ViscosityType
-{
-	FLUID = 0,
-	VISCOUS = 1
 };
 
 
@@ -82,34 +119,52 @@ public:
 	int getImmovableParticleCount() { return _immovableParticleCount; }
 	int getImmovableGlassParticleCount() { return _immovableGlassParticleCount; }
 	Vec2f getSpawnPosition() { return _spawnPosition; }
-	void spawnParticle(Vec2f position);
+	void spawnParticle(Vec2f position, Real radius, ViscosityType viscosityType, Vec2f vel=Vec2f(0));
 
 	void drawWalls(int resX, int resY);
-	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1);
-	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1);
-	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1);
+	void drawStraightLineWall(const Vec2f& p1, int particleLength, int type = 1, bool save=true);
+	void drawAngleLineWall(const Vec2f& p1, int particleLength, Real angle, int type = 1, bool save=true);
+	void drawAngleRectangleWall(const Vec2f& p1, int width, int height, Real angle, int type = 1, bool save=true);
 
 	void drawWinningGlass(int width, int height, Vec2f cornerPosition);
+	void drawRegularGlass(int width, int height, Vec2f cornerPosition);
 	void setSpawnPosition(Vec2f position);
 
-	void moveGlassLeft(bool move) { _moveGlassLeft = move; }
-	void moveGlassRight(bool move) { _moveGlassRight = move; }
-	void moveGlassUp(bool move) { _moveGlassUp = move; }
-	void moveGlassDown(bool move) { _moveGlassDown = move; }
-
 	Vec2f getGlassPosition();
-	void setGlassSpeed(Real speedX, Real speedY);
 	void setMaxParticles(int maxParticles) { _maxParticles = maxParticles; }
-	void setViscosityType(ViscosityType viscosityType) { _viscosityType = viscosityType; }
 
+	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0, ViscosityType viscosityType = ViscosityType::FLUID);
 
+	void rotateWall(int wallIdx, float angle, Vec2f orig = Vec2f(0));
+	void moveWall(int wallIdx, Vec2f moveVector);
+	bool isIdxValid(int x, int y);
+	void extendGridUpdate(vector<bool> &grid);
 
-	void spawnLiquidRectangle(Vec2f position, int width, int height, int type = 0);
+	void rotateGlass(int glassIdx, float angle, Vec2f orig = Vec2f(0));
+	void moveGlass(int glassIdx, Vec2f moveVector, bool isWinningGlass = false);
+	void addRigidBody(Vec2f pos, int width, int height, Real relMass);
 
+	void activateInfiniteWalls() { _infiniteWalls = true; }
+	void deactivateInfiniteWalls() { _infiniteWalls = false; }
+
+	void setViscosityForWin(ViscosityType viscosityType) { _specificParticlesWin = true; _specificParticlesViscosity.insert(viscosityType); }
+
+	Vec2f getGravity() { return _g; }
+	void setGravity( Vec2f &g ) { _g = g; }
+
+	void setDefaultDt(Real newDefaultDt) { DEFAULT_DT = newDefaultDt; }
+
+	void setLoseZone(Vec2f topLeft, Vec2f bottomRight) { _loseZoneTopLeft = topLeft; _loseZoneBottomRight = bottomRight; _loseZoneActive = true; }
+	bool isInLoseZone() { return _inLoseZone; }
+	void setLoseZoneOnlyDelete(bool onlyDelete) { _loseZoneOnlyDelete = onlyDelete; }
+
+	Vec2f getRigidPosition(int index) { return _rigidBodies[index].pos; }
+	Vec2f getWallPos(int index) { return _wallGroups[index].displacement; }
+	Vec2f getWallVel(int index) { return _wallGroups[index].vel; }
 
 private:
 	inline tIndex idx1d(const int i, const int j) { return i + j * _resX; }
-	void addParticle(const Vec2f& pos, const int type = 0, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
+	void addParticle(const Vec2f& pos, const int type = 0, ViscosityType viscosityType = ViscosityType::FLUID, const Vec2f& vel = Vec2f(0e0), const Vec2f& acc = Vec2f(0e0), const Real press = 0e0, const Real density = 0e0, const Real alpha = 0e0);
 	Particle removeParticle(const tIndex index);
 
 	void buildNeighbors();
@@ -122,6 +177,8 @@ private:
 	void updatePos(const Real dt);
 	void correctDivergenceError(const Real dt);
 
+	void updateRigidBodies(const Real dt);
+
 	void resizeSSBO();
 
 	shared_ptr<Kernel> _kernel;
@@ -130,13 +187,16 @@ private:
 	Real _h;
 	Vec2f _g;
 	Real _c;
-	const Real DEFAULT_DT = 0.05f;
+	Real DEFAULT_DT = 0.05f;
 	const Real MAX_PARTICLE_VEL = 25.0f;
 
 	Vec2f _glasscorner;
+	bool _moveGlassCorner = false;
+	Vec2f _winningGlassVel = Vec2f(0);
 	Vec2f _glassSize;
 	int _particlesInGlass = 0;
 	int _winningGlass = 0;
+	int winGlassIdx=0;
 
 	tIndex _particleCount;
 	tIndex _immovableParticleCount;
@@ -153,15 +213,10 @@ private:
 
 	vector<vector<tIndex>> _particlesInGrid;
 
-	Real _moveGlassSpeedX = 4.0f; // per second so dt 1000
-	Real _moveGlassSpeedY = 4.0f; // per second so dt 1000
-
 	bool _moveGlassLeft = false;
 	bool _moveGlassRight = false;
 	bool _moveGlassUp = false;
 	bool _moveGlassDown = false;
-
-	ViscosityType _viscosityType = ViscosityType::FLUID;
 	
 	int _maxParticles = 10000;
 	//OpenGL compute shader variables
@@ -174,6 +229,25 @@ private:
 	void setupComputeShaderPredictVel();
 	void setupComputeShaderDensityAlpha();
 	void setupBuffers();
+
+	bool _infiniteWalls = false;
+
+	bool _specificParticlesWin = false;
+	set<ViscosityType> _specificParticlesViscosity;
+
+	double lastSpawnTime = 0;
+
+	Vec2f _loseZoneTopLeft = Vec2f(0.0f);
+	Vec2f _loseZoneBottomRight = Vec2f(0.0f);
+	bool _inLoseZone = false;
+	bool _loseZoneActive = false;
+	bool _loseZoneOnlyDelete = false;
+
+public:
+	vector<ParticleGroup> _glassGroups;
+	vector<ParticleGroup> _wallGroups;
+
+	vector<RigidBody> _rigidBodies;
 };
 
 #endif // !_SOLVER_H_

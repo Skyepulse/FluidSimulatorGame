@@ -7,6 +7,10 @@
 
 #include <glad/glad.h>
 
+Texture2D::Texture2D(int width, int height, int nrChannels) : m_Width(width), m_Height(height), m_NrChannels(nrChannels)
+{
+}
+
 Texture2D::Texture2D(const char* texturePath)
 {
   m_RendererID = GenerateTexture(texturePath, &m_Width, &m_Height, &m_NrChannels);
@@ -14,24 +18,27 @@ Texture2D::Texture2D(const char* texturePath)
 
 Texture2D::~Texture2D()
 {
-
 }
 
-void Texture2D::Bind() const
+void Texture2D::Bind(uint32_t slot) const
 {
-  // TEMP
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	m_Slot = slot;
+
+	glActiveTexture(GL_TEXTURE0 + m_Slot);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 }
 
 void Texture2D::Unbind() const
 {
-  glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0 + m_Slot);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	m_Slot = 0;
 }
 
 uint32_t Texture2D::GenerateTexture(const char* texturePath, int* width, int* height, int* nrChannels)
 {
-  unsigned int textureID;
+	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
 	const char* path = texturePath;
@@ -53,7 +60,7 @@ uint32_t Texture2D::GenerateTexture(const char* texturePath, int* width, int* he
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 	else
 	{

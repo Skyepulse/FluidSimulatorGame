@@ -1,0 +1,134 @@
+#version 430
+
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+layout(std430, binding = 1) buffer Particles {
+	vec2 particles[];
+};
+
+layout(std430, binding = 2) buffer ParticlesInd {
+	uvec4 particleindex[]; // Acceed with key
+};
+
+layout(std430, binding = 3) buffer LevelInfos {
+	vec4 lowDensityColor;
+	vec4 highDensityColor;
+	vec2 densTexSize;
+	uint particleCount;
+	uint densityZoomFactor;
+	uint backgroundZoomFactor;
+	float lowDensityThreshold;
+};
+
+layout(std430, binding = 4) buffer ParticlesViscosity {
+	int viscosityType[]; // contains viscosity type of ith particle
+};
+
+layout(std430, binding = 5) buffer ParticlesColor{
+	vec4 colorPerViscosity[]; // acceed with 2 * viscosity type, first element is color for low density, second for high density
+};
+
+// From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
+const ivec2 offsets2D[9] =
+{
+	ivec2(-1, 1),
+	ivec2(0, 1),
+	ivec2(1, 1),
+	ivec2(-1, 0),
+	ivec2(0, 0),
+	ivec2(1, 0),
+	ivec2(-1, -1),
+	ivec2(0, -1),
+	ivec2(1, -1),
+};
+
+// Constants used for hashing
+const uint hashK1 = 15823;
+const uint hashK2 = 9737333;
+
+// Hash cell coordinate to a single unsigned integer
+uint HashCell2D(ivec2 _cell)
+{
+	uvec2 cell = uvec2(_cell);
+	uint a = cell.x * hashK1;
+	uint b = cell.y * hashK2;
+	return (a + b);
+}
+
+uint KeyFromHash(uint hash, uint tableSize)
+{
+	return hash % tableSize;
+}
+
+// viscosityCount;
+float densityPerViscosity[4];
+
+// Density kernel
+const float h = 2.0;
+float densityKernel(float length_r)
+{
+	return 315.0 * pow((h - length_r) * (h + length_r), 3.0) / (64.0 * 3.141592 * pow(h, 9.0));
+}
+
+void main() {
+	vec2 cell_pos = gl_GlobalInvocationID.xy;
+	ivec2 cell = ivec2(cell_pos);
+
+	// Reset array
+	for(int i = 0; i < 4; i++)
+		densityPerViscosity[i] = 0.0;
+
+	// neighbour search
+	for(int i = 0; i < 9; i++)
+	{
+		ivec2 n_cell = cell + offsets2D[i];
+		uint hash = HashCell2D(n_cell);
+		uint key = KeyFromHash(hash, particleCount);
+
+		// Retrieve particle indexes
+		uvec4 partind = particleindex[key];
+		uint count = partind.x; // particle count 
+		uvec3 ind = partind.yzw; // particle ind, valid if count > 0 for x, 1 for y, 2 for z
+
+		vec2 candidate_pos = particles[ind.x] * float(densityZoomFactor);
+		float length_r = length(cell_pos - candidate_pos);
+		if(count > 0 && length_r < 2.0)
+		{
+			int viscType = viscosityType[ind.x];
+			densityPerViscosity[viscType] += densityKernel(length_r);
+		}
+		candidate_pos = particles[ind.y] * float(densityZoomFactor);
+		length_r = length(cell_pos - candidate_pos);
+		if(count > 1 && length_r < 2.0)
+		{
+			int viscType = viscosityType[ind.y];
+			densityPerViscosity[viscType] += densityKernel(length_r);
+		}
+		candidate_pos = particles[ind.z] * float(densityZoomFactor);
+		length_r = length(cell_pos - candidate_pos);
+		if(count > 2 && length_r < 2.0)
+		{
+			int viscType = viscosityType[ind.z];
+			densityPerViscosity[viscType] += densityKernel(length_r);
+		}
+	}
+
+	float density = 0;
+	for(int i = 0; i < 4; i++)
+		density += densityPerViscosity[i];
+
+	vec4 col = vec4(0);
+	if(density > lowDensityThreshold)
+	{
+		for(int i = 0; i < 4; i++)
+		{
+			float t = 3.0 * densityPerViscosity[i];
+			col += densityPerViscosity[i] * mix(colorPerViscosity[2 * i], colorPerViscosity[2 * i + 1], t);
+		}
+		col /= density;
+	}
+
+
+	imageStore(imgOutput, cell, col);
+}

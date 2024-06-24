@@ -5,6 +5,15 @@
 #include "Game.h"
 #include "Game2.h"
 #include "Game3.h"
+#include "Game4.h"
+#include "Game5.h"
+#include "Game6.h"
+#include "Game7.h"
+#include "Game8.h"
+#include "Game9.h"
+#include "Game10.h"
+#include "Game11.h"
+#include "Game12.h"
 
 class GameApplication : public Application
 {
@@ -15,6 +24,9 @@ public:
 
     void loadGame(int index) override {
 		unloadGame();
+		userInterface->reset();
+
+
 		switch (index)
 		{
 		case 1:
@@ -26,6 +38,33 @@ public:
 		case 3:
 			m_game = new Game3();
 			break;
+		case 4:
+			m_game = new Game4();
+			break;
+		case 5:
+			m_game = new Game5();
+			break;
+		case 6:
+			m_game = new Game6();
+			break;
+		case 7:
+			m_game = new Game7();
+			break;
+		case 8:
+			m_game = new Game8();
+			break;
+		case 9:
+			m_game = new Game9();
+			break;
+		case 10:
+			m_game = new Game10();
+			break;
+		case 11:
+			m_game = new Game11();
+			break;
+		case 12:
+			m_game = new Game12();
+			break;
 		default:
 			m_game = new Game();
 			break;
@@ -33,6 +72,7 @@ public:
 		game_index = index;
 
 		PushLayer(m_game);
+		setBgSize();
 	}
 
 	void unloadGame() override {

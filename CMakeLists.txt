@@ -5,7 +5,7 @@ SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(CMAKE_CXX_FLAGS "-O2")
+set(CMAKE_CXX_FLAGS "-O2 -fpermissive")
 
 project(glassOverFlow)
 
@@ -20,7 +20,7 @@ file(GLOB_RECURSE SOURCE
 add_executable(
   ${PROJECT_NAME}
   ${SOURCE}
-)
+ "src/Game/Game7.cpp")
 
 target_sources(${PROJECT_NAME} PRIVATE dep/glad/src/glad.c)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/glad/include/)

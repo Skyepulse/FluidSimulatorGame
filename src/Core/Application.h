@@ -5,6 +5,7 @@
 #include "Layer.h"
 
 #include "Rendering/CameraController.h"
+#include "Scene/Rectangle.h"
 
 #include "Event/Event.h"
 #include "Event/ApplicationEvent.h"
@@ -25,6 +26,7 @@ public:
 
   void Start();
   void OnEvent(Event& e);
+  bool OnWindowResized(WindowResizedEvent& e);
 
   void PushOverlay(Layer* overlay) { m_Layers.PushOverlay(overlay); }
   void PushLayer(Layer* layer) { m_Layers.PushLayer(layer); }
@@ -44,16 +46,22 @@ public:
   
   std::shared_ptr<CameraController> GetCameraController() const { return m_Controller; }
 
+  std::shared_ptr<UserInterface> GetUI() const { return userInterface; }
+
   ~Application();
 protected:
   Application();
+  std::shared_ptr<UserInterface> userInterface;
+  void setBgSize();
 
 private:
   static Application* s_Instance; 
   std::shared_ptr<Window> m_Window;
   LayerStack m_Layers;
+  bool m_Minimized = false;
 
   std::shared_ptr<CameraController> m_Controller;
 
-  UserInterface userInterface;
+  std::shared_ptr<Shape> background;
+  std::shared_ptr<Texture2D> backgroundTex;
 };
