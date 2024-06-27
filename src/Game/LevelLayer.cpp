@@ -248,7 +248,7 @@ void LevelLayer::DispatchComputes(std::shared_ptr<RenderTexture2D> renderTexture
 	m_ParticleViscosityColorBuffer.Bind(5);
 
 	m_ResetCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
-	m_SpatialHashCompute.Dispatch((particlePositions.size() + 31) / 32, 1);
+	m_SpatialHashCompute.Dispatch((particlePositions.size() + (32*32-1)) / 32*32, 1);
 	m_DensityCompute.Dispatch((renderTexture->GetWidth() + 31) / 32, (renderTexture->GetHeight() + 31) / 32);
 
 	renderTexture->Unbind();

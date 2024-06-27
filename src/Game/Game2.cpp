@@ -42,7 +42,7 @@ void Game2::OnAttach()
 	winningGlassParticles = m_Solver.getWinningGlass();
 	particleSpawnPosition = m_Solver.getSpawnPosition();
 
-	_glassRange = resY / 8 * 0.8;
+	_glassRange = resY / _glassPeriod;
 
 	startTime = maxTime;
 

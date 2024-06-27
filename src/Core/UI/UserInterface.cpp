@@ -170,7 +170,7 @@ void UserInterface::buildMenu(){
 
 void UserInterface::buildHint(const char* message){
 
-    float time = Time::GetSeconds();
+    float time = ImGui::GetTime();
 
     if (shouldRestart) {
         hintStartTime = time;
@@ -249,7 +249,7 @@ void UserInterface::buildInGame(){
 
     ImGui::SetCursorPos(ImVec2(windowWidth - 130, 0));
     if (ImGui::Button("?", ImVec2(60, 60))) {
-        hintStartTime = -1;
+        shouldRestart = true;
     }
 
     Application* app = Application::Get();

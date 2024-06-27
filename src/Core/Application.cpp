@@ -49,7 +49,7 @@ Application::~Application()
 
 void Application::setBgSize(){
 	background->Transform->SetPosition2D(m_Controller->getCenterBound());
-	glm::vec2 size = glm::vec2(4401.0/2466.0, 1)*(2.0f*m_Controller->getZoomLevel());
+	glm::vec2 size = glm::vec2(4401.0/2466.0, 1)*(2.0f*m_Controller->getZoomLevel())*1.05f;
 	if (m_Controller->getAspectRatio() > 4401.0/2466.0) size *= m_Controller->getAspectRatio() / (4401.0/2466.0);
 	background->Transform->SetSize(size);
 }
@@ -115,6 +115,8 @@ bool Application::OnWindowResized(WindowResizedEvent& e)
 		m_Minimized = true;
 		return false;
 	}
+
+	setBgSize();
 
 	m_Minimized = false;
 	return false;

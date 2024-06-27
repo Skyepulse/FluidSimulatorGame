@@ -24,7 +24,7 @@ private:
 	Real glassWidth = 0.0f;
 
 	int glassIndex = 0;
-	float _glassPeriod = 10.0;
+	float _glassPeriod = 5.0;
 	float _glassRange;
 	float startTime;
 
