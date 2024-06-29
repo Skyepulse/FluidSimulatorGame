@@ -48,9 +48,9 @@ Application::~Application()
 }
 
 void Application::setBgSize(){
-	background->Transform->SetPosition2D(m_Controller->getCenterBound());
-	glm::vec2 size = glm::vec2(4401.0/2466.0, 1)*(2.0f*m_Controller->getZoomLevel())*1.05f;
-	if (m_Controller->getAspectRatio() > 4401.0/2466.0) size *= m_Controller->getAspectRatio() / (4401.0/2466.0);
+	background->Transform->SetPosition2D(m_Controller->GetCenterBound());
+	glm::vec2 size = glm::vec2(4401.0/2466.0, 1)*(2.0f*m_Controller->GetZoomLevel());
+	if (m_Controller->GetAspectRatio() > 4401.0/2466.0) size *= m_Controller->GetAspectRatio() / (4401.0/2466.0);
 	background->Transform->SetSize(size);
 }
 
@@ -58,7 +58,6 @@ void Application::Start()
 {
 	CORE_TRACE("Applications started")
 
-	// TEMP ?
 	m_Controller = std::make_shared<CameraController>(1080.0f / 720.0f, 35.99162f, 2.0f);
 	setBgSize();
 
@@ -102,14 +101,12 @@ void Application::OnEvent(Event &e)
 		setBgSize();
     }
 
-	// TEMP ?
 	if(m_Controller->OnEvent(e))
 		return;
 }
 
 bool Application::OnWindowResized(WindowResizedEvent& e)
 {
-	CORE_DEBUG("REsized event")
 	if (e.GetSize().x == 0 || e.GetSize().y == 0)
 	{
 		m_Minimized = true;

@@ -12,37 +12,22 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
-	vec4 lowDensityColor;
-	vec4 highDensityColor;
+	vec4 BaseColor;
 	vec2 densTexSize;
 	uint particleCount;
 	uint densityZoomFactor;
-	uint backgroundZoomFactor;
 	float lowDensityThreshold;
 };
 
 // From Sebastian Lague https://github.com/SebLague/Fluid-Sim/blob/main/Assets/Scripts/Sim%202D/Compute/SpatialHash.hlsl
-const ivec2 offsets2D[9] =
-{
-	ivec2(-1, 1),
-	ivec2(0, 1),
-	ivec2(1, 1),
-	ivec2(-1, 0),
-	ivec2(0, 0),
-	ivec2(1, 0),
-	ivec2(-1, -1),
-	ivec2(0, -1),
-	ivec2(1, -1),
-};
-
 // Constants used for hashing
 const uint hashK1 = 15823;
 const uint hashK2 = 9737333;
 
 // Hash cell coordinate to a single unsigned integer
-uint HashCell2D(ivec2 _cell)
+uint Hash2D(ivec2 pixel)
 {
-	uvec2 cell = uvec2(_cell);
+	uvec2 cell = uvec2(pixel);
 	uint a = cell.x * hashK1;
 	uint b = cell.y * hashK2;
 	return (a + b);
@@ -56,26 +41,34 @@ uint KeyFromHash(uint hash, uint tableSize)
 void main() {
 	ivec2 x = ivec2(gl_GlobalInvocationID.xy);
 
-	uint index = uint(x.x * 32 + x.y);
+	// Compute the index corresponding to the compute shader invocation
+	uint index = uint(x.x * 32*32 + x.y);
+
+	// Return if the index is out of bound
 	if(index >= particleCount)
 		return;
 
+	// Compute the position in the texture space
 	vec2 pos = particles[index] * float(densityZoomFactor);
 
-	ivec2 cell = ivec2(pos);
+	// Compute the nearest_pixel position
+	ivec2 nearest_pixel = ivec2(pos);
 
-	uint hash = HashCell2D(cell);
+	// Compute the hash of the pixel
+	uint hash = Hash2D(nearest_pixel);
 	uint key = KeyFromHash(hash, particleCount);
 
-	// No var for particle index because can change
+	// Stores the pixel index into the spatial hashmap
+	// Atomic add because accessed in parallel
 	uint count = atomicAdd(particleindex[key].x, 1);
 
 	if(count == 0)
 		atomicExchange(particleindex[key].y, index);
 	else if(count == 1)
 		atomicExchange(particleindex[key].z, index);
-	else if(count == 2)
+	else if(count == 2){
 		atomicExchange(particleindex[key].w, index);
-
-	imageStore(imgOutput, cell, float(count) * vec4(vec3(0.2), 1.0));
+	}
+	// Used for debugging
+	//imageStore(imgOutput, nearest_pixel, vec4(0.0, 0.0, 1.0, 1.0));
 }

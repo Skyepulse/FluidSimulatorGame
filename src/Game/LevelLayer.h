@@ -7,12 +7,10 @@ class LevelLayer : public Layer
 {
 	struct LevelInfo
 	{
-		glm::vec4 LowDensityColor;
-		glm::vec4 HighDensityColor;
-		glm::ivec2 DensityTextureSize;
+		glm::vec4 BaseColor;
+		glm::ivec2 TextureSize;
 		uint32_t ParticleCount;
-		uint32_t DensityZoomFactor;
-		uint32_t BackgroundZoomFactor;
+		uint32_t ZoomFactor;
 		float LowDensityThreshold;
 	};
 public:

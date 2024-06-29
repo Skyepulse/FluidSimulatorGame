@@ -12,12 +12,10 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
-	vec4 lowDensityColor;
-	vec4 highDensityColor;
+	vec4 BaseColor;
 	vec2 densTexSize;
 	uint particleCount;
 	uint densityZoomFactor;
-	uint backgroundZoomFactor;
 	float lowDensityThreshold;
 };
 
@@ -48,9 +46,9 @@ const uint hashK1 = 15823;
 const uint hashK2 = 9737333;
 
 // Hash cell coordinate to a single unsigned integer
-uint HashCell2D(ivec2 _cell)
+uint Hash2D(ivec2 pixel)
 {
-	uvec2 cell = uvec2(_cell);
+	uvec2 cell = uvec2(pixel);
 	uint a = cell.x * hashK1;
 	uint b = cell.y * hashK2;
 	return (a + b);
@@ -72,8 +70,8 @@ float densityKernel(float length_r)
 }
 
 void main() {
-	vec2 cell_pos = gl_GlobalInvocationID.xy;
-	ivec2 cell = ivec2(cell_pos);
+	vec2 pixel_pos = gl_GlobalInvocationID.xy;
+	ivec2 pixel = ivec2(pixel_pos);
 
 	// Reset array
 	for(int i = 0; i < 4; i++)
@@ -82,8 +80,8 @@ void main() {
 	// neighbour search
 	for(int i = 0; i < 9; i++)
 	{
-		ivec2 n_cell = cell + offsets2D[i];
-		uint hash = HashCell2D(n_cell);
+		ivec2 n_pixel = pixel + offsets2D[i];
+		uint hash = Hash2D(n_pixel);
 		uint key = KeyFromHash(hash, particleCount);
 
 		// Retrieve particle indexes
@@ -92,28 +90,29 @@ void main() {
 		uvec3 ind = partind.yzw; // particle ind, valid if count > 0 for x, 1 for y, 2 for z
 
 		vec2 candidate_pos = particles[ind.x] * float(densityZoomFactor);
-		float length_r = length(cell_pos - candidate_pos);
-		if(count > 0 && length_r < 2.0)
+		float length_r = length(pixel_pos - candidate_pos);
+		if(count > 0 && length_r < h)
 		{
 			int viscType = viscosityType[ind.x];
 			densityPerViscosity[viscType] += densityKernel(length_r);
 		}
 		candidate_pos = particles[ind.y] * float(densityZoomFactor);
-		length_r = length(cell_pos - candidate_pos);
-		if(count > 1 && length_r < 2.0)
+		length_r = length(pixel_pos - candidate_pos);
+		if(count > 1 && length_r < h)
 		{
 			int viscType = viscosityType[ind.y];
 			densityPerViscosity[viscType] += densityKernel(length_r);
 		}
 		candidate_pos = particles[ind.z] * float(densityZoomFactor);
-		length_r = length(cell_pos - candidate_pos);
-		if(count > 2 && length_r < 2.0)
+		length_r = length(pixel_pos - candidate_pos);
+		if(count > 2 && length_r < h)
 		{
 			int viscType = viscosityType[ind.z];
 			densityPerViscosity[viscType] += densityKernel(length_r);
 		}
 	}
 
+	// The global density 
 	float density = 0;
 	for(int i = 0; i < 4; i++)
 		density += densityPerViscosity[i];
@@ -121,14 +120,17 @@ void main() {
 	vec4 col = vec4(0);
 	if(density > lowDensityThreshold)
 	{
+		// add per-viscosity-type color to global color
 		for(int i = 0; i < 4; i++)
 		{
 			float t = 3.0 * densityPerViscosity[i];
 			col += densityPerViscosity[i] * mix(colorPerViscosity[2 * i], colorPerViscosity[2 * i + 1], t);
 		}
+		// Normalize color
 		col /= density;
 	}
 
 
-	imageStore(imgOutput, cell, col);
+	imageStore(imgOutput, pixel, col);
+	//imageStore(imgOutput, pixel, vec4(vec3(density), 1.0));
 }

@@ -12,12 +12,10 @@ layout(std430, binding = 2) buffer ParticlesInd {
 };
 
 layout(std430, binding = 3) buffer LevelInfos {
-	vec4 lowDensityColor;
-	vec4 highDensityColor;
+	vec4 BaseColor;
 	vec2 densTexSize;
 	uint particleCount;
 	uint densityZoomFactor;
-	uint backgroundZoomFactor;
 	float lowDensityThreshold;
 };
 

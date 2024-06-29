@@ -18,9 +18,9 @@ public:
 	void SetCameraPosition(const glm::vec2& position);
 	void AdaptZoomLevel(const Bound& levelBound);
 
-	float const getAspectRatio() { return m_AspectRatio; }
-	float const getZoomLevel() { return m_ZoomLevel; }
-	glm::vec2 getCenterBound();
+	float const GetAspectRatio() const { return m_AspectRatio; }
+	float const GetZoomLevel() const { return m_ZoomLevel; }
+	glm::vec2 GetCenterBound();
 
 	std::shared_ptr<Camera> GetCamera() const { return m_Camera; }
 private:
@@ -31,6 +31,6 @@ private:
 	float m_AspectRatio;
 	float m_ZoomLevel;
 
-	Bound m_LimitBound; // Limit the camera movement in the bound
+	Bound m_LimitBound;
 	glm::vec2 m_CameraPosition;
  };
