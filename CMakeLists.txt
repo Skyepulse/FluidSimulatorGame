@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "-O2 -fpermissive")
 project(glassOverFlow)
 
 # Enable debugging symbols
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 file(GLOB_RECURSE SOURCE
      "src/*.h"
@@ -20,7 +20,9 @@ file(GLOB_RECURSE SOURCE
 add_executable(
   ${PROJECT_NAME}
   ${SOURCE}
- "src/Game/Game7.cpp")
+ "src/Game/Game7.cpp"
+ "resources/resource.rc"
+)
 
 target_sources(${PROJECT_NAME} PRIVATE dep/glad/src/glad.c)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/glad/include/)
@@ -55,6 +57,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS} OpenGL::GL)
 
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${CMAKE_SOURCE_DIR}/src" "${CMAKE_BINARY_DIR}/src")
