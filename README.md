@@ -6,7 +6,7 @@
 
 ## Overview
 
-GlassOverFlow is a real-time 2D fluid simulation game developed by a team of three enthusiasts. The game is built from scratch using the OpenGL API.
+GlassOverFlow is a real-time 2D fluid simulation game developed by a team of three enthusiasts for the IGR205 course. The game is built from scratch using the OpenGL API. The technical report can be found [here](https://www.overleaf.com/read/jrjpbczqsnwh#1b5051).
 
 ## Description
 
